@@ -91,6 +91,15 @@ public function searchNhanVien($keyword) {
                OR nv.PhongBan LIKE '%$keyword%'";
     return mysqli_query($this->conn, $sql);
 }
+function checkma( $manv)
+{
+    $sql = "Select * from nhanvien where MaNV='$manv'";
+    $result = mysqli_query($this->conn, $sql);
+    if (mysqli_num_rows($result) > 0) {
+        return true; //trùng mã tg
+    } else
+        return false; //ko trùng ãm
+}
 
 
 }

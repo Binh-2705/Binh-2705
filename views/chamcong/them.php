@@ -25,7 +25,8 @@
       <form method="POST" action="index.php?controller=chamcong&action=luu" class="form-nv">
         <div class="form-group">
           <label>Mã chấm công:</label>
-          <input type="text" name="MaCC" value="<?= $newMaCC ?>" readonly>
+           <input type="text" name="MaCC" required>
+      <!--<input type="text" name="MaCC" value="<?= $newMaCC ?>" readonly> -->
         </div>
 
         <div class="form-group">

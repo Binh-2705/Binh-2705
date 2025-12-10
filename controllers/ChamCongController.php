@@ -56,7 +56,7 @@ class ChamCongController {
         }
     }
     public function them() {
-        $newMaCC = $this->model->getNewMaCC();
+      //  $newMaCC = $this->model->getNewMaCC();
         $nhanvien = $this->model->getAllNhanVien();
         include './views/chamcong/them.php';
     }
@@ -69,6 +69,11 @@ class ChamCongController {
             $songaylam = $_POST['SoNgayLam'];
             $songaynghi = $_POST['SoNgayNghi'];
             $ghichu = $_POST['GhiChu'];
+
+            if($this->model->checkma($macc)){
+                 echo "<script>alert('❌ Mã chấm công đã tồn tại!'); window.history.back();</script>";
+                exit;
+            }
 
             if ($this->model->insertChamCong($macc, $manv, $thang, $songaylam, $songaynghi, $ghichu)) {
                 echo "<script>alert('✅ Thêm chấm công thành công!'); 
@@ -112,6 +117,42 @@ class ChamCongController {
         header('Content-Type: application/json');
         echo json_encode($data);
     }
+    public function exportExcel() {
+    $chamcong = $this->model->getAllChamCong();
+
+    $filename = "Danh_sach_cham_cong_" . date('Ymd') . ".xls";
+
+    header("Content-Type: application/vnd.ms-excel; charset=UTF-8");
+    header("Content-Disposition: attachment; filename=\"$filename\"");
+    echo "\xEF\xBB\xBF"; // BOM UTF-8
+
+    echo "<table border='1'>";
+    echo "<tr style='background-color:#f2f2f2; font-weight:bold;'>
+            <th>Mã chấm công</th>
+            <th>Mã NV</th>
+            <th>Họ tên</th>
+            <th>Tháng</th>
+            <th>Số ngày làm</th>
+            <th>Số ngày nghỉ</th>
+            <th>Ghi chú</th>
+          </tr>";
+
+    foreach ($chamcong as $row) {
+        
+        echo "<tr>
+                <td>{$row['MaCC']}</td>
+                <td>{$row['MaNV']}</td>
+                <td>{$row['HoTen']}</td>
+                <td>{$row['Thang']}</td>
+                <td>{$row['SoNgayLam']}</td>
+                <td>{$row['SoNgayNghi']}</td>
+                <td>{$row['GhiChu']}</td>
+              </tr>";
+    }
+
+    echo "</table>";
+    exit;
+}
 
 }
 ?>

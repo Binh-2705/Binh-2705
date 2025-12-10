@@ -21,7 +21,11 @@
         <li><a href="index.php?controller=nghiphep&action=index">📆 Quản lý nghỉ phép</a></li>
         <li><a href="index.php?controller=khenthuong&action=index">🏅 Khen thưởng - Kỷ luật</a></li>
         <li><a href="index.php?controller=thongke&action=index">📊 Thống kê - Báo cáo</a></li>
+        <li><a href="index.php?controller=chucvu&action=index">🙍‍♂️ Quản lý chức vụ</a></li>
         <li><a href="index.php?controller=hoso&action=index">👤 Hồ sơ cá nhân</a></li>
+        <li><a href="">💼 Quản lý tuyển dụng</a></li>
+        <li><a href="">📚 Quản lý đào tạo</a></li>
+        <li><a href="">🗂 Quản lý đăng nhập – phân quyền</a></li>
         <li><a href="index.php?controller=timkiem&action=index">🔎 Tìm kiếm nâng cao</a></li>
         <li><a href="index.php?controller=dangxuat&action=index">🚪 Đăng xuất</a></li>
       </ul>

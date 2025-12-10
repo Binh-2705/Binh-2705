@@ -26,6 +26,12 @@ class NhanVienController {
             $phongban = $_POST['phongban'];
             $chucvu = $_POST['chucvu'];
 
+            //kiểm tra trùng
+            if($this->model->checkma($manv)){
+                echo "<script>alert('❌ Mã nhân viên đã tồn tại!'); window.history.back();</script>";
+                exit;
+            }
+
             if ($this->model->insertNhanVien($manv, $hoten, $gioitinh, $ngaysinh, $phongban, $chucvu)) {
                 echo "<script>alert('Thêm nhân viên thành công!'); 
                       window.location='index.php?controller=nhanvien&action=index';</script>";
@@ -109,4 +115,41 @@ class NhanVienController {
 
         require 'views/nhanvien/timkiem.php';
     }
+
+   public function exportExcel() {
+    $result = $this->model->getAllNhanVien();
+
+    $filename = "Danh_sach_nhan_vien_" . date('Ymd') . ".xls";
+
+    header("Content-Type: application/vnd.ms-excel; charset=UTF-8");
+    header("Content-Disposition: attachment; filename=\"$filename\"");
+    echo "\xEF\xBB\xBF"; // BOM UTF-8
+
+    echo "<table border='1'>";
+    echo "<tr style='background-color:#f2f2f2; font-weight:bold;'>
+            <th>Mã NV</th>
+            <th>Họ tên</th>
+            <th>Giới tính</th>
+            <th>Ngày sinh</th>
+            <th>Phòng ban</th>
+            <th>Chức vụ</th>
+            <th>Mức lương</th>
+          </tr>";
+
+    while ($row = mysqli_fetch_assoc($result)) {
+        echo "<tr>
+                <td>{$row['MaNV']}</td>
+                <td>{$row['HoTen']}</td>
+                <td>{$row['GioiTinh']}</td>
+                <td>{$row['NgaySinh']}</td>
+                <td>".($row['TenPB'] ?? '')."</td>
+                <td>{$row['ChucVu']}</td>
+                <td>".(isset($row['LuongCB']) ? number_format($row['LuongCB'],0,',','.') : '')."</td>
+              </tr>";
+    }
+
+    echo "</table>";
+    exit;
+}
+
 }

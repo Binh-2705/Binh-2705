@@ -10,18 +10,24 @@
   <nav class="sidebar">
     <h2>HỆ THỐNG <br> QUẢN LÝ NHÂN SỰ</h2>
     <ul>
-      <li><a href="index.php?controller=home&action=index" >🏠 Trang chủ</a></li>
+       <ul>
+        <li><a href="index.php?controller=home&action=index" class="active">🏠 Trang chủ</a></li>
         <li><a href="index.php?controller=nhanvien&action=index">👥 Quản lý nhân viên</a></li>
         <li><a href="index.php?controller=phongban&action=index">🏢 Quản lý phòng ban</a></li>
         <li><a href="index.php?controller=luong&action=index">💰 Quản lý lương</a></li>
-        <li><a href="index.php?controller=chamcong&action=index" class="active">🕒 Quản lý chấm công</a></li>
+        <li><a href="index.php?controller=chamcong&action=index">🕒 Quản lý chấm công</a></li>
         <li><a href="index.php?controller=hopdong&action=index">📄 Quản lý hợp đồng</a></li>
         <li><a href="index.php?controller=nghiphep&action=index">📆 Quản lý nghỉ phép</a></li>
         <li><a href="index.php?controller=khenthuong&action=index">🏅 Khen thưởng - Kỷ luật</a></li>
         <li><a href="index.php?controller=thongke&action=index">📊 Thống kê - Báo cáo</a></li>
+        <li><a href="index.php?controller=chucvu&action=index">🙍‍♂️ Quản lý chức vụ</a></li>
         <li><a href="index.php?controller=hoso&action=index">👤 Hồ sơ cá nhân</a></li>
+        <li><a href="">💼 Quản lý tuyển dụng</a></li>
+        <li><a href="">📚 Quản lý đào tạo</a></li>
+        <li><a href="">🗂 Quản lý đăng nhập – phân quyền</a></li>
         <li><a href="index.php?controller=timkiem&action=index">🔎 Tìm kiếm nâng cao</a></li>
         <li><a href="index.php?controller=dangxuat&action=index">🚪 Đăng xuất</a></li>
+      </ul>
     </ul>
   </nav>
 
@@ -31,8 +37,10 @@
     </header>
 
     <div class="actions">
-      <a href="index.php?controller=chamcong&action=them" class="btn add">➕ Thêm chấm công</a>
-
+      <div class="btn-group">
+       <a href="index.php?controller=chamcong&action=them" class="btn add">➕ Thêm chấm công</a>
+     <a href="index.php?controller=chamcong&action=exportExcel" class="btn export">📥 Xuất Excel</a>
+</div>
       <form method="GET" action="index.php" style="display:inline;">
         <input type="hidden" name="controller" value="chamcong">
         <input type="hidden" name="action" value="search">

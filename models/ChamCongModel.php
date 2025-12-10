@@ -68,6 +68,14 @@ class ChamCongModel {
         }
         return 0;
     }
-
+public function checkma( $macc)
+{
+    $sql = "Select * from chamcong where MaCC='$macc'";
+    $result = mysqli_query($this->conn, $sql);
+    if (mysqli_num_rows($result) > 0) {
+        return true; //trùng mã tg
+    } else
+        return false; //ko trùng ãm
+}
 }
 ?>

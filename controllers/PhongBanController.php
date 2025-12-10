@@ -28,6 +28,11 @@ class PhongBanController {
             $tenpb = trim($_POST['tenpb']);
             $mota = trim($_POST['mota']);
 
+             if($this->model->checkma($mapb)){
+                echo "<script>alert('❌ Mã phòng ban đã tồn tại!'); window.history.back();</script>";
+                exit;
+            }
+
             if ($mapb == "" || $tenpb == "") {
                 echo "<script>alert('Vui lòng nhập đầy đủ thông tin!'); window.history.back();</script>";
                 exit;

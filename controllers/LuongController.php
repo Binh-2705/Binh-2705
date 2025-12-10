@@ -27,6 +27,11 @@ class LuongController {
    
     public function store() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $maluong = $_POST['maluong'];
+            if($this->model->checkma($maluong)){
+                echo "<script>alert('❌ Mã lương đã tồn tại!'); window.history.back();</script>";
+                exit;
+            }
             $data = $_POST;
             $success = $this->model->insertLuong($data);
             if ($success) {

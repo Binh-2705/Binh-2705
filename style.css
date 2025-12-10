@@ -91,11 +91,18 @@ header h1 {
 }
 
 .actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100%;
 }
+
+.btn-group {
+    display: flex !important;
+    gap: 10px !important;
+}
+
+
 
 .btn {
   border: none;
@@ -210,29 +217,7 @@ header h1 {
   background: #5a6268;
 }
 
-.btn-export {
-    display: inline-block;
-    background-color: #28a745;
-    color: #fff; 
-    padding: 8px 16px; 
-    font-size: 14px;
-    font-weight: bold;
-    text-decoration: none;
-    border-radius: 6px; 
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
 
-.btn-export:hover {
-    background-color: #218838;
-    text-decoration: none;
-    color: #fff;
-}
-
-.btn-export:active {
-    background-color: #1e7e34;
-}
 /* ====== GIAO DIỆN CHUNG ====== */
 * {
   box-sizing: border-box;
@@ -390,4 +375,18 @@ header h1 {
 .table tbody tr:hover {
   background-color: #f1f5f9;
 }
+
+button.btn.export, 
+a.btn.export {
+    background-color: #22c55e !important;  /* màu xanh lá */
+    color: #fff !important;
+    border: none !important;
+    background-image: none !important;
+}
+
+button.btn.export:hover,
+a.btn.export:hover {
+    background-color: #16a34a !important;  /* hover xanh đậm */
+}
+
 

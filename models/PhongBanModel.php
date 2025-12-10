@@ -46,4 +46,14 @@ class PhongBanModel {
         $sql = "DELETE FROM phongban WHERE MaPB='$mapb'";
         return $this->conn->query($sql);
     }
+    
+    public function checkma( $mapb)
+{
+    $sql = "Select * from phongban where MaPB='$mapb'";
+    $result = mysqli_query($this->conn, $sql);
+    if (mysqli_num_rows($result) > 0) {
+        return true; //trùng mã tg
+    } else
+        return false; //ko trùng ãm
+}
 }

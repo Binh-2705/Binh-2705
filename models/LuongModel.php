@@ -114,5 +114,14 @@ public function getAllForExcel() {
     return $data;
 }
 
+ public function checkma( $maluong)
+{
+    $sql = "Select * from luong where MaLuong='$maluong'";
+    $result = mysqli_query($this->conn, $sql);
+    if (mysqli_num_rows($result) > 0) {
+        return true; //trùng mã tg
+    } else
+        return false; //ko trùng ãm
+}
 
 }
