@@ -1,80 +1,93 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Thêm Nhân Viên</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thêm Nhân Viên</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="container">
-  <nav class="sidebar">
-    <h2>QUẢN LÝ NHÂN SỰ</h2>
-    <ul>
-      <li><a href="index.php">🏠 Trang chủ</a></li>
-      <li><a href="index.php?controller=nhanvien&action=index" class="active">👥 Quản lý nhân viên</a></li>
-      <li><a href="index.php?controller=phongban&action=index">🏢 Quản lý phòng ban</a></li>
-      <li><a href="#" class="active">➕ Thêm nhân viên</a></li>
-    </ul>
-  </nav>
+    <nav class="sidebar">
+        <h2>QUẢN LÝ NHÂN SỰ</h2>
+        <ul>
+            <li><a href="index.php">🏠 Trang chủ</a></li>
+            <li><a href="index.php?controller=nhanvien&action=index" class="active">👥 Quản lý nhân viên</a></li>
+            <li><a href="index.php?controller=phongban&action=index">🏢 Quản lý phòng ban</a></li>
+            <li><a href="#" class="active">➕ Thêm nhân viên</a></li>
+        </ul>
+    </nav>
 
-  <main class="main-content">
-    <header>
-      <h1>➕ Thêm Nhân viên mới</h1>
-    </header>
+    <main class="main-content">
+        <header>
+            <h1>➕ Thêm Nhân viên mới</h1>
+        </header>
 
-    <form action="index.php?controller=nhanvien&action=luuThem" method="POST" class="form-nv">
-      <div class="form-group">
-        <label for="manv">Mã nhân viên:</label>
-        <input type="text" id="manv" name="manv" required>
-      </div>
+        <form action="index.php?controller=nhanvien&action=luuThem" method="POST" class="form-nv">
+            <div class="form-group">
+                <label for="manv">Mã nhân viên:</label>
+                <input type="text" id="manv" name="manv" required>
+            </div>
 
-      <div class="form-group">
-        <label for="hoten">Họ và tên:</label>
-        <input type="text" id="hoten" name="hoten" required>
-      </div>
+            <div class="form-group">
+                <label for="hoten">Họ và tên:</label>
+                <input type="text" id="hoten" name="hoten" required>
+            </div>
 
-      <div class="form-group">
-        <label for="gioitinh">Giới tính:</label>
-        <select id="gioitinh" name="gioitinh" required>
-          <option value="">-- Chọn giới tính --</option>
-          <option value="Nam">Nam</option>
-          <option value="Nữ">Nữ</option>
-        </select>
-      </div>
+            <div class="form-group">
+                <label for="gioitinh">Giới tính:</label>
+                <select id="gioitinh" name="gioitinh" required>
+                    <option value="">-- Chọn giới tính --</option>
+                    <option value="Nam">Nam</option>
+                    <option value="Nữ">Nữ</option>
+                </select>
+            </div>
 
-      <div class="form-group">
-        <label for="ngaysinh">Ngày sinh:</label>
-        <input type="date" id="ngaysinh" name="ngaysinh" required>
-      </div>
+            <div class="form-group">
+                <label for="ngaysinh">Ngày sinh:</label>
+                <input type="date" id="ngaysinh" name="ngaysinh" required>
+            </div>
 
-      <div class="form-group">
-        <label for="phongban">Phòng ban:</label>
-        <select id="phongban" name="phongban" required>
-          <option value="">-- Chọn phòng ban --</option>
-          <?php
-          if ($phongbans && mysqli_num_rows($phongbans) > 0) {
-            while ($row = mysqli_fetch_assoc($phongbans)) {
-              echo "<option value='{$row['MaPB']}'>{$row['TenPB']}</option>";
-            }
-          } else {
-            echo "<option value=''>Không có phòng ban</option>";
-          }
-          ?>
-        </select>
-      </div>
+            <div class="form-group">
+                <label for="phongban">Phòng ban:</label>
+                <select id="phongban" name="phongban" required>
+                    <option value="">-- Chọn phòng ban --</option>
+                    <?php
+                    // Lặp qua $phongbans (ResultSet)
+                    if (isset($phongbans) && $phongbans && mysqli_num_rows($phongbans) > 0) {
+                        while ($row = mysqli_fetch_assoc($phongbans)) {
+                            echo "<option value='{$row['MaPB']}'>{$row['TenPB']}</option>";
+                        }
+                    } else {
+                        echo "<option value=''>Không có phòng ban</option>";
+                    }
+                    ?>
+                </select>
+            </div>
 
-      <div class="form-group">
-        <label for="chucvu">Chức vụ:</label>
-        <input type="text" id="chucvu" name="chucvu">
-      </div>
-
-      <div class="form-buttons">
-        <button type="submit" class="btn add">💾 Lưu</button>
-        <a href="index.php?controller=nhanvien&action=index" class="btn cancel">↩️ Quay lại</a>
-      </div>
-    </form>
-  </main>
+            <div class="form-group">
+                <label for="chucvu">Chức vụ:</label>
+                <select id="chucvu" name="chucvu" required>
+                    <option value="">-- Chọn chức vụ --</option>
+                    <?php 
+                    // Lặp qua $chucvus (Array) đã được Controller truyền từ Model
+                    $chucvus = $chucvus ?? [];
+                    if (!empty($chucvus)):
+                        foreach ($chucvus as $cv): ?>
+                            <option value="<?php echo $cv['MaCV']; ?>">
+                                <?php echo htmlspecialchars($cv['TenChucVu']); ?>
+                            </option>
+                        <?php endforeach; 
+                    endif;
+                    ?>
+                </select>
+            </div>
+            <div class="form-buttons">
+                <button type="submit" class="btn add">💾 Lưu</button>
+                <a href="index.php?controller=nhanvien&action=index" class="btn cancel">↩️ Quay lại</a>
+            </div>
+        </form>
+    </main>
 </div>
 </body>
 </html>
