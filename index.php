@@ -27,6 +27,18 @@ switch ($controller) {
     case 'luong':
         require_once 'controllers/LuongController.php';
         $controllerObj = new LuongController($conn);
+        break; 
+    case 'hopdong':
+        require_once 'controllers/HopDongController.php';
+        $controllerObj = new HopDongController($conn);
+        break;
+    case 'chucvu':
+        require_once 'controllers/ChucVuController.php';
+        $controllerObj = new ChucVuController($conn);
+        break;
+    case 'khenthuong':
+        require_once 'controllers/KhenThuongController.php';
+        $controllerObj = new KhenThuongController($conn);
         break;
 
     default:
