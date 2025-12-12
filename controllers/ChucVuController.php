@@ -49,7 +49,6 @@ class ChucVuController {
             header('Location: index.php?controller=chucvu&action=index');
             exit;
         }
-
         $chucVuChiTiet = $this->model->getById($id);
         
         if (!$chucVuChiTiet) {
