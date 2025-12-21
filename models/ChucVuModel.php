@@ -20,7 +20,7 @@ class ChucVuModel {
                 FROM 
                     {$this->table} c
                 LEFT JOIN 
-                    nhanvien nv ON c.MaCV = nv.MaCV"; 
+                    nhanvien nv ON c.MaCV = nv.ChucVu"; 
         
         if (!empty($keyword)) {
             // Áp dụng tìm kiếm theo Mã CV hoặc Tên Chức vụ

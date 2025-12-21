@@ -31,6 +31,7 @@ class PhongBanModel {
         $sql = "INSERT INTO phongban (MaPB, TenPB, MoTa) VALUES ('$mapb', '$tenpb', '$mota')";
         return mysqli_query($this->conn, $sql);
 
+        
     }
     public function updatePhongBan($mapb, $tenpb, $mota) {
         $mapb = $this->conn->real_escape_string($mapb);

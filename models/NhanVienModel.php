@@ -9,6 +9,10 @@ class NhanVienModel {
     public function __construct($conn) {
         $this->conn = $conn;
     }
+     public function getAllPhongBan() {
+        $sql = "SELECT MaPB, TenPB FROM phongban";
+        return mysqli_query($this->conn, $sql);
+    }
 
     // THÊM: Lấy danh sách Chức vụ để dùng trong Form Thêm/Sửa
     public function getAllChucVu() {
@@ -36,9 +40,9 @@ class NhanVienModel {
             FROM 
                 nhanvien nv
             LEFT JOIN 
-                phongban pb ON nv.MaPB = pb.MaPB 
+                phongban pb ON nv.PhongBan = pb.MaPB 
             LEFT JOIN 
-                tbl_chucvu cv ON nv.MaCV = cv.MaCV
+                tbl_chucvu cv ON nv.ChucVu = cv.MaCV
             LEFT JOIN (
                 SELECT l1.MaNV, l1.LuongCB
                 FROM luong l1
@@ -54,10 +58,8 @@ class NhanVienModel {
     }
     
     // READ: Lấy danh sách Phòng ban
-    public function getAllPhongBan() {
-        $sql = "SELECT MaPB, TenPB FROM phongban";
-        return mysqli_query($this->conn, $sql);
-    }
+   
+    
 
     // CREATE: Thêm mới Nhân viên
     public function insertNhanVien($manv, $hoten, $gioitinh, $ngaysinh, $maPB, $maCV) {
@@ -68,7 +70,7 @@ class NhanVienModel {
         $maPB = mysqli_real_escape_string($this->conn, $maPB); 
         $maCV = mysqli_real_escape_string($this->conn, $maCV); 
 
-        $sql = "INSERT INTO nhanvien (MaNV, HoTen, GioiTinh, NgaySinh, MaPB, MaCV)
+        $sql = "INSERT INTO nhanvien (MaNV, HoTen, GioiTinh, NgaySinh, PhongBan, ChucVu)
                 VALUES ('$manv', '$hoten', '$gioitinh', '$ngaysinh', '$maPB', '$maCV')";
         return mysqli_query($this->conn, $sql);
     }
@@ -95,7 +97,7 @@ class NhanVienModel {
 
         $sql = "UPDATE nhanvien 
                 SET HoTen='$hoten', GioiTinh='$gioitinh', NgaySinh='$ngaysinh',
-                    MaPB='$maPB', MaCV='$maCV'
+                    PhongBan='$maPB', ChucVu='$maCV'
                 WHERE MaNV='$manv'";
         return mysqli_query($this->conn, $sql);
     }
@@ -117,10 +119,10 @@ class NhanVienModel {
                 FROM 
                     nhanvien nv
                 LEFT JOIN 
-                    phongban pb ON nv.MaPB = pb.MaPB
+                    phongban pb ON nv.PhongBan = pb.MaPB
                 LEFT JOIN 
-                    tbl_chucvu cv ON nv.MaCV = cv.MaCV
-                LEFT JOIN (
+                    tbl_chucvu cv ON nv.ChucVu = cv.MaCV
+                LEFT JOIN (s
                     SELECT MaNV, LuongCB
                     FROM luong
                     WHERE (MaNV, Thang) IN (
@@ -146,4 +148,3 @@ class NhanVienModel {
             return false;
     }
 }
-?>

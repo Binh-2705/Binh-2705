@@ -74,7 +74,8 @@
                                 <td>{$row['GioiTinh']}</td>
                                 <td>{$row['NgaySinh']}</td>
                                 <td>" . ($row['TenPB'] ?? 'Chưa có') . "</td>
-                                <td>" . ($row['TenChucVu'] ?? 'Chưa có') . "</td> <td>" . (isset($row['LuongCB']) ? number_format($row['LuongCB'],0,',','.') . "đ" : "Chưa có") . "</td>
+                                <td>" . ($row['TenChucVu'] ?? 'Chưa có') . "</td> 
+                                <td>" . (isset($row['LuongCB']) ? number_format($row['LuongCB'],0,',','.') . "đ" : "Chưa có") . "</td>
                                 <td>
                                     <a href='index.php?controller=nhanvien&action=sua&manv={$row['MaNV']}' class='btn edit'>✏️ Sửa</a>
                                     <a href='index.php?controller=nhanvien&action=xoa&manv={$row['MaNV']}' class='btn delete'
