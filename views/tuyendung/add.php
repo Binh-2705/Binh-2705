@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>➕ Thêm Quyết định Khen thưởng/Kỷ luật</title>
+    <title>➕ Thêm ứng viên mới</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -29,70 +29,52 @@
             <li><a href="index.php?controller=dangxuat&action=index">🚪 Đăng xuất</a></li>
         </ul>
     </nav>
+
     <main class="main-content">
-        <header>
-            <h1>➕ Thêm Quyết định mới</h1>
-        </header>
+        <header><h1>➕ Thêm Ứng viên mới</h1></header>
 
-        <form action="index.php?controller=khenthuong&action=luuThem" method="POST" class="form-nv">
+        <form action="index.php?controller=tuyendung&action=add" method="POST" class="form-nv">
             
+            <?php if (isset($error)): ?>
+                <p style="color: red; font-weight: bold; margin-bottom: 15px;"><?php echo htmlspecialchars($error); ?></p>
+            <?php endif; ?>
+
             <div class="form-group">
-                <label for="maQD">Mã Quyết định (*):</label>
-                <input type="text" id="maQD" name="maQD" required placeholder="Ví dụ: KT001 hoặc KL001">
+                <label for="HoTen">Họ và Tên:</label>
+                <input type="text" id="HoTen" name="HoTen" required placeholder="Nhập họ tên ứng viên">
             </div>
 
             <div class="form-group">
-                <label for="maNV">Nhân viên:</label>
-                <select id="maNV" name="maNV" required> 
-                    <option value="">-- Chọn Nhân viên --</option>
-                    <?php 
-                    if (isset($nhanviens) && mysqli_num_rows($nhanviens) > 0): 
-                        mysqli_data_seek($nhanviens, 0);
-                        while ($nv = mysqli_fetch_assoc($nhanviens)): ?>
-                            <option value="<?php echo $nv['MaNV']; ?>">
-                                <?php echo htmlspecialchars($nv['HoTen']) . ' (' . $nv['MaNV'] . ')'; ?>
-                            </option>
-                        <?php endwhile; 
-                    endif;
-                    ?>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label for="loaiQD">Loại Quyết định:</label>
-                <select id="loaiQD" name="loaiQD" required>
-                    <option value="Khen thưởng">Khen thưởng</option>
-                    <option value="Kỷ luật">Kỷ luật</option>
-                </select>
+                <label for="Email">Email:</label>
+                <input type="email" id="Email" name="Email" placeholder="example@gmail.com">
             </div>
 
             <div class="form-group">
-                <label for="ngayQD">Ngày ra Quyết định (NgayRaQD):</label>
-                <input type="date" id="ngayQD" name="ngayQD" required>
+                <label for="SoDienThoai">Số điện thoại:</label>
+                <input type="text" id="SoDienThoai" name="SoDienThoai" placeholder="Nhập số điện thoại">
             </div>
 
             <div class="form-group">
-                <label for="tieuDe">Tiêu đề (TieuDe):</label>
-                <input type="text" id="tieuDe" name="tieuDe" required placeholder="Ví dụ: Thưởng hiệu suất Quý 1">
+                <label for="ViTriUngTuyen">Vị trí ứng tuyển:</label>
+                <input type="text" id="ViTriUngTuyen" name="ViTriUngTuyen" required placeholder="Ví dụ: Nhân viên IT, Kế toán...">
             </div>
 
             <div class="form-group">
-                <label for="noiDung">Nội dung (NoiDung):</label>
-                <textarea id="noiDung" name="noiDung" rows="3" required placeholder="Chi tiết lý do khen thưởng/kỷ luật"></textarea>
+                <label for="NgayNop">Ngày nộp hồ sơ:</label>
+                <input type="date" id="NgayNop" name="NgayNop" value="<?php echo date('Y-m-d'); ?>">
             </div>
 
             <div class="form-group">
-                <label for="giaTri">Giá trị (GiaTri - VNĐ/USD):</label>
-                <input type="number" id="giaTri" name="giaTri" required min="0" value="0">
+                <label for="GhiChu">Ghi chú / Đánh giá:</label>
+                <textarea id="GhiChu" name="GhiChu" rows="4" style="width: 100%; border: 1px solid #ccc; border-radius: 4px; padding: 8px;"></textarea>
             </div>
-
 
             <div class="form-buttons">
-                <button type="submit" class="btn add">💾 Lưu Quyết định</button>
-                <a href="index.php?controller=khenthuong&action=index" class="btn cancel">↩️ Hủy</a>
+                <button type="submit" class="btn add">💾 Lưu hồ sơ</button>
+                <a href="index.php?controller=tuyendung&action=index" class="btn cancel">↩️ Quay lại</a>
             </div>
         </form>
-        </main>
+    </main>
 </div>
 </body>
 </html>

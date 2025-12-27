@@ -40,7 +40,18 @@ switch ($controller) {
         require_once 'controllers/KhenThuongController.php';
         $controllerObj = new KhenThuongController($conn);
         break;
-
+    case 'nghiphep':
+        require_once 'controllers/NghiPhepController.php';
+        $controllerObj = new NghiPhepController($conn);
+        break;
+    case 'hoso':
+        require_once 'controllers/HoSoCaNhanController.php';
+        $controllerObj = new HoSoCaNhanController($conn);
+        break;
+    case 'tuyendung':
+        require_once 'controllers/TuyenDungController.php';
+        $controllerObj = new TuyenDungController($conn);
+        break;
     default:
         die("Controller không tồn tại!");
 }
