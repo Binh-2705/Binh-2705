@@ -5,37 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>➕ Thêm Lương Nhân Viên</title>
 <link rel="stylesheet" href="style.css">
-<script>
-function tinhTongLuong() {
-    let luongcb = parseFloat(document.getElementById('luongcb').value) || 0;
-    let phucap = parseFloat(document.getElementById('phucap').value) || 0;
-    let thuong = parseFloat(document.getElementById('thuong').value) || 0;
-    let soNgayLam = parseInt(document.getElementById('soNgayLam').value) || 0;
-    let khautru = 0;
 
-    const ngayChuan = 26; // Số ngày chuẩn/tháng
-    khautru = ((ngayChuan - soNgayLam) / ngayChuan) * luongcb;
-
-    let tong = luongcb + phucap + thuong - khautru;
-    document.getElementById('khautru').value = Math.round(khautru);
-    document.getElementById('tongluong').value = Math.round(tong).toLocaleString('vi-VN');
-}
-
-function laySoNgayLam() {
-    let manv = document.getElementById('manv').value;
-    let thang = document.getElementById('thang').value;
-    if (!manv || !thang) return;
-
-    fetch(`index.php?controller=chamcong&action=getSoNgayLam&manv=${manv}&thang=${thang}`)
-        .then(res => res.json())
-        .then(data => {
-            document.getElementById('soNgayLam').value = data.SoNgayLam || 0;
-            tinhTongLuong();
-        })
-        .catch(err => console.error(err));
-}
-
-</script>
 </head>
 <body>
 <div class="container">
@@ -61,32 +31,43 @@ function laySoNgayLam() {
 
 <div class="form-group">
     <label for="manv">Chọn nhân viên:</label>
-    <select id="manv" name="manv" required onchange="laySoNgayLam()">
-        <option value="">-- Chọn nhân viên --</option>
-        <?php foreach ($dsNV as $nv): ?>
-            <option value="<?= $nv['MaNV'] ?>"><?= $nv['HoTen'] ?> (<?= $nv['MaNV'] ?>)</option>
-        <?php endforeach; ?>
-    </select>
+  <select id="manv" name="manv" onchange="layLuongCoBan(); layThuongKyLuat()" required>
+    <option value="">-- Chọn nhân viên --</option>
+    <?php foreach ($dsNV as $nv): ?>
+        <option value="<?= $nv['MaNV'] ?>"><?= $nv['HoTen'] ?></option>
+    <?php endforeach; ?>
+</select>
+
+
 </div>
 
 <div class="form-group">
     <label for="thang">Tháng:</label>
-    <input type="month" id="thang" name="thang" required onchange="laySoNgayLam()">
+    <input type="month" id="thang" name="thang"
+           required onchange="laySoNgayLam(); layThuongKyLuat()">
 </div>
 
+
 <div class="form-group">
-    <label for="luongcb">Lương cơ bản (VNĐ):</label>
-    <input type="number" id="luongcb" name="luongcb" min="0" oninput="tinhTongLuong()" required>
+    <label>Lương cơ bản:</label>
+   <input type="number" id="luongcb" name="luongcb" readonly>
+
+
 </div>
+
 
 <div class="form-group">
     <label for="phucap">Phụ cấp (VNĐ):</label>
-    <input type="number" id="phucap" name="phucap" min="0" oninput="tinhTongLuong()">
+   <input type="number" id="phucap" name="phucap" oninput="tinhTongLuong()">
+
+
 </div>
 
 <div class="form-group">
     <label for="thuong">Thưởng (VNĐ):</label>
-    <input type="number" id="thuong" name="thuong" min="0" oninput="tinhTongLuong()">
+   <input type="number" id="thuong" name="thuong" readonly>
+
+
 </div>
 
 <div class="form-group">
@@ -95,8 +76,14 @@ function laySoNgayLam() {
 </div>
 
 <div class="form-group">
+    <label for="kyluat">Kỷ luật (VNĐ):</label>
+  <input type="number" id="kyluat" name="kyluat" readonly>
+</div>
+
+
+<div class="form-group">
     <label for="khautru">Khấu trừ (VNĐ):</label>
-    <input type="number" id="khautru" name="khautru" readonly>
+   <input type="number" id="khautru" readonly>
 </div>
 
 <div class="form-group">
@@ -112,6 +99,7 @@ function laySoNgayLam() {
 </main>
 </div>
 
+<script src="public/js/luong.js"></script>
 
 </body>
 </html>

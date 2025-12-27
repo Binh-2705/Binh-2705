@@ -21,6 +21,7 @@ class LuongController {
     }
     public function them() {
         $dsNV = $this->model->getNhanVien();
+        $luongcb = 0;
         include './views/luong/them.php';
     }
 
@@ -55,6 +56,8 @@ class LuongController {
         }
 
         $dsNV = $this->model->getNhanVien();
+         $luongcb = $this->model->getLuongCBFromHopDong($luong['MaNV']);
+
         include './views/luong/sua.php';
     }
 
@@ -98,37 +101,70 @@ public function exportExcel() {
     header("Content-Disposition: attachment; filename=\"$filename\"");
     echo "\xEF\xBB\xBF"; // BOM UTF-8
 
-    echo "<table border='1'>";
-    echo "<tr style='background-color:#f2f2f2; font-weight:bold;'>
-            <th>Mã Lương</th>
-            <th>Mã NV</th>
-            <th>Họ tên</th>
-            <th>Tháng</th>
-            <th>Lương cơ bản</th>
-            <th>Phụ cấp</th>
-            <th>Thưởng</th>
-            <th>Khấu trừ</th>
-            <th>Tổng lương</th>
+   echo "<tr style='background-color:#f2f2f2; font-weight:bold;'>
+        <th>Mã Lương</th>
+        <th>Mã NV</th>
+        <th>Họ tên</th>
+        <th>Tháng</th>
+        <th>Lương cơ bản</th>
+        <th>Phụ cấp</th>
+        <th>Thưởng</th>
+        <th>Kỷ luật</th>
+        <th>Khấu trừ</th>
+        <th>Tổng lương</th>
+      </tr>";
+
+foreach ($luong as $row) {
+    $tong = $row['LuongCB'] + $row['PhuCap'] + $row['Thuong']
+          - $row['KyLuat'] - $row['KhauTru'];
+
+    echo "<tr>
+            <td>{$row['MaLuong']}</td>
+            <td>{$row['MaNV']}</td>
+            <td>{$row['HoTen']}</td>
+            <td>{$row['Thang']}</td>
+            <td>".number_format($row['LuongCB'],0,',','.')."</td>
+            <td>".number_format($row['PhuCap'],0,',','.')."</td>
+            <td>".number_format($row['Thuong'],0,',','.')."</td>
+            <td>".number_format($row['KyLuat'],0,',','.')."</td>
+            <td>".number_format($row['KhauTru'],0,',','.')."</td>
+            <td>".number_format($tong,0,',','.')."</td>
           </tr>";
+}
 
-    foreach ($luong as $row) {
-        $tong = $row['LuongCB'] + $row['PhuCap'] + $row['Thuong'] - $row['KhauTru'];
-        echo "<tr>
-                <td>{$row['MaLuong']}</td>
-                <td>{$row['MaNV']}</td>
-                <td>{$row['HoTen']}</td>
-                <td>{$row['Thang']}</td>
-                <td>".number_format($row['LuongCB'],0,',','.')."</td>
-                <td>".number_format($row['PhuCap'],0,',','.')."</td>
-                <td>".number_format($row['Thuong'],0,',','.')."</td>
-                <td>".number_format($row['KhauTru'],0,',','.')."</td>
-                <td>".number_format($tong,0,',','.')."</td>
-              </tr>";
-    }
-
-    echo "</table>";
     exit;
 }
+
+public function getLuongCoBan() {
+    $manv = $_GET['manv'] ?? '';
+    $luongcb = 0;
+
+    if ($manv) {
+        $luongcb = $this->model->getLuongCBFromHopDong($manv);
+    }
+
+    header('Content-Type: application/json');
+    echo json_encode(['LuongCoBan' => $luongcb]);
+    exit;
+}
+public function getThuongKyLuat() {
+    $manv  = $_GET['manv'] ?? '';
+    $thang = $_GET['thang'] ?? '';
+
+    $data = [
+        'TongThuong' => 0,
+        'TongKyLuat' => 0
+    ];
+
+    if ($manv && $thang) {
+        $data = $this->model->getThuongVaKyLuat($manv, $thang);
+    }
+
+    header('Content-Type: application/json');
+    echo json_encode($data);
+    exit;
+}
+
 
 
 }

@@ -60,35 +60,51 @@ function laySoNgayLam() {
         </select>
     </div>
 
-    <div class="form-group">
-        <label for="thang">Tháng:</label>
+   <div class="form-group">
+        <label>Tháng:</label>
         <input type="month" id="thang" name="thang" value="<?= $luong['Thang'] ?>" required>
     </div>
 
+   
     <div class="form-group">
-        <label for="luongcb">Lương cơ bản:</label>
-        <input type="number" id="luongcb" name="luongcb" value="<?= $luong['LuongCB'] ?>" oninput="tinhTongLuong()" required>
+        <label>Lương cơ bản:</label>
+        <input type="number" id="luongcb" value="<?= $luongcb ?>" readonly>
     </div>
 
     <div class="form-group">
-        <label for="phucap">Phụ cấp:</label>
-        <input type="number" id="phucap" name="phucap" value="<?= $luong['PhuCap'] ?>" oninput="tinhTongLuong()">
+        <label>Phụ cấp:</label>
+        <input type="number" id="phucap" name="phucap"
+               value="<?= $luong['PhuCap'] ?>" oninput="tinhTongLuong()">
     </div>
 
     <div class="form-group">
-        <label for="thuong">Thưởng:</label>
-        <input type="number" id="thuong" name="thuong" value="<?= $luong['Thuong'] ?>" oninput="tinhTongLuong()">
+        <label>Thưởng:</label>
+        <input type="number" id="thuong" name="thuong"
+               value="<?= $luong['Thuong'] ?>" oninput="tinhTongLuong()">
+    </div>
+
+    
+    <div class="form-group">
+        <label>Kỷ luật:</label>
+        <input type="number" id="kyluat" value="<?= $luong['KyLuat'] ?? 0 ?>" readonly>
     </div>
 
     <div class="form-group">
-        <label for="khautru">Khấu trừ:</label>
-        <input type="number" id="khautru" name="khautru" value="<?= $luong['KhauTru'] ?>" oninput="tinhTongLuong()">
+        <label>Khấu trừ:</label>
+        <input type="number" id="khautru" name="khautru"
+               value="<?= $luong['KhauTru'] ?>" oninput="tinhTongLuong()">
     </div>
 
     <div class="form-group">
-        <label for="tongluong">Tổng lương:</label>
-        <input type="text" id="tongluong" value="<?= number_format($luong['LuongCB'] + $luong['PhuCap'] + $luong['Thuong'] - $luong['KhauTru'], 0, ',', '.') ?>" disabled>
+        <label>Tổng lương:</label>
+        <input type="text" id="tongluong" disabled
+               value="<?= number_format(
+                    $luong['LuongCB'] + $luong['PhuCap'] + $luong['Thuong']
+                    - $luong['KyLuat'] - $luong['KhauTru'],
+                    0, ',', '.'
+               ) ?>">
     </div>
+
 
     <div class="form-buttons">
         <button type="submit" class="btn edit">💾 Cập nhật</button>
@@ -99,5 +115,6 @@ function laySoNgayLam() {
 </div>
 
 
+<script src="public/js/luong.js"></script>
 </body>
 </html>

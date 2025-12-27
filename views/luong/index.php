@@ -58,6 +58,7 @@
           <th>Lương cơ bản</th>
           <th>Phụ cấp</th>
           <th>Thưởng</th>
+          <th>Kỷ luật</th>
           <th>Khấu trừ</th>
           <th>Tổng lương</th>
           <th>Thao tác</th>
@@ -74,6 +75,7 @@
               <td><?= number_format($row['LuongCB'], 0, ',', '.') ?></td>
               <td><?= number_format($row['PhuCap'], 0, ',', '.') ?></td>
               <td><?= number_format($row['Thuong'], 0, ',', '.') ?></td>
+              <td><?= number_format($row['KyLuat'], 0, ',', '.') ?></td>
               <td><?= number_format($row['KhauTru'], 0, ',', '.') ?></td>
               <td><b><?= number_format($row['TongLuong'], 0, ',', '.') ?></b></td>
               <td>
@@ -85,7 +87,7 @@
             </tr>
           <?php endforeach; ?>
         <?php else: ?>
-          <tr><td colspan="10">Chưa có dữ liệu lương.</td></tr>
+          <tr><td colspan="11">Chưa có dữ liệu lương.</td></tr>
         <?php endif; ?>
       </tbody>
     </table>
