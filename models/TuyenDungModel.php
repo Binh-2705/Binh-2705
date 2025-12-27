@@ -96,6 +96,19 @@ class TuyenDungModel {
     
     $sql = "UPDATE {$this->table} SET TrangThai = '$trangThaiText' WHERE MaUV = '$id'";
     return $this->conn->query($sql);
+    }
+
+    // 7. LẤY DỮ LIỆU XUẤT EXCEL
+    public function getListExcel() {
+    $sql = "SELECT * FROM tuyendung ORDER BY NgayNop DESC";
+    $result = mysqli_query($this->conn, $sql);
+    $data = [];
+    if ($result) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $data[] = $row;
+        }
+    }
+    return $data;
 }
 }
 ?>

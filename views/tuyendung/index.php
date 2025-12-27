@@ -46,6 +46,7 @@
                 <input type="hidden" name="action" value="index">
                 <input type="text" name="search" class="search-box" placeholder="Tìm theo tên, vị trí, SĐT..." value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>">
                 <button type="submit" class="btn search">🔍 Tìm</button>
+                <a href="index.php?controller=tuyendung&action=xuatexcel" class="btn add" style="background-color: #27ae60;"> Xuất Excel</a>
             </form>
 
             <a href="index.php?controller=tuyendung&action=add" class="btn add">➕ Thêm ứng viên</a>

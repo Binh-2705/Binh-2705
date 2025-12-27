@@ -62,7 +62,49 @@ class TuyenDungController {
         }
         header('Location: index.php?controller=tuyendung&action=index&msg=' . urlencode($message));
         exit;
+        }
     }
-}
-}
-?>
+
+    // ACTION XUẤT EXCEL
+    public function xuatexcel() {
+    $danhSachUngVien = $this->model->getListExcel(); 
+    
+    $filename = "Danh_sach_ung_vien_" . date('Ymd_His') . ".xls";
+
+    header("Content-Type: application/vnd.ms-excel; charset=UTF-8");
+    header("Content-Disposition: attachment; filename=\"$filename\"");
+    echo "\xEF\xBB\xBF"; 
+    echo "<table border='1'>";
+    
+    echo "<tr style='background-color:#1e3a8a; color:white; font-weight:bold;'>
+            <th>STT</th>
+            <th>Họ và Tên</th>
+            <th>Vị trí</th>
+            <th>SĐT</th>
+            <th>Ngày nộp</th>
+            <th>Trạng thái</th>
+          </tr>";
+
+    if (!empty($danhSachUngVien)) {
+        $stt = 1;
+        foreach ($danhSachUngVien as $uv) {
+            $hoTen = $uv['HoTen'] ?? '';
+            $viTri = $uv['ViTriUngTuyen'] ?? $uv['ViTri'] ?? ''; 
+            $sdt = $uv['SoDienThoai'] ?? $uv['SDT'] ?? '';    
+            $ngayNop = isset($uv['NgayNop']) ? date('d/m/Y', strtotime($uv['NgayNop'])) : '';
+            $trangThai = $uv['TrangThai'] ?? '';
+
+            echo "<tr>
+                    <td>" . $stt++ . "</td>
+                    <td>{$hoTen}</td>
+                    <td>{$viTri}</td>
+                    <td>{$sdt}</td>
+                    <td>{$ngayNop}</td>
+                    <td>{$trangThai}</td>
+                  </tr>";
+            }
+        }
+        echo "</table>";
+        exit();
+    }
+}    
