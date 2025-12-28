@@ -145,7 +145,7 @@ class NhanVienController {
                 <td>{$row['GioiTinh']}</td>
                 <td>{$row['NgaySinh']}</td>
                 <td>".($row['TenPB'] ?? '')."</td>
-                <td>{$row['ChucVu']}</td>
+                <td>".($row['TenChucVu'] ?? '')."</td>
                 <td>".(isset($row['LuongCB']) ? number_format($row['LuongCB'],0,',','.') : '')."</td>
               </tr>";
     }

@@ -99,9 +99,15 @@ public function exportExcel() {
 
     header("Content-Type: application/vnd.ms-excel; charset=UTF-8");
     header("Content-Disposition: attachment; filename=\"$filename\"");
-    echo "\xEF\xBB\xBF"; // BOM UTF-8
+    header("Pragma: no-cache");
+    header("Expires: 0");
 
-   echo "<tr style='background-color:#f2f2f2; font-weight:bold;'>
+    echo "\xEF\xBB\xBF"; // BOM UTF-8 (tiếng Việt)
+
+    // ✅ MỞ TABLE (BẮT BUỘC)
+    echo "<table border='1'>";
+
+    echo "<tr style='background-color:#f2f2f2; font-weight:bold;'>
         <th>Mã Lương</th>
         <th>Mã NV</th>
         <th>Họ tên</th>
@@ -112,13 +118,13 @@ public function exportExcel() {
         <th>Kỷ luật</th>
         <th>Khấu trừ</th>
         <th>Tổng lương</th>
-      </tr>";
+    </tr>";
 
-foreach ($luong as $row) {
-    $tong = $row['LuongCB'] + $row['PhuCap'] + $row['Thuong']
-          - $row['KyLuat'] - $row['KhauTru'];
+    foreach ($luong as $row) {
+        $tong = $row['LuongCB'] + $row['PhuCap'] + $row['Thuong']
+              - $row['KyLuat'] - $row['KhauTru'];
 
-    echo "<tr>
+        echo "<tr>
             <td>{$row['MaLuong']}</td>
             <td>{$row['MaNV']}</td>
             <td>{$row['HoTen']}</td>
@@ -129,11 +135,15 @@ foreach ($luong as $row) {
             <td>".number_format($row['KyLuat'],0,',','.')."</td>
             <td>".number_format($row['KhauTru'],0,',','.')."</td>
             <td>".number_format($tong,0,',','.')."</td>
-          </tr>";
-}
+        </tr>";
+    }
+
+    // ✅ ĐÓNG TABLE
+    echo "</table>";
 
     exit;
 }
+
 
 public function getLuongCoBan() {
     $manv = $_GET['manv'] ?? '';

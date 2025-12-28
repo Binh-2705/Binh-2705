@@ -61,50 +61,62 @@ function laySoNgayLam() {
     <input type="hidden" name="maluong" value="<?= $luong['MaLuong'] ?>">
 
     <div class="form-group">
-        <label for="manv">Nhân viên:</label>
-        <select id="manv" name="manv" required>
-            <?php foreach ($dsNV as $nv): ?>
-                <option value="<?= $nv['MaNV'] ?>" <?= $nv['MaNV'] == $luong['MaNV'] ? 'selected' : '' ?>>
-                    <?= $nv['HoTen'] ?> (<?= $nv['MaNV'] ?>)
-                </option>
-            <?php endforeach; ?>
-        </select>
-    </div>
+    <label for="manv">Chọn nhân viên:</label>
+  <select id="manv" name="manv" onchange="layLuongCoBan(); layThuongKyLuat()" required>
+    <option value="">-- Chọn nhân viên --</option>
+    <?php foreach ($dsNV as $nv): ?>
+        <option value="<?= $nv['MaNV'] ?>"><?= $nv['HoTen'] ?></option>
+    <?php endforeach; ?>
+</select>
 
-   <div class="form-group">
-        <label>Tháng:</label>
-        <input type="month" id="thang" name="thang" value="<?= $luong['Thang'] ?>" required>
-    </div>
 
-   
-    <div class="form-group">
-        <label>Lương cơ bản:</label>
-        <input type="number" id="luongcb" value="<?= $luongcb ?>" readonly>
-    </div>
+</div>
 
-    <div class="form-group">
-        <label>Phụ cấp:</label>
-        <input type="number" id="phucap" name="phucap"
-               value="<?= $luong['PhuCap'] ?>" oninput="tinhTongLuong()">
-    </div>
+<div class="form-group">
+    <label for="thang">Tháng:</label>
+    <input type="month" id="thang" name="thang"
+           required onchange="laySoNgayLam(); layThuongKyLuat()">
+</div>
 
-    <div class="form-group">
-        <label>Thưởng:</label>
-        <input type="number" id="thuong" name="thuong"
-               value="<?= $luong['Thuong'] ?>" oninput="tinhTongLuong()">
-    </div>
 
-    
-    <div class="form-group">
-        <label>Kỷ luật:</label>
-        <input type="number" id="kyluat" value="<?= $luong['KyLuat'] ?? 0 ?>" readonly>
-    </div>
+<div class="form-group">
+    <label>Lương cơ bản:</label>
+   <input type="number" id="luongcb" name="luongcb" readonly>
 
-    <div class="form-group">
-        <label>Khấu trừ:</label>
-        <input type="number" id="khautru" name="khautru"
-               value="<?= $luong['KhauTru'] ?>" oninput="tinhTongLuong()">
-    </div>
+
+</div>
+
+
+<div class="form-group">
+    <label for="phucap">Phụ cấp (VNĐ):</label>
+   <input type="number" id="phucap" name="phucap" oninput="tinhTongLuong()">
+
+
+</div>
+
+<div class="form-group">
+    <label for="thuong">Thưởng (VNĐ):</label>
+   <input type="number" id="thuong" name="thuong" readonly>
+
+
+</div>
+
+<div class="form-group">
+    <label for="soNgayLam">Số ngày làm thực tế:</label>
+    <input type="number" id="soNgayLam" name="soNgayLam" readonly>
+</div>
+
+<div class="form-group">
+    <label for="kyluat">Kỷ luật (VNĐ):</label>
+  <input type="number" id="kyluat" name="kyluat" readonly>
+</div>
+
+
+<div class="form-group">
+    <label for="khautru">Khấu trừ (VNĐ):</label>
+   <input type="number" id="khautru" readonly>
+</div>
+
 
     <div class="form-group">
         <label>Tổng lương:</label>
