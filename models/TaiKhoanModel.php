@@ -6,18 +6,19 @@ class TaiKhoanModel {
         $this->conn = $conn;
     }
      public function dangNhap($tenDangNhap, $matKhau){
-        $matKhau = md5($matKhau); // nếu bạn đang lưu md5
+    $sql = "SELECT * FROM taikhoan WHERE TenDangNhap = ?";
+    $stmt = $this->conn->prepare($sql);
+    $stmt->bind_param("s", $tenDangNhap);
+    $stmt->execute();
 
-        $sql = "SELECT * FROM taikhoan 
-                WHERE TenDangNhap = ? 
-                AND MatKhau = ?";
+    $tk = $stmt->get_result()->fetch_assoc();
 
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("ss", $tenDangNhap, $matKhau);
-        $stmt->execute();
-
-        return $stmt->get_result()->fetch_assoc();
+    if ($tk && password_verify($matKhau, $tk['MatKhau'])) {
+        return $tk;
     }
+    return false;
+}
+
 
 
     // LẤY DANH SÁCH + TÌM KIẾM

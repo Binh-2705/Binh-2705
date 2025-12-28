@@ -22,16 +22,12 @@
 
         <form method="post">
             <label>Tên đăng nhập</label>
-            <input type="text"
-                   name="TenDangNhap"
-                   placeholder="Nhập tên đăng nhập"
-                   required>
+            <input type="text" name="TenDangNhap">
+
+
 
             <label>Mật khẩu</label>
-            <input type="password"
-                   name="MatKhau"
-                   placeholder="Nhập mật khẩu"
-                   required>
+            <input type="password" name="MatKhau">
 
             <div class="options">
                 <label>

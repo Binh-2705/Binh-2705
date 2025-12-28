@@ -1,4 +1,5 @@
 <?php
+
 require_once 'models/TaiKhoanModel.php';
 
 class DangNhapController {
@@ -10,15 +11,14 @@ class DangNhapController {
 
     public function login(){
         if($_POST){
-            $user = $_POST['TenDangNhap'];
-            $pass = $_POST['MatKhau'];
-
-            $tk = $this->model->dangNhap($user, $pass);
+            $tk = $this->model->dangNhap(
+                $_POST['TenDangNhap'],
+                $_POST['MatKhau']
+            );
 
             if($tk){
                 $_SESSION['taikhoan'] = $tk;
-                $_SESSION['vaitro']   = $tk['VaiTro'];
-
+                $_SESSION['vaitro'] = $tk['VaiTro'];
                 header("Location: index.php");
                 exit;
             }else{
@@ -27,9 +27,9 @@ class DangNhapController {
         }
         require 'views/dangnhap/login.php';
     }
-
     public function dangxuat(){
-        session_destroy();
+        session_unset();      // xoá biến session
+        session_destroy();    // huỷ session
         header("Location: index.php?controller=dangnhap&action=login");
         exit;
     }

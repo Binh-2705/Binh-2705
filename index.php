@@ -5,15 +5,15 @@ require_once 'ketnoi.php';
 $controller = $_GET['controller'] ?? 'home';
 $action = $_GET['action'] ?? 'index';
 
-// Controller KHÔNG cần đăng nhập
-/*$controller = $_GET['controller'] ?? 'home';
+//Controller KHÔNG cần đăng nhập
+$controller = $_GET['controller'] ?? 'home';
 $action     = $_GET['action'] ?? 'index';
 
 if (!isset($_SESSION['taikhoan']) && $controller != 'dangnhap') {
     header("Location: index.php?controller=dangnhap&action=login");
     exit;
 }
-*/
+
 switch ($controller) {
     case 'home':
         require_once 'controllers/HomeController.php';
@@ -70,15 +70,15 @@ switch ($controller) {
         require_once 'controllers/ThongKeController.php';
         $controllerObj = new ThongKeController($conn);
         break;
-    /*case 'taikhoan':
+    case 'taikhoan':
     require_once 'controllers/TaiKhoanController.php';
     $controllerObj = new TaiKhoanController($conn);
-    break;*/
+    break;
 
-       /* case 'dangnhap':
+   case 'dangnhap':
             require_once 'controllers/DangNhapController.php';
             $controllerObj = new DangNhapController($conn);
-            break;*/
+            break;
     default:
         die("Controller không tồn tại!");
 }

@@ -104,7 +104,6 @@ public function exportExcel() {
 
     echo "\xEF\xBB\xBF"; // BOM UTF-8 (tiếng Việt)
 
-    // ✅ MỞ TABLE (BẮT BUỘC)
     echo "<table border='1'>";
 
     echo "<tr style='background-color:#f2f2f2; font-weight:bold;'>
