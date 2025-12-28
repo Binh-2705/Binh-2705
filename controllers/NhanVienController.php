@@ -10,7 +10,7 @@ class NhanVienController {
 
     public function index() {
         $result = $this->model->getAllNhanVien();
-        include 'views/nhanvien/index.php'; 
+        include 'views/nhanvien/index.php';  
     }
     public function them() {
         $phongbans = $this->model->getAllPhongBan();
