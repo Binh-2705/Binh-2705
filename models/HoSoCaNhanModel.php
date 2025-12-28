@@ -11,7 +11,7 @@ class HoSoCaNhanModel {
         $result = mysqli_query($this->conn, $sql);
         return $result;
     }
-
+ 
     public function getChiTietNhanVien($manv) {
         $manv = mysqli_real_escape_string($this->conn, $manv);
         $sql = "SELECT nv.*, pb.TenPB, cv.TenChucVu 
