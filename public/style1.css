@@ -1,0 +1,133 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #f2f4f7;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-container {
+    width: 900px;
+    height: 500px;
+    background: white;
+    border-radius: 20px;
+    display: flex;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+/* BÊN TRÁI */
+.login-left {
+    width: 45%;
+    background: #0d8ddb;
+    color: white;
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.login-left img {
+    width: 200px;
+    margin-bottom: 30px;
+}
+
+.login-left h2 {
+    margin-bottom: 10px;
+}
+
+.login-left p {
+    opacity: 0.9;
+}
+
+/* BÊN PHẢI */
+.login-right {
+    width: 55%;
+    padding: 40px;
+}
+
+.login-right h2 {
+    margin-bottom: 5px;
+}
+
+.login-right p {
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.login-right label {
+    display: block;
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+.login-right input {
+    width: 100%;
+    padding: 12px;
+    margin-top: 5px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+.options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 15px 0;
+    font-size: 14px;
+}
+
+.options a {
+    text-decoration: none;
+    color: #0d8ddb;
+}
+
+.login-right button {
+    width: 100%;
+    padding: 12px;
+    background: #1877f2;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.login-right button:hover {
+    background: #125fd1;
+}
+
+.or {
+    text-align: center;
+    margin: 15px 0;
+    color: #999;
+}
+
+.google-btn {
+    background: white;
+    border: 1px solid #ccc;
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.google-btn img {
+    width: 20px;
+}
+
+.signup {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.signup a {
+    color: #0d8ddb;
+    text-decoration: none;
+}

@@ -12,8 +12,8 @@
         <h2>HỆ THỐNG <br> QUẢN LÝ NHÂN SỰ</h2>
         <ul>
             <ul>
-                <li><a href="index.php?controller=home&action=index" class="active">🏠 Trang chủ</a></li>
-                <li><a href="index.php?controller=nhanvien&action=index">👥 Quản lý nhân viên</a></li>
+                <li><a href="index.php?controller=home&action=index" >🏠 Trang chủ</a></li>
+                <li><a href="index.php?controller=nhanvien&action=index" class="active">👥 Quản lý nhân viên</a></li>
                 <li><a href="index.php?controller=phongban&action=index">🏢 Quản lý phòng ban</a></li>
                 <li><a href="index.php?controller=luong&action=index">💰 Quản lý lương</a></li>
                 <li><a href="index.php?controller=chamcong&action=index">🕒 Quản lý chấm công</a></li>
@@ -25,7 +25,7 @@
                 <li><a href="index.php?controller=hoso&action=index">👤 Hồ sơ cá nhân</a></li>
                 <li><a href="index.php?controller=tuyendung&action=index">💼 Quản lý tuyển dụng</a></li>
                 <li><a href="index.php?controller=daotao&action=index">📚 Quản lý đào tạo</a></li>
-                <li><a href="index.php?controller=phanquyen&action=index">🗂 Quản lý đăng nhập – phân quyền</a></li>
+                <li><a href="index.php?controller=taikhoan&action=index">🗂 Quản lý tài khoản</a></li>
                 <li><a href="index.php?controller=timkiem&action=index">🔎 Tìm kiếm nâng cao</a></li>
                 <li><a href="index.php?controller=dangxuat&action=index">🚪 Đăng xuất</a></li>
             </ul>

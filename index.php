@@ -1,9 +1,19 @@
 <?php
+session_start();
 require_once 'ketnoi.php';
 
-$controller = isset($_GET['controller']) ? $_GET['controller'] : 'home';
-$action = isset($_GET['action']) ? $_GET['action'] : 'index';
+$controller = $_GET['controller'] ?? 'home';
+$action = $_GET['action'] ?? 'index';
 
+// Controller KHÔNG cần đăng nhập
+/*$controller = $_GET['controller'] ?? 'home';
+$action     = $_GET['action'] ?? 'index';
+
+if (!isset($_SESSION['taikhoan']) && $controller != 'dangnhap') {
+    header("Location: index.php?controller=dangnhap&action=login");
+    exit;
+}
+*/
 switch ($controller) {
     case 'home':
         require_once 'controllers/HomeController.php';
@@ -52,9 +62,28 @@ switch ($controller) {
         require_once 'controllers/TuyenDungController.php';
         $controllerObj = new TuyenDungController($conn);
         break;
+    case 'daotao':
+        require_once 'controllers/DaoTaoController.php';
+        $controllerObj = new DaoTaoController($conn);
+        break;
+    case 'thongke':
+        require_once 'controllers/ThongKeController.php';
+        $controllerObj = new ThongKeController($conn);
+        break;
+    /*case 'taikhoan':
+    require_once 'controllers/TaiKhoanController.php';
+    $controllerObj = new TaiKhoanController($conn);
+    break;*/
+
+       /* case 'dangnhap':
+            require_once 'controllers/DangNhapController.php';
+            $controllerObj = new DangNhapController($conn);
+            break;*/
     default:
         die("Controller không tồn tại!");
 }
+
+
 
 
 if (method_exists($controllerObj, $action)) {
