@@ -50,4 +50,23 @@ class TaiKhoanController {
         $this->model->delete($_GET['id']);
         header("Location: index.php?controller=taikhoan");
     }
+    public function quenMatKhau(){
+    if($_SERVER['REQUEST_METHOD'] == 'POST'){
+        $tenDangNhap = $_POST['TenDangNhap'];
+
+        if($this->model->checkTenDangNhap($tenDangNhap)){
+            // tạo mật khẩu mới
+            $matKhauMoi = rand(100000,999999);
+            $matKhauMaHoa = password_hash($matKhauMoi, PASSWORD_DEFAULT);
+
+            $this->model->resetMatKhau($tenDangNhap, $matKhauMaHoa);
+
+            $thongbao = "Mật khẩu mới của bạn là: <b>$matKhauMoi</b>";
+        }else{
+            $loi = "Tên đăng nhập không tồn tại!";
+        }
+    }
+    include 'views/dangnhap/quenmatkhau.php';
+}
+
 }

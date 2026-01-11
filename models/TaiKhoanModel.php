@@ -5,7 +5,7 @@ class TaiKhoanModel {
     public function __construct($conn){
         $this->conn = $conn;
     }
-     public function dangNhap($tenDangNhap, $matKhau){
+    public function dangNhap($tenDangNhap, $matKhau){
     $sql = "SELECT * FROM taikhoan WHERE TenDangNhap = ?";
     $stmt = $this->conn->prepare($sql);
     $stmt->bind_param("s", $tenDangNhap);
@@ -18,7 +18,6 @@ class TaiKhoanModel {
     }
     return false;
 }
-
 
 
     // LẤY DANH SÁCH + TÌM KIẾM
@@ -65,4 +64,19 @@ class TaiKhoanModel {
             "DELETE FROM taikhoan WHERE MaTK=$id"
         );
     }
+    public function resetMatKhau($tenDangNhap, $matKhauMoi){
+    $sql = "UPDATE taikhoan SET MatKhau = ? WHERE TenDangNhap = ?";
+    $stmt = $this->conn->prepare($sql);
+    $stmt->bind_param("ss", $matKhauMoi, $tenDangNhap);
+    return $stmt->execute();
+}
+
+public function checkTenDangNhap($tenDangNhap){
+    $sql = "SELECT * FROM taikhoan WHERE TenDangNhap = ?";
+    $stmt = $this->conn->prepare($sql);
+    $stmt->bind_param("s", $tenDangNhap);
+    $stmt->execute();
+    return $stmt->get_result()->num_rows > 0;
+}
+
 }

@@ -33,7 +33,8 @@
                 <label>
                     <input type="checkbox"> Ghi nhớ đăng nhập
                 </label>
-                <a href="#">Quên mật khẩu?</a>
+                <a href="index.php?controller=dangnhap&action=quenMatKhau">Quên mật khẩu?</a>
+
             </div>
 
             <button type="submit">ĐĂNG NHẬP</button>

@@ -27,6 +27,23 @@ class DangNhapController {
         }
         require 'views/dangnhap/login.php';
     }
+    public function quenMatKhau(){
+        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+            $tenDangNhap = $_POST['TenDangNhap'];
+
+            if($this->model->checkTenDangNhap($tenDangNhap)){
+                $matKhauMoi = rand(100000,999999);
+                $hash = password_hash($matKhauMoi, PASSWORD_DEFAULT);
+
+                $this->model->resetMatKhau($tenDangNhap, $hash);
+
+                $thongbao = "Mật khẩu mới của bạn là: <b>$matKhauMoi</b>";
+            }else{
+                $loi = "Tên đăng nhập không tồn tại!";
+            }
+        }
+        include 'views/dangnhap/quenmatkhau.php';
+    }
     public function dangxuat(){
         session_unset();      // xoá biến session
         session_destroy();    // huỷ session
