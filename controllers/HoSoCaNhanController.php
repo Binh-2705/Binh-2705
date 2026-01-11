@@ -1,5 +1,5 @@
 <?php
-require_once 'models/HoSoCaNhanModel.php'; 
+require_once 'models/HoSoCaNhanModel.php';
 
 class HoSoCaNhanController {
     private $model;
@@ -9,13 +9,25 @@ class HoSoCaNhanController {
     }
 
     public function index() {
-        if (isset($_GET['id'])) {
-            $id = $_GET['id'];
-            $nv = $this->model->getChiTietNhanVien($id);
-            include 'views/hosocanhan/chitiet.php';
-        } else {
-            $danhSach = $this->model->getAllNhanVien(); 
-            include 'views/hosocanhan/index.php';
-        }
+
+    // ===== XEM CHI TIẾT =====
+    if (isset($_GET['id']) && $_GET['id'] !== '') {
+
+        $id = $_GET['id'];
+
+        $nv       = $this->model->getChiTietNhanVien($id);
+        $luong    = $this->model->getLuongGanNhat($id);
+        $hopdong  = $this->model->getHopDongHienTai($id);
+        $chamcong = $this->model->getChamCongThangGanNhat($id);
+        $ktkl     = $this->model->getKTKL($id);
+
+        include 'views/hosocanhan/chitiet.php';
+        return;
     }
+
+    // ===== DANH SÁCH =====
+    $danhSach = $this->model->getAllNhanVien();
+    include 'views/hosocanhan/index.php';
+}
+
 }
