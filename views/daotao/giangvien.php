@@ -63,25 +63,7 @@
                         <a href="index.php?controller=daotao&action=giangvien" class="btn" style="background: #6c757d;">Xóa tìm kiếm</a>
                     <?php endif; ?>
                 </form>
-
-                <!-- Top giảng viên -->
-                <?php if ($topGiangVien && $topGiangVien->num_rows > 0): ?>
-                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #8b5cf6;">
-                    <h3 style="color: #8b5cf6; margin-bottom: 10px;">🏆 Top giảng viên tích cực</h3>
-                    <div style="display: flex; gap: 15px; overflow-x: auto;">
-                        <?php while ($gv = $topGiangVien->fetch_assoc()): ?>
-                        <div style="background: white; padding: 10px; border-radius: 6px; min-width: 200px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                            <div style="font-weight: bold; color: #495057;"><?= $gv['HoTen'] ?></div>
-                            <div style="font-size: 12px; color: #6c757d;"><?= $gv['ChuyenMon'] ?></div>
-                            <div style="display: flex; justify-content: space-between; margin-top: 8px;">
-                                <span style="font-size: 12px;">📚 <?= $gv['soKhoaHoc'] ?> khóa</span>
-                                <span style="font-size: 12px;">👥 <?= $gv['tongHocVien'] ?? 0 ?> HV</span>
-                            </div>
-                        </div>
-                        <?php endwhile; ?>
-                    </div>
-                </div>
-                <?php endif; ?>
+                
             </header>
 
             <!-- Danh sách giảng viên -->
