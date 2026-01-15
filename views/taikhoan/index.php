@@ -28,7 +28,7 @@
                 <li><a href="index.php?controller=tuyendung&action=index">💼 Quản lý tuyển dụng</a></li>
                 <li><a href="index.php?controller=daotao&action=index">📚 Quản lý đào tạo</a></li>
                 <li><a href="index.php?controller=taikhoan&action=index" class="active">🗂 Quản lý tài khoản</a></li>
-                <li><a href="index.php?controller=timkiem&action=index">🔎 Tìm kiếm nâng cao</a></li>
+              
                 <li><a href="index.php?controller=dangnhap&action=dangxuat">🚪 Đăng xuất</a></li>
             </ul>
         </ul>

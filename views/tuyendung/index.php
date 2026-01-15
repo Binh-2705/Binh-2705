@@ -8,7 +8,7 @@
 <body>
 <div class="container">
     <nav class="sidebar">
-        <h2>HỆ THỐNG <br> QUẢN LÝ NHÂN SỰ</h2>
+       <h2>HỆ THỐNG <br> QUẢN LÝ NHÂN SỰ</h2>
         <ul>
             <ul>
                 <li><a href="index.php?controller=home&action=index" >🏠 Trang chủ</a></li>
@@ -25,7 +25,7 @@
                 <li><a href="index.php?controller=tuyendung&action=index" class="active">💼 Quản lý tuyển dụng</a></li>
                 <li><a href="index.php?controller=daotao&action=index">📚 Quản lý đào tạo</a></li>
                 <li><a href="index.php?controller=taikhoan&action=index">🗂 Quản lý tài khoản</a></li>
-                <li><a href="index.php?controller=timkiem&action=index">🔎 Tìm kiếm nâng cao</a></li>
+                
                <li><a href="index.php?controller=dangnhap&action=dangxuat">🚪 Đăng xuất</a></li>
             </ul>
         </ul>
