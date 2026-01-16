@@ -30,14 +30,27 @@
 <body>
     <div class="container">
         <nav class="sidebar">
-            <h2>HỆ THỐNG<br>QUẢN LÝ NHÂN SỰ</h2>
-            <ul>
-                <li><a href="index.php?controller=home&action=index">🏠 Trang chủ</a></li>
-                <li><a href="index.php?controller=daotao&action=index">📚 Quản lý đào tạo</a></li>
-                <li><a href="index.php?controller=daotao&action=giangvien">👨‍🏫 Quản lý giảng viên</a></li>
-                <li><a href="" class="active">📊 Báo cáo đào tạo</a></li>
-            </ul>
-        </nav>
+      <h2>HỆ THỐNG<br>QUẢN LÝ NHÂN SỰ</h2>
+      <ul>
+        <li><a href="index.php?controller=home&action=index" class="active">🏠 Trang chủ</a></li>
+        <li><a href="index.php?controller=nhanvien&action=index">👥 Quản lý nhân viên</a></li>
+        <li><a href="index.php?controller=phongban&action=index">🏢 Quản lý phòng ban</a></li>
+        <li><a href="index.php?controller=luong&action=index">💰 Quản lý lương</a></li>
+        <li><a href="index.php?controller=chamcong&action=index">🕒 Quản lý chấm công</a></li>
+        <li><a href="index.php?controller=hopdong&action=index">📄 Quản lý hợp đồng</a></li>
+        <li><a href="index.php?controller=nghiphep&action=index">📆 Quản lý nghỉ phép</a></li>
+        <li><a href="index.php?controller=khenthuong&action=index">🏅 Khen thưởng - Kỷ luật</a></li>
+        <li><a href="index.php?controller=thongke&action=index">📊 Thống kê - Báo cáo</a></li>
+        <li><a href="index.php?controller=chucvu&action=index">🙍‍♂️ Quản lý chức vụ</a></li>
+        <li><a href="index.php?controller=hoso&action=index">👤 Hồ sơ cá nhân</a></li>
+        <li><a href="index.php?controller=tuyendung&action=index">💼 Quản lý tuyển dụng</a></li>
+        <li><a href="index.php?controller=daotao&action=index">📚 Quản lý đào tạo</a></li>
+        <li><a href="index.php?controller=daotao&action=giangvien" class="active">👨‍🏫 Quản lý giảng viên</a></li>
+        <li><a href="index.php?controller=daotao&action=baocao">📊 Báo cáo đào tạo</a></li>
+        <li><a href="index.php?controller=taikhoan&action=index">🗂 Quản lý tài khoản</a></li>
+       <li><a href="index.php?controller=dangnhap&action=dangxuat">🚪 Đăng xuất</a></li>
+      </ul>
+    </nav>
 
         <main class="main-content">
             <header>
