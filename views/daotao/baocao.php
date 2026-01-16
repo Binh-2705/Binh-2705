@@ -120,7 +120,7 @@
             <!-- Thống kê học viên -->
             <?php if (isset($thongKeHocVien) && $thongKeHocVien->num_rows > 0): ?>
             <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); margin-top: 30px;">
-                <h3 style="margin-bottom: 15px;">📊 Thống kê học viên</h3>
+                <h3 style="margin-bottom: 15px;">Thống kê học viên</h3>
                 <table class="table">
                     <thead>
                         <tr><th>Chỉ tiêu</th><th>Giá trị</th></tr>
