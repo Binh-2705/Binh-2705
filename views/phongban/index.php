@@ -40,7 +40,11 @@
       </header>
 
      <div class="actions">
+        <div class="btn-group">
     <a href="index.php?controller=phongban&action=them" class="btn add">➕ Thêm phòng ban</a>
+    <a href="index.php?controller=phongban&action=import" class="btn export">📂 Import CSV</a>
+    <a href="index.php?controller=phongban&action=exportExcel" class="btn export">📥 Xuất Excel</a>
+        </div>
     <form method="GET" action="index.php" style="display:inline-block;">
         <input type="hidden" name="controller" value="phongban">
         <input type="hidden" name="action" value="timkiem">

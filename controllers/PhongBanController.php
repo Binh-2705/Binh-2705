@@ -16,6 +16,10 @@ class PhongBanController {
     public function them() {
         include 'views/phongban/them.php';
     }
+    public function import() {
+    include 'views/phongban/import.php';
+}
+
 
     public function timkiem() {
         $keyword = isset($_GET['keyword']) ? $_GET['keyword'] : '';
@@ -96,5 +100,72 @@ class PhongBanController {
                   </script>";
         }
     }
+    public function exportExcel() {
+    $result = $this->model->getAllPhongBan();
+
+    $filename = "Danh_sach_phong_ban_" . date('Ymd') . ".xls";
+
+    header("Content-Type: application/vnd.ms-excel; charset=UTF-8");
+    header("Content-Disposition: attachment; filename=\"$filename\"");
+    echo "\xEF\xBB\xBF"; // BOM UTF-8
+
+    echo "<table border='1'>";
+    echo "<tr style='background-color:#f2f2f2; font-weight:bold;'>
+            <th>Mã PB</th>
+            <th>Tên phòng ban</th>
+            <th>Mô tả</th>
+            
+          </tr>";
+
+    while ($row = mysqli_fetch_assoc($result)) {
+        echo "<tr>
+                <td>{$row['MaPB']}</td>
+                <td>{$row['TenPB']}</td>
+                <td>{$row['MoTa']}</td>
+              </tr>";
+    }
+
+    echo "</table>";
+    exit;
+}
+    public function docFile() {
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
+        if (!isset($_FILES['filecsv']) || $_FILES['filecsv']['error'] != 0) {
+            echo "<script>alert('❌ Vui lòng chọn file CSV'); window.history.back();</script>";
+            exit;
+        }
+
+        $fileTmp = $_FILES['filecsv']['tmp_name'];
+        $handle = fopen($fileTmp, "r");
+
+        if ($handle === false) {
+            echo "<script>alert('❌ Không thể đọc file'); window.history.back();</script>";
+            exit;
+        }
+
+        $count = 0;
+        fgetcsv($handle); // bỏ dòng tiêu đề
+
+        while (($data = fgetcsv($handle, 1000, ",")) !== false) {
+            $mapb = trim($data[0]);
+            $tenpb = trim($data[1]);
+            $mota  = trim($data[2]);
+
+            if ($mapb != "" && !$this->model->checkma($mapb)) {
+                $this->model->insertPhongBan($mapb, $tenpb, $mota);
+                $count++;
+            }
+        }
+
+        fclose($handle);
+
+        echo "<script>
+                alert('✅ Đã import $count phòng ban!');
+                window.location='index.php?controller=phongban&action=index';
+              </script>";
+    }
+}
+
    
 }
