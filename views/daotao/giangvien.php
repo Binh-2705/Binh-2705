@@ -32,36 +32,12 @@
 
         <main class="main-content">
             <header>
-                <h1>👨‍🏫 Quản lý giảng viên</h1>
-                
-                <!-- Thống kê nhanh -->
-                <?php if ($thongKeGV): ?>
-                <div class="dashboard" style="margin-bottom: 20px;">
-                    <div class="card">
-                        <h3>Tổng giảng viên</h3>
-                        <p style="font-size: 24px; font-weight: bold; color: #8b5cf6;">
-                            <?= $thongKeGV['tongGiangVien'] ?? 0 ?>
-                        </p>
-                    </div>
-                    <div class="card">
-                        <h3>Kinh nghiệm TB</h3>
-                        <p style="font-size: 24px; font-weight: bold; color: #10b981;">
-                            <?= round($thongKeGV['kinhNghiemTB'] ?? 0, 1) ?> năm
-                        </p>
-                    </div>
-                    <div class="card">
-                        <h3>Chuyên môn</h3>
-                        <p style="font-size: 24px; font-weight: bold; color: #ef4444;">
-                            <?= $thongKeGV['soChuyenMon'] ?? 0 ?>
-                        </p>
-                    </div>
-                </div>
-                <?php endif; ?>
+                <h1> Quản lý giảng viên</h1>
 
                 <!-- Nút chức năng -->
                 <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                    <a href="index.php?controller=daotao&action=themgiangvien" class="btn add">➕ Thêm giảng viên</a>
-                    <a href="index.php?controller=daotao&action=index" class="btn back">↩️ Quay lại</a>
+                    <a href="index.php?controller=daotao&action=themgiangvien" class="btn add"> Thêm giảng viên</a>
+                    <a href="index.php?controller=daotao&action=index" class="btn back"> Quay lại</a>
                 </div>
 
                 <!-- Tìm kiếm -->

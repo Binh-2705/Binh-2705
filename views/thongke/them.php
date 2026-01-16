@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>➕ Thêm báo cáo</title>
+  <title> Thêm báo cáo</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -32,7 +32,7 @@
   </nav>
 
   <main class="main-content">
-    <header><h1>➕ Thêm báo cáo</h1></header>
+    <header><h1> Thêm báo cáo</h1></header>
     <form method="POST" action="index.php?controller=thongke&action=luu" class="form">
       <div class="form-group">
         <label>Tiêu đề:</label>

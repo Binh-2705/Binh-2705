@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>📊 Thống kê - Báo cáo</title>
+  <title> Thống kê - Báo cáo</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -34,7 +34,7 @@
 
   <main class="main-content">
     <header>
-      <h1>📊 Thống kê - Báo cáo</h1>
+      <h1> Thống kê - Báo cáo</h1>
     </header>
 
     <div class="actions">
@@ -52,13 +52,13 @@
           <option value="luong" <?php echo (isset($_GET['loai']) && $_GET['loai'] == 'luong') ? 'selected' : ''; ?>>Lương</option>
           <option value="daotao" <?php echo (isset($_GET['loai']) && $_GET['loai'] == 'daotao') ? 'selected' : ''; ?>>Đào tạo</option>
         </select>
-        <input type="text" name="thang" placeholder="📅 Tháng (YYYY-MM)" class="search-box" value="<?php echo isset($_GET['thang']) ? htmlspecialchars($_GET['thang']) : ''; ?>">
-        <input type="text" name="ma_pb" placeholder="🏢 Mã phòng ban" class="search-box" value="<?php echo isset($_GET['ma_pb']) ? htmlspecialchars($_GET['ma_pb']) : ''; ?>">
+        <input type="text" name="thang" placeholder=" Tháng (YYYY-MM)" class="search-box" value="<?php echo isset($_GET['thang']) ? htmlspecialchars($_GET['thang']) : ''; ?>">
+        <input type="text" name="ma_pb" placeholder=" Mã phòng ban" class="search-box" value="<?php echo isset($_GET['ma_pb']) ? htmlspecialchars($_GET['ma_pb']) : ''; ?>">
         <button type="submit" class="btn search">Tìm</button>
       </form>
     </div>
 
-    <h2>📑 Danh sách báo cáo</h2>
+    <h2> Danh sách báo cáo</h2>
     <table class="table">
       <thead>
         <tr>
@@ -82,22 +82,22 @@
               <td><?= $row['TenPB'] ?></td>
               <td><?= $row['created_at'] ?></td>
               <td>
-                <a href="index.php?controller=thongke&action=sua&id=<?= $row['id'] ?>" class="btn edit">✏️ Sửa</a>
+                <a href="index.php?controller=thongke&action=sua&id=<?= $row['id'] ?>" class="btn edit"> Sửa</a>
                 <a href="index.php?controller=thongke&action=xoa&id=<?= $row['id'] ?>" class="btn delete"
-                   onclick="return confirm('Bạn có chắc muốn xóa báo cáo này không?');">🗑️ Xóa</a>
-                <a href="index.php?controller=thongke&action=chitiet&id=<?= $row['id'] ?>" class="btn detail">📑 Chi tiết</a>
+                   onclick="return confirm('Bạn có chắc muốn xóa báo cáo này không?');"> Xóa</a>
+                <a href="index.php?controller=thongke&action=chitiet&id=<?= $row['id'] ?>" class="btn detail"> Chi tiết</a>
               </td>
             </tr>
           <?php endwhile; ?>
         <?php else: ?>
-          <tr><td colspan="7">❌ Chưa có dữ liệu báo cáo nào.</td></tr>
+          <tr><td colspan="7"> Chưa có dữ liệu báo cáo nào.</td></tr>
         <?php endif; ?>
       </tbody>
     </table>
 
-    <h2>📊 Thống kê tổng hợp</h2>
+    <h2> Thống kê tổng hợp</h2>
 
-    <h3>👥 Nhân viên theo phòng ban</h3>
+    <h3> Nhân viên theo phòng ban</h3>
     <table class="table">
       <thead><tr><th>Phòng ban</th><th>Số lượng</th></tr></thead>
       <tbody>
@@ -110,12 +110,12 @@
             </tr>
           <?php endwhile; 
         else: ?>
-          <tr><td colspan="2">❌ Không có dữ liệu</td></tr>
+          <tr><td colspan="2"> Không có dữ liệu</td></tr>
         <?php endif; ?>
       </tbody>
     </table>
 
-    <h3>🕒 Chấm công <?= isset($_GET['thang']) && !empty($_GET['thang']) ? "tháng {$_GET['thang']}" : "(tất cả)" ?></h3>
+    <h3> Chấm công <?= isset($_GET['thang']) && !empty($_GET['thang']) ? "tháng {$_GET['thang']}" : "(tất cả)" ?></h3>
     <table class="table">
       <thead><tr><th>Tháng</th><th>Ngày làm</th><th>Ngày nghỉ</th></tr></thead>
       <tbody>
@@ -129,12 +129,12 @@
             </tr>
           <?php endwhile; 
         else: ?>
-          <tr><td colspan="3">❌ Không có dữ liệu</td></tr>
+          <tr><td colspan="3"> Không có dữ liệu</td></tr>
         <?php endif; ?>
       </tbody>
     </table>
 
-    <h3>💰 Lương <?= isset($_GET['thang']) && !empty($_GET['thang']) ? "tháng {$_GET['thang']}" : "(tất cả)" ?></h3>
+    <h3> Lương <?= isset($_GET['thang']) && !empty($_GET['thang']) ? "tháng {$_GET['thang']}" : "(tất cả)" ?></h3>
     <table class="table">
       <thead>
         <tr><th>Tháng</th><th>Lương CB</th><th>Phụ cấp</th><th>Thưởng</th><th>Khấu trừ</th><th>Tổng lương</th></tr>
@@ -153,20 +153,38 @@
             </tr>
           <?php endwhile; 
         else: ?>
-          <tr><td colspan="6">❌ Không có dữ liệu</td></tr>
+          <tr><td colspan="6"> Không có dữ liệu</td></tr>
         <?php endif; ?>
       </tbody>
     </table>
 
-    <h3>📚 Đào tạo</h3>
-    <?php 
-    if ($thongKeDT && $thongKeDT->num_rows > 0): 
-      $dt = $thongKeDT->fetch_assoc(); ?>
-      <p>Số khóa học: <strong><?= $dt['soKhoaHoc'] ?></strong></p>
-      <p>Tổng chi phí đào tạo: <strong><?= number_format($dt['tongChiPhi'], 0, ',', '.') ?></strong></p>
-    <?php else: ?>
-      <p>❌ Không có dữ liệu đào tạo</p>
-    <?php endif; ?>
+    <h3> Đào tạo</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Loại thống kê</th>
+          <th>Giá trị</th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php 
+        if ($thongKeDT && $thongKeDT->num_rows > 0): 
+          $dt = $thongKeDT->fetch_assoc(); ?>
+          <tr>
+            <td>Số khóa học</td>
+            <td><strong><?= $dt['soKhoaHoc'] ?></strong></td>
+          </tr>
+          <tr>
+            <td>Tổng chi phí đào tạo</td>
+            <td><strong><?= number_format($dt['tongChiPhi'], 0, ',', '.') ?> VND</strong></td>
+          </tr>
+        <?php else: ?>
+          <tr>
+            <td colspan="2"> Không có dữ liệu đào tạo</td>
+          </tr>
+        <?php endif; ?>
+      </tbody>
+    </table>
 
   </main>
 </div>

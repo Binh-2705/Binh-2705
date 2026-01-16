@@ -35,36 +35,15 @@
 
     <main class="main-content">
       <header>
-        <h1>📚 Quản lý đào tạo</h1>
+        <h1> Quản lý đào tạo</h1>
         
-        <!-- Dashboard thống kê nhanh -->
-        <div class="dashboard" style="margin-bottom: 25px;">
-          <div class="card" onclick="location.href='index.php?controller=daotao&action=index'" style="cursor:pointer;">
-            <h3>Khóa học</h3>
-            <p style="font-size: 32px; font-weight: bold; color: #3b82f6;">
-              <?= $countKhoaHoc ?? 0 ?>
-            </p>
-          </div>
-          <div class="card" onclick="location.href='index.php?controller=daotao&action=giangvien'" style="cursor:pointer;">
-            <h3>Giảng viên</h3>
-            <p style="font-size: 32px; font-weight: bold; color: #10b981;">
-              <?= $countGiangVien ?? 0 ?>
-            </p>
-          </div>
-          <div class="card" onclick="location.href='index.php?controller=daotao&action=baocao'" style="cursor:pointer;">
-            <h3>Học viên</h3>
-            <p style="font-size: 32px; font-weight: bold; color: #ef4444;">
-              <?= $countHocVien ?? 0 ?>
-            </p>
-          </div>
-        </div>
 
         <!-- Các nút chức năng -->
         <div class="action-buttons" style="margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
-          <a href="index.php?controller=daotao&action=them" class="btn add">➕ Thêm khóa học</a>
-          <a href="index.php?controller=daotao&action=giangvien" class="btn" style="background: #8b5cf6;">👨‍🏫 Quản lý giảng viên</a>
-          <a href="index.php?controller=daotao&action=baocao" class="btn" style="background: #f59e0b;">📊 Báo cáo đào tạo</a>
-          <a href="index.php?controller=daotao&action=exportExcel" class="btn export">📥 Xuất Excel</a>
+          <a href="index.php?controller=daotao&action=them" class="btn add"> Thêm khóa học</a>
+          <a href="index.php?controller=daotao&action=giangvien" class="btn" style="background: #8b5cf6;"> Quản lý giảng viên</a>
+          <a href="index.php?controller=daotao&action=baocao" class="btn" style="background: #f59e0b;"> Báo cáo đào tạo</a>
+          <a href="index.php?controller=daotao&action=exportExcel" class="btn export"> Xuất Excel</a>
         </div>
 
         <!-- Tìm kiếm -->
@@ -102,11 +81,11 @@
                     <td><?= number_format($row['ChiPhi']) ?> VNĐ</td>
                     <td style="white-space: nowrap;">
                       <a href="index.php?controller=daotao&action=hocvien&madt=<?= $row['MaDT'] ?>" 
-                         class="btn" style="background: #10b981; color: white;">👥 Học viên</a>
+                         class="btn" style="background: #10b981; color: white;"> Học viên</a>
                       <a href="index.php?controller=daotao&action=sua&madt=<?= $row['MaDT'] ?>" 
-                         class="btn edit">✏️ Sửa</a>
+                         class="btn edit"> Sửa</a>
                       <a href="index.php?controller=daotao&action=xoa&madt=<?= $row['MaDT'] ?>" 
-                         class="btn delete" onclick="return confirm('Xóa khóa học này?');">🗑️ Xóa</a>
+                         class="btn delete" onclick="return confirm('Xóa khóa học này?');"> Xóa</a>
                     </td>
                   </tr>
             <?php } } else { echo "<tr><td colspan='8'>Không có dữ liệu đào tạo</td></tr>"; } ?>

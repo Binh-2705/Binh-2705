@@ -52,7 +52,7 @@
 
         <main class="main-content">
             <header>
-                <h1>👥 Quản lý học viên</h1>
+                <h1> Quản lý học viên</h1>
                 <div style="margin: 10px 0; padding: 10px; background: #e8f4fc; border-radius: 6px; border-left: 4px solid #3b82f6;">
                     <strong>Khóa học:</strong> <?= $daotao['TenKhoaHoc'] ?? 'Chưa chọn khóa học' ?><br>
                     <strong>Mã khóa:</strong> <?= $daotao['MaDT'] ?? '' ?> | 
@@ -60,7 +60,7 @@
                 </div>
                 
                 <div style="display: flex; gap: 10px; margin-top: 10px;">
-                    <a href="index.php?controller=daotao&action=index" class="btn back">↩️ Quay lại danh sách</a>
+                    <a href="index.php?controller=daotao&action=index" class="btn back"> Quay lại danh sách</a>
                     <?php if (isset($daotao['MaDT'])): ?>
                         <a href="index.php?controller=daotao&action=xuatdiem&madt=<?= $daotao['MaDT'] ?>" 
                            class="btn export">📥 Xuất Excel Điểm</a>
@@ -71,7 +71,7 @@
             <?php if (isset($daotao['MaDT'])): ?>
             <!-- Thêm học viên -->
             <div class="card" style="margin-bottom: 20px; padding: 15px; background: #f8f9fa;">
-                <h3 style="margin-bottom: 15px; color: #2b3d51;">➕ Thêm học viên mới</h3>
+                <h3 style="margin-bottom: 15px; color: #2b3d51;"> Thêm học viên mới</h3>
                 <form method="POST" action="index.php?controller=daotao&action=themhocvien">
                     <input type="hidden" name="MaDT" value="<?= $daotao['MaDT'] ?>">
                     <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: flex-end;">
@@ -96,7 +96,7 @@
                                    placeholder="Nhập ghi chú..." style="width: 100%;">
                         </div>
                         <div>
-                            <button type="submit" class="btn add" style="height: 38px;">➕ Thêm học viên</button>
+                            <button type="submit" class="btn add" style="height: 38px;"> Thêm học viên</button>
                         </div>
                     </div>
                 </form>
@@ -104,7 +104,7 @@
 
             <!-- Danh sách học viên -->
             <div style="margin-top: 20px;">
-                <h3 style="margin-bottom: 15px; color: #2b3d51;">📋 Danh sách học viên</h3>
+                <h3 style="margin-bottom: 15px; color: #2b3d51;"> Danh sách học viên</h3>
                 
                 <?php if ($hocVienList && $hocVienList->num_rows > 0): ?>
                     <table class="table">
@@ -179,15 +179,13 @@
                                             <input type="text" name="GhiChu" placeholder="Ghi chú" 
                                                    style="width: 120px; padding: 5px;" 
                                                    value="<?= htmlspecialchars($hv['GhiChu'] ?? '') ?>">
-                                            <button type="submit" class="btn edit btn-small" title="Lưu điểm">
-                                                💾
+                                            <button type="submit" class="btn edit btn-small" title="Lưu điểm">💾
                                             </button>
                                         </form>
                                         <a href="index.php?controller=daotao&action=xoahocvien&id=<?= $hv['ID'] ?>&madt=<?= $daotao['MaDT'] ?>" 
                                            class="btn delete btn-small" 
                                            onclick="return confirm('Xóa học viên này khỏi khóa học?');" 
-                                           title="Xóa học viên">
-                                            🗑️
+                                           title="Xóa học viên">🗑️
                                         </a>
                                     </td>
                                 </tr>
@@ -255,7 +253,7 @@
                     <div style="font-size: 48px; color: #dc3545;">⚠️</div>
                     <h3 style="color: #dc3545; margin: 15px 0;">Không tìm thấy khóa học</h3>
                     <p>Vui lòng chọn khóa học từ danh sách đào tạo</p>
-                    <a href="index.php?controller=daotao&action=index" class="btn add">📚 Quay lại danh sách khóa học</a>
+                    <a href="index.php?controller=daotao&action=index" class="btn add">  Quay lại danh sách khóa học</a>
                 </div>
             <?php endif; ?>
         </main>

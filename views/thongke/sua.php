@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>✏️ Sửa báo cáo</title>
+  <title> Sửa báo cáo</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -32,7 +32,7 @@
   </nav>
 
   <main class="main-content">
-    <header><h1>✏️ Sửa báo cáo</h1></header>
+    <header><h1> Sửa báo cáo</h1></header>
     <form method="POST" action="index.php?controller=thongke&action=capnhat" class="form">
       <input type="hidden" name="id" value="<?= $baoCao['id'] ?>">
       <div class="form-group">
@@ -61,8 +61,8 @@
         <textarea name="noi_dung" rows="5"><?= $baoCao['noi_dung'] ?></textarea>
       </div>
       <div class="form-actions">
-        <button type="submit" class="btn save">💾 Cập nhật</button>
-        <a href="index.php?controller=thongke&action=index" class="btn back">↩️ Quay lại</a>
+        <button type="submit" class="btn save"> Cập nhật</button>
+        <a href="index.php?controller=thongke&action=index" class="btn back"> Quay lại</a>
       </div>
     </form>
   </main>

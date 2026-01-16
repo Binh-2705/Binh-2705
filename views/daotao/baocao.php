@@ -54,16 +54,16 @@
 
         <main class="main-content">
             <header>
-                <h1>📊 Báo cáo đào tạo</h1>
+                <h1> Báo cáo đào tạo</h1>
                 <div style="display: flex; gap: 10px; margin-top: 10px;">
                     <a href="index.php?controller=daotao&action=exportbaocao" class="btn export">📥 Xuất Excel Báo cáo</a>
-                    <a href="index.php?controller=daotao&action=index" class="btn back">↩️ Quay lại</a>
+                    <a href="index.php?controller=daotao&action=index" class="btn back"> Quay lại</a>
                 </div>
             </header>
 
             <!-- Thống kê tổng quan -->
             <div style="margin-bottom: 30px;">
-                <h2 style="margin-bottom: 20px;">📈 Tổng quan đào tạo</h2>
+                <h2 style="margin-bottom: 20px;"> Tổng quan đào tạo</h2>
                 <div class="dashboard">
                     <div class="card">
                         <h3>Tổng số khóa học</h3>
@@ -94,7 +94,7 @@
 
             <!-- Khóa học theo tháng -->
             <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); margin-bottom: 30px;">
-                <h3 style="margin-bottom: 15px;">📅 Khóa học theo tháng (6 tháng gần nhất)</h3>
+                <h3 style="margin-bottom: 15px;"> Khóa học theo tháng (6 tháng gần nhất)</h3>
                 <table class="table">
                     <thead>
                         <tr>
@@ -112,88 +112,6 @@
                             <?php endwhile; ?>
                         <?php else: ?>
                             <tr><td colspan="2">Không có dữ liệu</td></tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Top khóa học -->
-            <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); margin-bottom: 30px;">
-                <h3 style="margin-bottom: 15px;">🏆 Top khóa học nhiều học viên</h3>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>STT</th>
-                            <th>Mã khóa</th>
-                            <th>Tên khóa học</th>
-                            <th>Giảng viên</th>
-                            <th>Số học viên</th>
-                            <th>Tỷ lệ hoàn thành</th>
-                            <th>Chi phí</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if ($topKhoaHoc && $topKhoaHoc->num_rows > 0): ?>
-                            <?php $stt = 1; while ($row = $topKhoaHoc->fetch_assoc()): ?>
-                                <tr>
-                                    <td><?= $stt++ ?></td>
-                                    <td><?= $row['MaDT'] ?></td>
-                                    <td><?= $row['TenKhoaHoc'] ?></td>
-                                    <td><?= $row['GiangVien'] ?></td>
-                                    <td>
-                                        <span style="font-weight: bold; color: #3b82f6;"><?= $row['soHocVien'] ?></span>
-                                    </td>
-                                    <td>
-                                        <?php 
-                                            $tyLe = $row['hoanThanh'] > 0 ? round(($row['hoanThanh'] / $row['soHocVien']) * 100, 1) : 0;
-                                            $color = $tyLe >= 80 ? 'green' : ($tyLe >= 60 ? 'orange' : 'red');
-                                        ?>
-                                        <span style="color: <?= $color ?>; font-weight: bold;">
-                                            <?= $tyLe ?>%
-                                        </span>
-                                    </td>
-                                    <td><?= number_format($row['ChiPhi']) ?> VNĐ</td>
-                                </tr>
-                            <?php endwhile; ?>
-                        <?php else: ?>
-                            <tr><td colspan="7">Không có dữ liệu</td></tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Top giảng viên -->
-            <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
-                <h3 style="margin-bottom: 15px;">👨‍🏫 Top giảng viên tích cực</h3>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>STT</th>
-                            <th>Mã GV</th>
-                            <th>Họ tên</th>
-                            <th>Số khóa học</th>
-                            <th>Chuyên môn</th>
-                            <th>Kinh nghiệm</th>
-                            <th>Tổng học viên</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if ($topGiangVien && $topGiangVien->num_rows > 0): ?>
-                            <?php $stt = 1; while ($row = $topGiangVien->fetch_assoc()): ?>
-                                <tr>
-                                    <td><?= $stt++ ?></td>
-                                    <td><?= $row['MaGV'] ?></td>
-                                    <td><?= $row['HoTen'] ?></td>
-                                    <td>
-                                        <span style="font-weight: bold; color: #8b5cf6;"><?= $row['soKhoaHoc'] ?></span>
-                                    </td>
-                                    <td><?= $row['ChuyenMon'] ?></td>
-                                    <td><?= $row['KinhNghiem'] ?> năm</td>
-                                    <td><?= $row['tongHocVien'] ?? 0 ?></td>
-                                </tr>
-                            <?php endwhile; ?>
-                        <?php else: ?>
-                            <tr><td colspan="7">Không có dữ liệu</td></tr>
                         <?php endif; ?>
                     </tbody>
                 </table>

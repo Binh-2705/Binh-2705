@@ -33,7 +33,7 @@
 
   <main class="main-content">
     <header>
-      <h1>📑 Chi tiết báo cáo: <?= htmlspecialchars($baoCao['tieu_de']) ?></h1>
+      <h1> Chi tiết báo cáo: <?= htmlspecialchars($baoCao['tieu_de']) ?></h1>
     </header>
 
     <div style="margin-bottom: 20px;">
@@ -48,7 +48,7 @@
     </div>
 
     <?php if ($baoCao['loai'] == 'nhanvien'): ?>
-      <h3>👥 Nhân viên phòng <?= htmlspecialchars($baoCao['ma_pb']) ?></h3>
+      <h3> Nhân viên phòng <?= htmlspecialchars($baoCao['ma_pb']) ?></h3>
       <table class="table">
         <thead><tr><th>Mã NV</th><th>Họ tên</th><th>Giới tính</th><th>Ngày sinh</th><th>Chức vụ</th><th>Lương</th></tr></thead>
         <tbody>
@@ -70,7 +70,7 @@
       </table>
 
     <?php elseif ($baoCao['loai'] == 'chamcong'): ?>
-      <h3>🕒 Chi tiết chấm công (Mã CC: <?= htmlspecialchars($baoCao['ma_pb']) ?>)</h3>
+      <h3> Chi tiết chấm công (Mã CC: <?= htmlspecialchars($baoCao['ma_pb']) ?>)</h3>
       <table class="table">
         <thead><tr><th>Mã CC</th><th>Mã NV</th><th>Họ tên</th><th>Tháng</th><th>Ngày làm</th><th>Ngày nghỉ</th><th>Ghi chú</th></tr></thead>
         <tbody>
@@ -87,13 +87,13 @@
               </tr>
             <?php endwhile; ?>
           <?php else: ?>
-            <tr><td colspan="7">❌ Không có dữ liệu chấm công.</td></tr>
+            <tr><td colspan="7"> Không có dữ liệu chấm công.</td></tr>
           <?php endif; ?>
         </tbody>
       </table>
 
     <?php elseif ($baoCao['loai'] == 'luong'): ?>
-      <h3>💰 Chi tiết lương (Mã lương: <?= htmlspecialchars($baoCao['ma_pb']) ?>)</h3>
+      <h3> Chi tiết lương (Mã lương: <?= htmlspecialchars($baoCao['ma_pb']) ?>)</h3>
       <table class="table">
         <thead><tr><th>Mã lương</th><th>Mã NV</th><th>Họ tên</th><th>Tháng</th><th>Lương CB</th><th>Phụ cấp</th><th>Thưởng</th><th>Khấu trừ</th><th>Tổng lương</th></tr></thead>
         <tbody>
@@ -112,13 +112,13 @@
               </tr>
             <?php endwhile; ?>
           <?php else: ?>
-            <tr><td colspan="9">❌ Không có dữ liệu lương.</td></tr>
+            <tr><td colspan="9"> Không có dữ liệu lương.</td></tr>
           <?php endif; ?>
         </tbody>
       </table>
 
     <?php elseif ($baoCao['loai'] == 'daotao'): ?>
-      <h3>📚 Danh sách khóa đào tạo</h3>
+      <h3> Danh sách khóa đào tạo</h3>
       <table class="table">
         <thead><tr><th>Tên khóa học</th><th>Ngày bắt đầu</th><th>Ngày kết thúc</th><th>Chi phí</th></tr></thead>
         <tbody>
@@ -132,24 +132,24 @@
               </tr>
             <?php endwhile; ?>
           <?php else: ?>
-            <tr><td colspan="4">❌ Không có dữ liệu đào tạo.</td></tr>
+            <tr><td colspan="4"> Không có dữ liệu đào tạo.</td></tr>
           <?php endif; ?>
         </tbody>
       </table>
 
     <?php else: ?>
-      <p>⚠️ Loại báo cáo này chưa có chi tiết hiển thị.</p>
+      <p> Loại báo cáo này chưa có chi tiết hiển thị.</p>
     <?php endif; ?>
 
     <?php if (!empty($baoCao['noi_dung'])): ?>
       <div style="margin-top: 30px; padding: 15px; background: #f8f9fa; border-radius: 5px; border: 1px solid #dee2e6;">
-        <h3>📝 Nội dung báo cáo</h3>
+        <h3> Nội dung báo cáo</h3>
         <p style="white-space: pre-line;"><?= htmlspecialchars($baoCao['noi_dung']) ?></p>
       </div>
     <?php endif; ?>
 
     <div class="form-actions" style="margin-top: 20px;">
-      <a href="index.php?controller=thongke&action=index" class="btn back">↩️ Quay lại</a>
+      <a href="index.php?controller=thongke&action=index" class="btn back"> Quay lại</a>
     </div>
   </main>
 </div>
