@@ -226,14 +226,6 @@ class DaoTaoController {
         echo "<tr><th colspan='6' style='background:#3b82f6;color:white;height:40px;font-size:16px;'>BÁO CÁO TỔNG HỢP ĐÀO TẠO</th></tr>";
         echo "<tr><th colspan='6'>Ngày xuất: " . date('d/m/Y H:i:s') . "</th></tr>";
         
-        // Thống kê tổng quan
-        echo "<tr><th colspan='3' style='background:#e3f2fd;'>TỔNG QUAN ĐÀO TẠO</th><th colspan='3' style='background:#e3f2fd;'>GIÁ TRỊ</th></tr>";
-        echo "<tr><td colspan='3'>Tổng số khóa học</td><td colspan='3' style='font-weight:bold;'>" . number_format($thongKe['tongKhoaHoc']) . "</td></tr>";
-        echo "<tr><td colspan='3'>Tổng chi phí đào tạo</td><td colspan='3' style='font-weight:bold;'>" . number_format($thongKe['tongChiPhi']) . " VNĐ</td></tr>";
-        echo "<tr><td colspan='3'>Số giảng viên</td><td colspan='3' style='font-weight:bold;'>" . $thongKe['tongGiangVien'] . "</td></tr>";
-        echo "<tr><td colspan='3'>Tổng học viên</td><td colspan='3' style='font-weight:bold;'>" . $thongKe['tongHocVien'] . "</td></tr>";
-        
-        echo "<tr><td colspan='6'>&nbsp;</td></tr>";
         
         
         echo "</table>";

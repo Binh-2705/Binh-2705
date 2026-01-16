@@ -18,7 +18,7 @@
 
         <main class="main-content">
             <header>
-                <h1>➕ Thêm giảng viên mới</h1>
+                <h1> Thêm giảng viên mới</h1>
             </header>
 
             <form method="POST" class="form-nv">

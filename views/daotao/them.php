@@ -20,7 +20,7 @@
 
     <main class="main-content">
       <header>
-        <h1>➕ Thêm khóa học đào tạo</h1>
+        <h1> Thêm khóa học đào tạo</h1>
       </header>
 
       <form method="POST" class="form-add">
