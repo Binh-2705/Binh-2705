@@ -235,39 +235,6 @@ class DaoTaoController {
         
         echo "<tr><td colspan='6'>&nbsp;</td></tr>";
         
-        // Top khóa học
-        echo "<tr><th colspan='6' style='background:#e3f2fd;'>TOP 5 KHÓA HỌC NHIỀU HỌC VIÊN NHẤT</th></tr>";
-        echo "<tr><th>STT</th><th>Mã khóa</th><th>Tên khóa học</th><th>Số học viên</th><th>Giảng viên</th><th>Chi phí</th></tr>";
-        
-        $stt = 1;
-        while ($row = $topKhoaHoc->fetch_assoc()) {
-            echo "<tr>";
-            echo "<td>" . $stt++ . "</td>";
-            echo "<td>" . $row['MaDT'] . "</td>";
-            echo "<td>" . $row['TenKhoaHoc'] . "</td>";
-            echo "<td>" . $row['soHocVien'] . "</td>";
-            echo "<td>" . $row['GiangVien'] . "</td>";
-            echo "<td>" . number_format($row['ChiPhi']) . " VNĐ</td>";
-            echo "</tr>";
-        }
-        
-        echo "<tr><td colspan='6'>&nbsp;</td></tr>";
-        
-        // Top giảng viên
-        echo "<tr><th colspan='6' style='background:#e3f2fd;'>TOP 5 GIẢNG VIÊN NHIỀU KHÓA HỌC NHẤT</th></tr>";
-        echo "<tr><th>STT</th><th>Mã GV</th><th>Họ tên</th><th>Số khóa học</th><th>Chuyên môn</th><th>Kinh nghiệm</th></tr>";
-        
-        $stt = 1;
-        while ($row = $topGiangVien->fetch_assoc()) {
-            echo "<tr>";
-            echo "<td>" . $stt++ . "</td>";
-            echo "<td>" . $row['MaGV'] . "</td>";
-            echo "<td>" . $row['HoTen'] . "</td>";
-            echo "<td>" . $row['soKhoaHoc'] . "</td>";
-            echo "<td>" . $row['ChuyenMon'] . "</td>";
-            echo "<td>" . $row['KinhNghiem'] . " năm</td>";
-            echo "</tr>";
-        }
         
         echo "</table>";
         exit;

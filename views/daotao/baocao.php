@@ -56,7 +56,7 @@
             <header>
                 <h1> Báo cáo đào tạo</h1>
                 <div style="display: flex; gap: 10px; margin-top: 10px;">
-                    <a href="index.php?controller=daotao&action=exportbaocao" class="btn export">📥 Xuất Excel Báo cáo</a>
+                    <a href="index.php?controller=daotao&action=exportbaocao" class="btn export"> Xuất Excel Báo cáo</a>
                     <a href="index.php?controller=daotao&action=index" class="btn back"> Quay lại</a>
                 </div>
             </header>
