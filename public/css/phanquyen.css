@@ -1,0 +1,143 @@
+/* Permission page styles, built on top of existing admin theme */
+.permission-wrap {
+  display: grid;
+  gap: 16px;
+}
+
+.permission-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+  overflow: hidden;
+}
+
+.permission-card h3 {
+  margin: 0;
+  padding: 12px 16px;
+  background: #f8fafc;
+  color: #1e293b;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 16px;
+}
+
+.permission-content {
+  padding: 14px 16px;
+}
+
+.permission-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.permission-bulk-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.permission-group {
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed #e2e8f0;
+}
+
+.permission-group:last-of-type {
+  border-bottom: none;
+}
+
+.permission-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 8px 12px;
+}
+
+.permission-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #eef2f7;
+  background: #fcfdff;
+}
+
+.permission-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+}
+
+.permission-actions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.btn.reset {
+  background: #f59e0b;
+  color: #fff;
+}
+
+.btn.reset:hover {
+  background: #d97706;
+}
+
+.permission-alert {
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-weight: 600;
+}
+
+.permission-alert.success {
+  background: #ecfdf5;
+  color: #166534;
+  border-color: #bbf7d0;
+}
+
+.permission-alert.error {
+  background: #fef2f2;
+  color: #991b1b;
+  border-color: #fecaca;
+}
+
+.permission-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.permission-chip {
+  padding: 6px 10px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.section-title {
+  font-size: 16px;
+  margin-bottom: 10px;
+  color: #334155;
+}
+
+@media (max-width: 768px) {
+  .permission-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .permission-bulk-actions {
+    justify-content: flex-end;
+  }
+}

@@ -1,102 +1,141 @@
 <?php
-// controllers/KhenThuongController.php
-
 require_once 'models/KhenThuongModel.php';
-
+require_once 'core/AuthMiddleware.php';
+require_once 'core/RequestValidator.php';
+require_once 'core/WebResponder.php';
+require_once 'core/AppLogger.php';
 class KhenThuongController {
     private $model;
+    private $conn;
 
     public function __construct($conn) {
+        $this->conn = $conn;
         $this->model = new KhenThuongModel($conn);
     }
 
-    // Hiển thị danh sách (Index)
-    public function index() {
-        $keyword = $_GET['search'] ?? ''; 
-        $result = $this->model->getAllQuyetDinh($keyword); 
-        include 'views/khenthuong/index.php'; // Gọi View Index
-    }
+    /* ================== DANH SÁCH ================== */
+   public function index() {
+            AuthMiddleware::check($this->conn, 'xem_khenthuong');
+            $quyen = $_SESSION['quyen'] ?? [];
 
-    // Chuẩn bị form Thêm
+    $keyword = $_GET['search'] ?? '';
+    $loai    = $_GET['loai'] ?? '';
+    $thang   = $_GET['thang'] ?? '';
+$tong   = $this->model->getTongTien($keyword, $loai, $thang);
+    $result = $this->model->getAll($keyword, $loai, $thang);
+
+    include 'views/khenthuong/index.php';
+}
+
+    /* ================== FORM THÊM ================== */
     public function them() {
-        $nhanviens = $this->model->getAllNhanVienForSelect();
-        include 'views/khenthuong/them.php'; // Gọi View Thêm
+        AuthMiddleware::check($this->conn, 'them_khenthuong');
+        $quyen = $_SESSION['quyen'] ?? [];
+        $nhanviens = $this->model->getNhanVien();
+        $loais = $this->model->getLoai();
+
+        include 'views/khenthuong/them.php';
     }
 
-    // Xử lý Lưu Thêm
+    /* ================== LƯU THÊM ================== */
     public function luuThem() {
-        if ($_SERVER["REQUEST_METHOD"] == "POST") {
-            $maQD = $_POST['maQD'] ?? null;
-            $maNV = $_POST['maNV'];
-            $loaiQD = $_POST['loaiQD'];
-            $ngayRaQD = $_POST['ngayQD']; 
-            $tieuDe = $_POST['tieuDe'];
-            $noiDung = $_POST['noiDung'];
-            $giaTri = $_POST['giaTri'];
-            
-            if (empty($maQD) || $this->model->checkMaQDExists($maQD)) {
-                $msg = empty($maQD) ? '❌ Mã Quyết định không được để trống!' : "❌ Mã Quyết định $maQD đã tồn tại!";
-                echo "<script>alert('{$msg}'); window.history.back();</script>";
-                return;
+        AuthMiddleware::check($this->conn, 'them_khenthuong');
+        $quyen = $_SESSION['quyen'] ?? [];
+
+        if ($_SERVER["REQUEST_METHOD"] === "POST") {
+            $validator = new RequestValidator($_POST);
+
+            $data = [
+                'MaNV'           => $validator->requiredInt('MaNV', 'Nhân viên', 1),
+                'MaLoai'         => $validator->requiredInt('MaLoai', 'Loại', 1),
+                'NgayQuyetDinh'  => $validator->requiredDate('NgayQuyetDinh', 'Ngày quyết định'),
+                'HinhThuc'       => $validator->requiredString('HinhThuc', 'Hình thức', 2, 120),
+                'SoTien'         => $validator->optionalFloat('SoTien', 0) ?? 0,
+                'LyDo'           => $validator->requiredString('LyDo', 'Lý do', 2, 1000),
+                'GhiChu'         => $validator->optionalString('GhiChu', 1000)
+            ];
+
+            if (!$validator->isValid()) {
+                AppLogger::warning('Validation failed in KhenThuongController::luuThem', ['errors' => $validator->allErrors()]);
+                WebResponder::backWithMessage($validator->firstError(), 'error', 'index.php?controller=khenthuong&action=them');
             }
 
-            if ($this->model->insertQuyetDinh($maQD, $maNV, $loaiQD, $ngayRaQD, $tieuDe, $noiDung, $giaTri)) {
-                echo "<script>alert('✅ Thêm Quyết định thành công!'); 
-                      window.location='index.php?controller=khenthuong&action=index';</script>";
+            if ($this->model->insert($data)) {
+                WebResponder::redirectWithMessage('index.php?controller=khenthuong&action=index', 'Thêm thành công!', 'success');
             } else {
-                echo "<script>alert('❌ Lỗi khi thêm Quyết định!'); window.history.back();</script>";
+                WebResponder::backWithMessage('Lỗi khi thêm!', 'error', 'index.php?controller=khenthuong&action=them');
             }
         }
     }
 
-    // Chuẩn bị form Sửa
+    /* ================== FORM SỬA ================== */
     public function sua() {
-        if (!isset($_GET['maQD'])) {
-             echo "<script>alert('Thiếu mã quyết định!'); window.location='index.php?controller=khenthuong&action=index';</script>";
-             exit;
+        AuthMiddleware::check($this->conn, 'sua_khenthuong');
+$quyen = $_SESSION['quyen'] ?? [];
+        if (!isset($_GET['id'])) {
+            WebResponder::redirectWithMessage('index.php?controller=khenthuong&action=index', 'Thiếu ID!', 'error');
         }
 
-        $maQD = $_GET['maQD']; 
-        $quyetdinh = $this->model->getQuyetDinhById($maQD);
-        $nhanviens = $this->model->getAllNhanVienForSelect();
+        $id = (int)$_GET['id'];
+        $quyetdinh = $this->model->getById($id);
 
         if (!$quyetdinh) {
-            echo "<script>alert('Không tìm thấy Quyết định!'); window.location='index.php?controller=khenthuong&action=index';</script>";
-            exit;
+            WebResponder::redirectWithMessage('index.php?controller=khenthuong&action=index', 'Không tìm thấy dữ liệu!', 'error');
         }
-        // Gọi View Sửa
-        include 'views/khenthuong/sua.php'; 
+
+        $nhanviens = $this->model->getNhanVien();
+        $loais = $this->model->getLoai();
+
+        include 'views/khenthuong/sua.php';
     }
 
-    // Xử lý Lưu Sửa
+    /* ================== LƯU SỬA ================== */
     public function luuSua() {
-        if ($_SERVER["REQUEST_METHOD"] == "POST") {
-            $maQD = $_POST['maQD'];
-            $maNV = $_POST['maNV'];
-            $loaiQD = $_POST['loaiQD'];
-            $ngayRaQD = $_POST['ngayQD']; 
-            $tieuDe = $_POST['tieuDe'];
-            $noiDung = $_POST['noiDung'];
-            $giaTri = $_POST['giaTri'];
+        AuthMiddleware::check($this->conn, 'sua_khenthuong');
+        $quyen = $_SESSION['quyen'] ?? [];
 
-            if ($this->model->updateQuyetDinh($maQD, $maNV, $loaiQD, $ngayRaQD, $tieuDe, $noiDung, $giaTri)) {
-                echo "<script>alert('✅ Cập nhật Quyết định thành công!'); 
-                      window.location='index.php?controller=khenthuong&action=index';</script>";
+        if ($_SERVER["REQUEST_METHOD"] === "POST") {
+            $validator = new RequestValidator($_POST);
+
+            $data = [
+                'MaKTKL'         => $validator->requiredInt('MaKTKL', 'Mã quyết định', 1),
+                'MaNV'           => $validator->requiredInt('MaNV', 'Nhân viên', 1),
+                'MaLoai'         => $validator->requiredInt('MaLoai', 'Loại', 1),
+                'NgayQuyetDinh'  => $validator->requiredDate('NgayQuyetDinh', 'Ngày quyết định'),
+                'HinhThuc'       => $validator->requiredString('HinhThuc', 'Hình thức', 2, 120),
+                'SoTien'         => $validator->optionalFloat('SoTien', 0) ?? 0,
+                'LyDo'           => $validator->requiredString('LyDo', 'Lý do', 2, 1000),
+                'GhiChu'         => $validator->optionalString('GhiChu', 1000)
+            ];
+
+            if (!$validator->isValid()) {
+                AppLogger::warning('Validation failed in KhenThuongController::luuSua', ['errors' => $validator->allErrors()]);
+                WebResponder::backWithMessage($validator->firstError(), 'error', 'index.php?controller=khenthuong&action=index');
+            }
+
+            if ($this->model->update($data)) {
+                WebResponder::redirectWithMessage('index.php?controller=khenthuong&action=index', 'Cập nhật thành công!', 'success');
             } else {
-                echo "<script>alert('❌ Lỗi khi cập nhật Quyết định!'); window.history.back();</script>";
+                WebResponder::backWithMessage('Lỗi khi cập nhật!', 'error', 'index.php?controller=khenthuong&action=index');
             }
         }
     }
-    
-    // Xử lý Xóa
+
+    /* ================== XÓA ================== */
     public function xoa() {
-        if (isset($_GET['maQD'])) {
-            $maQD = $_GET['maQD'];
-            if ($this->model->deleteQuyetDinh($maQD)) {
-                echo "<script>alert('✅ Xóa Quyết định thành công!'); window.location='index.php?controller=khenthuong&action=index';</script>";
-            } else {
-                echo "<script>alert('❌ Lỗi khi xóa Quyết định!'); window.location='index.php?controller=khenthuong&action=index';</script>";
-            }
+        AuthMiddleware::check($this->conn, 'xoa_khenthuong');
+        $quyen = $_SESSION['quyen'] ?? [];
+
+        if (!isset($_GET['id'])) {
+            WebResponder::redirectWithMessage('index.php?controller=khenthuong&action=index', 'Thiếu ID!', 'error');
+        }
+
+        $id = (int)$_GET['id'];
+
+        if ($this->model->delete($id)) {
+            WebResponder::redirectWithMessage('index.php?controller=khenthuong&action=index', 'Xóa thành công!', 'success');
+        } else {
+            WebResponder::redirectWithMessage('index.php?controller=khenthuong&action=index', 'Lỗi khi xóa!', 'error');
         }
     }
 }

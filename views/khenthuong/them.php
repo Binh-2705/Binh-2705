@@ -1,100 +1,86 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>➕ Thêm Quyết định Khen thưởng/Kỷ luật</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-<div class="container">
-    <nav class="sidebar">
-         <h2>HỆ THỐNG <br> QUẢN LÝ NHÂN SỰ</h2>
-        <ul>
-            <ul>
-                <li><a href="index.php?controller=home&action=index" >🏠 Trang chủ</a></li>
-                <li><a href="index.php?controller=nhanvien&action=index">👥 Quản lý nhân viên</a></li>
-                <li><a href="index.php?controller=phongban&action=index">🏢 Quản lý phòng ban</a></li>
-                <li><a href="index.php?controller=luong&action=index">💰 Quản lý lương</a></li>
-                <li><a href="index.php?controller=chamcong&action=index">🕒 Quản lý chấm công</a></li>
-                <li><a href="index.php?controller=hopdong&action=index">📄 Quản lý hợp đồng</a></li>
-                <li><a href="index.php?controller=nghiphep&action=index">📆 Quản lý nghỉ phép</a></li>
-                <li><a href="index.php?controller=khenthuong&action=index" class="active">🏅 Khen thưởng - Kỷ luật</a></li>
-                <li><a href="index.php?controller=thongke&action=index" >📊 Thống kê - Báo cáo</a></li>
-                <li><a href="index.php?controller=chucvu&action=index">🙍‍♂️ Quản lý chức vụ</a></li>
-                <li><a href="index.php?controller=hoso&action=index">👤 Hồ sơ cá nhân</a></li>
-                <li><a href="index.php?controller=tuyendung&action=index">💼 Quản lý tuyển dụng</a></li>
-                <li><a href="index.php?controller=daotao&action=index">📚 Quản lý đào tạo</a></li>
-                <li><a href="index.php?controller=taikhoan&action=index">🗂 Quản lý tài khoản</a></li>
-               
-               <li><a href="index.php?controller=dangnhap&action=dangxuat">🚪 Đăng xuất</a></li>
-            </ul>
-        </ul>
-    </nav>
+<?php include 'views/layout/header.php'; ?>
+<?php include 'views/layout/sidebar.php'; ?>
     <main class="main-content">
         <header>
             <h1>➕ Thêm Quyết định mới</h1>
         </header>
 
-        <form action="index.php?controller=khenthuong&action=luuThem" method="POST" class="form-nv">
-            
-            <div class="form-group">
-                <label for="maQD">Mã Quyết định (*):</label>
-                <input type="text" id="maQD" name="maQD" required placeholder="Ví dụ: KT001 hoặc KL001">
-            </div>
+        <form action="index.php?controller=khenthuong&action=luuThem" 
+      method="POST" class="form-nv">
 
-            <div class="form-group">
-                <label for="maNV">Nhân viên:</label>
-                <select id="maNV" name="maNV" required> 
-                    <option value="">-- Chọn Nhân viên --</option>
-                    <?php 
-                    if (isset($nhanviens) && mysqli_num_rows($nhanviens) > 0): 
-                        mysqli_data_seek($nhanviens, 0);
-                        while ($nv = mysqli_fetch_assoc($nhanviens)): ?>
-                            <option value="<?php echo $nv['MaNV']; ?>">
-                                <?php echo htmlspecialchars($nv['HoTen']) . ' (' . $nv['MaNV'] . ')'; ?>
-                            </option>
-                        <?php endwhile; 
-                    endif;
-                    ?>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label for="loaiQD">Loại Quyết định:</label>
-                <select id="loaiQD" name="loaiQD" required>
-                    <option value="Khen thưởng">Khen thưởng</option>
-                    <option value="Kỷ luật">Kỷ luật</option>
-                </select>
-            </div>
+    <!-- Nhân viên -->
+    <div class="form-group">
+        <label>Nhân viên:</label>
+        <select name="MaNV" required>
+            <option value="">-- Chọn nhân viên --</option>
+            <?php 
+            if (isset($nhanviens) && mysqli_num_rows($nhanviens) > 0):
+                while ($nv = mysqli_fetch_assoc($nhanviens)): ?>
+                    <option value="<?= $nv['MaNV']; ?>">
+                        <?= htmlspecialchars($nv['HoTen']) . " (" . $nv['MaNV'] . ")"; ?>
+                    </option>
+                <?php endwhile;
+            endif;
+            ?>
+        </select>
+    </div>
 
-            <div class="form-group">
-                <label for="ngayQD">Ngày ra Quyết định (NgayRaQD):</label>
-                <input type="date" id="ngayQD" name="ngayQD" required>
-            </div>
+    <!-- Loại (lấy từ bảng loaikhenthuongkyluat) -->
+    <div class="form-group">
+        <label>Loại quyết định:</label>
+        <select name="MaLoai" required>
+            <option value="">-- Chọn loại --</option>
+            <?php 
+            if (isset($loais) && mysqli_num_rows($loais) > 0):
+                while ($l = mysqli_fetch_assoc($loais)): ?>
+                    <option value="<?= $l['MaLoai']; ?>">
+                        <?= $l['TenLoai']; ?> 
+                        (<?= $l['Loai']; ?>)
+                    </option>
+                <?php endwhile;
+            endif;
+            ?>
+        </select>
+    </div>
 
-            <div class="form-group">
-                <label for="tieuDe">Tiêu đề (TieuDe):</label>
-                <input type="text" id="tieuDe" name="tieuDe" required placeholder="Ví dụ: Thưởng hiệu suất Quý 1">
-            </div>
+    <!-- Ngày quyết định -->
+    <div class="form-group">
+        <label>Ngày quyết định:</label>
+        <input type="date" name="NgayQuyetDinh" required>
+    </div>
 
-            <div class="form-group">
-                <label for="noiDung">Nội dung (NoiDung):</label>
-                <textarea id="noiDung" name="noiDung" rows="3" required placeholder="Chi tiết lý do khen thưởng/kỷ luật"></textarea>
-            </div>
+    <!-- Hình thức -->
+    <div class="form-group">
+        <label>Hình thức:</label>
+        <input type="text" name="HinhThuc" 
+               placeholder="Ví dụ: Thưởng tiền mặt / Khiển trách">
+    </div>
 
-            <div class="form-group">
-                <label for="giaTri">Giá trị (GiaTri - VNĐ/USD):</label>
-                <input type="number" id="giaTri" name="giaTri" required min="0" value="0">
-            </div>
+    <!-- Số tiền -->
+    <div class="form-group">
+        <label>Số tiền (VNĐ):</label>
+        <input type="number" name="SoTien" min="0" value="0">
+    </div>
 
+    <!-- Lý do -->
+    <div class="form-group">
+        <label>Lý do:</label>
+        <textarea name="LyDo" rows="3"
+            placeholder="Nhập lý do khen thưởng/kỷ luật"></textarea>
+    </div>
 
-            <div class="form-buttons">
-                <button type="submit" class="btn add">💾 Lưu Quyết định</button>
-                <a href="index.php?controller=khenthuong&action=index" class="btn cancel">↩️ Hủy</a>
-            </div>
-        </form>
+    <!-- Ghi chú -->
+    <div class="form-group">
+        <label>Ghi chú:</label>
+        <textarea name="GhiChu" rows="2"></textarea>
+    </div>
+
+    <div class="form-buttons">
+        <button type="submit" class="btn add">💾 Lưu</button>
+        <a href="index.php?controller=khenthuong&action=index" 
+           class="btn cancel">↩️ Hủy</a>
+    </div>
+
+</form>
         </main>
-</div>
-</body>
-</html>
+<?php include 'views/layout/footer.php'; ?>

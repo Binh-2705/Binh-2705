@@ -1,60 +1,5 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>✏️ Sửa Lương Nhân Viên</title>
-<link rel="stylesheet" href="style.css">
-<script>
-function tinhTongLuong() {
-    let luongcb = parseFloat(document.getElementById('luongcb').value) || 0;
-    let phucap = parseFloat(document.getElementById('phucap').value) || 0;
-    let thuong = parseFloat(document.getElementById('thuong').value) || 0;
-    let khautru = parseFloat(document.getElementById('khautru').value) || 0;
-    let tong = luongcb + phucap + thuong - khautru;
-    document.getElementById('tongluong').value = tong.toLocaleString('vi-VN');
-
-}
-function laySoNgayLam() {
-    let manv = document.getElementById('manv').value;
-    let thang = document.getElementById('thang').value;
-    if (!manv || !thang) return;
-
-    fetch(`index.php?controller=chamcong&action=getSoNgayLam&manv=${manv}&thang=${thang}`)
-        .then(res => res.json())
-        .then(data => {
-            document.getElementById('soNgayLam').value = data.SoNgayLam || 0;
-            tinhTongLuong();
-        })
-        .catch(err => console.error(err));
-}
-</script>
-</head>
-<body>
-<div class="container">
-<nav class="sidebar">
-  <h2>HỆ THỐNG <br> QUẢN LÝ NHÂN SỰ</h2>
-        <ul>
-            <ul>
-                <li><a href="index.php?controller=home&action=index" >🏠 Trang chủ</a></li>
-                <li><a href="index.php?controller=nhanvien&action=index">👥 Quản lý nhân viên</a></li>
-                <li><a href="index.php?controller=phongban&action=index">🏢 Quản lý phòng ban</a></li>
-                <li><a href="index.php?controller=luong&action=index" class="active">💰 Quản lý lương</a></li>
-                <li><a href="index.php?controller=chamcong&action=index">🕒 Quản lý chấm công</a></li>
-                <li><a href="index.php?controller=hopdong&action=index">📄 Quản lý hợp đồng</a></li>
-                <li><a href="index.php?controller=nghiphep&action=index">📆 Quản lý nghỉ phép</a></li>
-                <li><a href="index.php?controller=khenthuong&action=index">🏅 Khen thưởng - Kỷ luật</a></li>
-                <li><a href="index.php?controller=thongke&action=index">📊 Thống kê - Báo cáo</a></li>
-                <li><a href="index.php?controller=chucvu&action=index">🙍‍♂️ Quản lý chức vụ</a></li>
-                <li><a href="index.php?controller=hoso&action=index">👤 Hồ sơ cá nhân</a></li>
-                <li><a href="index.php?controller=tuyendung&action=index">💼 Quản lý tuyển dụng</a></li>
-                <li><a href="index.php?controller=daotao&action=index">📚 Quản lý đào tạo</a></li>
-                <li><a href="index.php?controller=taikhoan&action=index">🗂 Quản lý tài khoản</a></li>
-              
-                <li><a href="index.php?controller=dangnhap&action=dangxuat">🚪 Đăng xuất</a></li>
-            </ul>
-        </ul>
-</nav>
+<?php include 'views/layout/header.php'; ?>
+<?php include 'views/layout/sidebar.php'; ?>
 
 <main class="main-content">
 <header><h1>✏️ Sửa Lương Nhân Viên</h1></header>
@@ -137,9 +82,4 @@ function laySoNgayLam() {
     </div>
 </form>
 </main>
-</div>
-
-
-<script src="public/js/luong.js"></script>
-</body>
-</html>
+<?php include 'views/layout/footer.php'; ?>

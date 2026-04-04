@@ -1,103 +1,91 @@
-<?php
-// views/nhanvien/sua.php
-// Biến $nhanvien, $phongbans, và $chucvus được controller truyền vào
-?>
+<?php include 'views/layout/header.php'; ?>
+<?php include 'views/layout/sidebar.php'; ?>
 
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>✏️ Sửa thông tin Nhân viên</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div class="container">
-        <nav class="sidebar">
-            <h2>HỆ THỐNG <br> QUẢN LÝ NHÂN SỰ</h2>
-        <ul>
-            <ul>
-                <li><a href="index.php?controller=home&action=index" >🏠 Trang chủ</a></li>
-                <li><a href="index.php?controller=nhanvien&action=index" class="active">👥 Quản lý nhân viên</a></li>
-                <li><a href="index.php?controller=phongban&action=index">🏢 Quản lý phòng ban</a></li>
-                <li><a href="index.php?controller=luong&action=index">💰 Quản lý lương</a></li>
-                <li><a href="index.php?controller=chamcong&action=index">🕒 Quản lý chấm công</a></li>
-                <li><a href="index.php?controller=hopdong&action=index">📄 Quản lý hợp đồng</a></li>
-                <li><a href="index.php?controller=nghiphep&action=index">📆 Quản lý nghỉ phép</a></li>
-                <li><a href="index.php?controller=khenthuong&action=index">🏅 Khen thưởng - Kỷ luật</a></li>
-                <li><a href="index.php?controller=thongke&action=index">📊 Thống kê - Báo cáo</a></li>
-                <li><a href="index.php?controller=chucvu&action=index">🙍‍♂️ Quản lý chức vụ</a></li>
-                <li><a href="index.php?controller=hoso&action=index">👤 Hồ sơ cá nhân</a></li>
-                <li><a href="index.php?controller=tuyendung&action=index">💼 Quản lý tuyển dụng</a></li>
-                <li><a href="index.php?controller=daotao&action=index">📚 Quản lý đào tạo</a></li>
-                <li><a href="index.php?controller=taikhoan&action=index">🗂 Quản lý tài khoản</a></li>
-           
-               <li><a href="index.php?controller=dangnhap&action=dangxuat">🚪 Đăng xuất</a></li>
-            </ul>
-        </ul>
-        </nav>
+    <main class="main-content">
+        <header>
+            <h1>✏️ Sửa thông tin Nhân viên</h1>
+        </header>
 
-        <main class="main-content">
-            <header>
-                <h1>✏️ Sửa thông tin Nhân viên</h1>
-            </header>
+        <form action="index.php?controller=nhanvien&action=luuSua" method="POST" class="form-nv">
+            <input type="hidden" name="MaNV" value="<?= $nhanvien['MaNV'] ?>">
 
-            <form action="index.php?controller=nhanvien&action=luuSua" method="POST" class="form-nv">
-                <input type="hidden" name="manv" value="<?= $nhanvien['MaNV'] ?>">
+            <div class="form-group">
+                <label>Họ và tên:</label>
+                <input type="text" name="HoTen" value="<?= htmlspecialchars($nhanvien['HoTen']) ?>" required>
+            </div>
 
-                <div class="form-group">
-                    <label for="hoten">Họ và tên:</label>
-                    <input type="text" id="hoten" name="hoten" value="<?= htmlspecialchars($nhanvien['HoTen']) ?>" required>
-                </div>
+            <div class="form-group">
+                <label>Giới tính:</label>
+                <select name="GioiTinh" required>
+                    <option value="Nam" <?= $nhanvien['GioiTinh']=='Nam'?'selected':'' ?>>Nam</option>
+                    <option value="Nữ" <?= $nhanvien['GioiTinh']=='Nữ'?'selected':'' ?>>Nữ</option>
+                </select>
+            </div>
 
-                <div class="form-group">
-                    <label for="gioitinh">Giới tính:</label>
-                    <select id="gioitinh" name="gioitinh" required>
-                        <option value="Nam" <?= $nhanvien['GioiTinh']=='Nam'?'selected':'' ?>>Nam</option>
-                        <option value="Nữ" <?= $nhanvien['GioiTinh']=='Nữ'?'selected':'' ?>>Nữ</option>
-                    </select>
-                </div>
+            <div class="form-group">
+                <label>Ngày sinh:</label>
+                <input type="date" name="NgaySinh" value="<?= $nhanvien['NgaySinh'] ?>" required>
+            </div>
 
-                <div class="form-group">
-                    <label for="ngaysinh">Ngày sinh:</label>
-                    <input type="date" id="ngaysinh" name="ngaysinh" value="<?= $nhanvien['NgaySinh'] ?>" required>
-                </div>
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" name="Email" value="<?= htmlspecialchars($nhanvien['Email']) ?>">
+            </div>
 
-                <div class="form-group">
-                    <label for="phongban">Phòng ban:</label>
-                    <select id="phongban" name="phongban" required>
-                        <option value="">-- Chọn phòng ban --</option>
-                        <?php while($pb = mysqli_fetch_assoc($phongbans)) {
-                            // SỬA LỖI: So sánh với MaPB trong DB
-                            $selected = ($nhanvien['MaPB'] == $pb['MaPB']) ? 'selected' : ''; 
-                        ?>
-                          <option value="<?= $pb['MaPB'] ?>" <?= $selected ?>><?= htmlspecialchars($pb['TenPB']) ?></option>
-                        <?php } ?>
-                    </select>
-                </div>
+            <div class="form-group">
+                <label>Điện thoại:</label>
+                <input type="text" name="DienThoai" value="<?= htmlspecialchars($nhanvien['DienThoai']) ?>" pattern="[0-9]{9,11}">
+            </div>
 
-                <div class="form-group">
-                    <label for="chucvu">Chức vụ:</label>
-                    <select id="chucvu" name="chucvu" required>
-                        <option value="">-- Chọn chức vụ --</option>
-                        <?php 
-                        $chucvus = $chucvus ?? [];
-                        foreach ($chucvus as $cv): 
-                            // SỬA LỖI: So sánh với MaCV trong DB
-                            $selected = ($nhanvien['MaCV'] == $cv['MaCV']) ? 'selected' : '';
-                        ?>
-                            <option value="<?= $cv['MaCV'] ?>" <?= $selected ?>>
-                                <?= htmlspecialchars($cv['TenChucVu']) ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="form-buttons">
-                    <button type="submit" class="btn edit">💾 Cập nhật</button>
-                    <a href="index.php?controller=nhanvien&action=index" class="btn cancel">↩️ Quay lại</a>
-                </div>
-            </form>
-        </main>
-    </div>
-</body>
-</html>
+            <div class="form-group">
+                <label>Trạng thái:</label>
+                <select name="TrangThai" required>
+                    <option value="Đang làm" <?= $nhanvien['TrangThai']=='Đang làm'?'selected':'' ?>>Đang làm</option>
+                    <option value="Nghỉ" <?= $nhanvien['TrangThai']=='Nghỉ'?'selected':'' ?>>Nghỉ</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Ngạch lương:</label>
+                <select id="select-ngach" class="form-control" required>
+                    <option value="">-- Chọn ngạch lương --</option>
+                    <?php 
+                    if ($dsNgach) {
+                        mysqli_data_seek($dsNgach, 0); 
+                        while ($n = mysqli_fetch_assoc($dsNgach)): 
+                    ?>
+                        <option value="<?= $n['MaNgach'] ?>" <?= ($maNgachHienTai == $n['MaNgach']) ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($n['TenNgach']) ?>
+                        </option>
+                    <?php 
+                        endwhile; 
+                    }
+                    ?>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Bậc lương:</label>
+                <select id="select-bac" name="MaBac" class="form-control" data-current-bac="<?= $nhanvien['MaBac'] ?>" required>
+                    <?php 
+                    if ($bacluongs) {
+                        mysqli_data_seek($bacluongs, 0);
+                        while ($bac = mysqli_fetch_assoc($bacluongs)): 
+                    ?>
+                        <option value="<?= $bac['MaBac'] ?>" <?= ($nhanvien['MaBac'] == $bac['MaBac']) ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($bac['TenBac']) ?> (HS: <?= $bac['HeSoLuong'] ?>)
+                        </option>
+                    <?php 
+                        endwhile; 
+                    }
+                    ?>
+                </select>
+            </div>
+
+            <div class="form-buttons">
+                <button type="submit" class="btn edit">💾 Cập nhật</button>
+                <a href="index.php?controller=nhanvien&action=index" class="btn cancel">↩️ Quay lại</a>
+            </div>
+        </form>
+    </main>
+<?php include 'views/layout/footer.php'; ?>

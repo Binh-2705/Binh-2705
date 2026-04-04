@@ -1,65 +1,51 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sửa phòng ban</title>
-     <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div class="container">
-        <nav class="sidebar">
-         <h2>HỆ THỐNG <br> QUẢN LÝ NHÂN SỰ</h2>
-        <ul>
-            <ul>
-                <li><a href="index.php?controller=home&action=index" >🏠 Trang chủ</a></li>
-                <li><a href="index.php?controller=nhanvien&action=index">👥 Quản lý nhân viên</a></li>
-                <li><a href="index.php?controller=phongban&action=index" class="active">🏢 Quản lý phòng ban</a></li>
-                <li><a href="index.php?controller=luong&action=index">💰 Quản lý lương</a></li>
-                <li><a href="index.php?controller=chamcong&action=index">🕒 Quản lý chấm công</a></li>
-                <li><a href="index.php?controller=hopdong&action=index">📄 Quản lý hợp đồng</a></li>
-                <li><a href="index.php?controller=nghiphep&action=index">📆 Quản lý nghỉ phép</a></li>
-                <li><a href="index.php?controller=khenthuong&action=index">🏅 Khen thưởng - Kỷ luật</a></li>
-                <li><a href="index.php?controller=thongke&action=index">📊 Thống kê - Báo cáo</a></li>
-                <li><a href="index.php?controller=chucvu&action=index">🙍‍♂️ Quản lý chức vụ</a></li>
-                <li><a href="index.php?controller=hoso&action=index">👤 Hồ sơ cá nhân</a></li>
-                <li><a href="index.php?controller=tuyendung&action=index">💼 Quản lý tuyển dụng</a></li>
-                <li><a href="index.php?controller=daotao&action=index">📚 Quản lý đào tạo</a></li>
-                <li><a href="index.php?controller=taikhoan&action=index">🗂 Quản lý tài khoản</a></li>
-               
-              <li><a href="index.php?controller=dangnhap&action=dangxuat">🚪 Đăng xuất</a></li>
-            </ul>
-        </ul>
-        </nav>
-       <main class="main-content">
-    <header><h1>✏️ Sửa thông tin phòng ban</h1></header>
+<?php include 'views/layout/header.php'; ?>
+<?php include 'views/layout/sidebar.php'; ?>
 
-    <form action="index.php?controller=phongban&action=luuSua" method="POST" class="form-nv">
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="main-content">
+
+    <header>
+      <h1>✏️ Sửa thông tin phòng ban</h1>
+    </header>
+
+    <form action="index.php?controller=phongban&action=luuSua"
+          method="POST"
+          class="form-nv">
+
+      <!-- giữ mã phòng ban để submit -->
       <input type="hidden" name="mapb" value="<?php echo $phongban['MaPB']; ?>">
 
       <div class="form-group">
-        <label>Mã phòng ban:</label>
-        <input type="text" value="<?php echo $phongban['MaPB']; ?>" disabled>
+        <label>Mã phòng ban</label>
+        <input type="text"
+               value="<?php echo $phongban['MaPB']; ?>"
+               disabled>
       </div>
 
       <div class="form-group">
-        <label for="tenpb">Tên phòng ban:</label>
-        <input type="text" name="tenpb" id="tenpb" value="<?php echo $phongban['TenPB']; ?>" required>
+        <label for="tenpb">Tên phòng ban</label>
+        <input type="text"
+               id="tenpb"
+               name="tenpb"
+               value="<?php echo $phongban['TenPB']; ?>"
+               maxlength="100"
+               required>
       </div>
 
       <div class="form-group">
-        <label for="mota">Mô tả:</label>
-        <textarea name="mota" id="mota" rows="4"><?php echo $phongban['MoTa']; ?></textarea>
+        <label for="mota">Mô tả</label>
+        <textarea id="mota"
+                  name="mota"
+                  rows="4"
+                  placeholder="Mô tả chức năng phòng ban..."><?php echo $phongban['MoTa']; ?></textarea>
       </div>
 
       <div class="form-buttons">
         <button type="submit" class="btn edit">💾 Cập nhật</button>
         <a href="index.php?controller=phongban&action=index" class="btn cancel">↩️ Quay lại</a>
       </div>
-    </form>
-  </main>
 
-    </div>
-    
-</body>
-</html>
+    </form>
+
+  </main>
+<?php include 'views/layout/footer.php'; ?>

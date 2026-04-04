@@ -1,0 +1,125 @@
+.inline-action-form {
+  margin: 0;
+}
+
+.inline-action-form .btn {
+  display: inline-block;
+}
+
+.health-actions {
+  margin-bottom: 14px;
+}
+
+.health-report-card {
+  margin-bottom: 16px;
+  background: #fff;
+  border: 1px solid #dbeafe;
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+}
+
+.health-report-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.health-report-head h3 {
+  margin: 0;
+  color: #1f2937;
+}
+
+.health-meta {
+  margin: 0 0 10px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.security-notice-panel {
+  margin-bottom: 18px;
+  padding: 18px 20px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #eff6ff, #f8fafc);
+  border: 1px solid #bfdbfe;
+  box-shadow: 0 10px 24px rgba(59, 130, 246, 0.12);
+}
+
+.security-notice-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.security-notice-header h2 {
+  font-size: 18px;
+  color: #1e3a8a;
+  margin-bottom: 6px;
+}
+
+.security-notice-header p {
+  margin: 0;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.security-notice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.security-notice-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+}
+
+.security-secret {
+  display: inline-block;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #0f172a;
+  color: #f8fafc;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+[data-theme="dark"] .security-notice-panel {
+  background: linear-gradient(135deg, #172554, #0f172a);
+  border-color: #1d4ed8;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.35);
+}
+
+[data-theme="dark"] .security-notice-header h2 {
+  color: #dbeafe;
+}
+
+[data-theme="dark"] .security-notice-header p,
+[data-theme="dark"] .security-notice-label {
+  color: #cbd5e1;
+}
+
+[data-theme="dark"] .security-secret {
+  background: #020617;
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .health-report-card {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 2px 8px rgba(2, 6, 23, 0.5);
+}
+
+[data-theme="dark"] .health-report-head h3,
+[data-theme="dark"] .health-meta {
+  color: #cbd5e1;
+}

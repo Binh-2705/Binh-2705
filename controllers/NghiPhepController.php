@@ -1,73 +1,108 @@
 <?php
 require_once './ketnoi.php';
 require_once './models/NghiPhepModel.php';
+require_once 'core/AuthMiddleware.php';
+require_once 'core/RequestValidator.php';
+require_once 'core/AppLogger.php';
+require_once 'core/WebResponder.php';
 
 class NghiPhepController {
     private $model;
+    private $conn;
 
     public function __construct($conn) {
+        $this->conn = $conn;
         $this->model = new NghiPhepModel($conn);
     }
 
-    // Hiển thị danh sách nghỉ phép
+    /* ================= DANH SÁCH ================= */
     public function index() {
-        $data = $this->model->getAllNghiPhep();
-        include './views/nghiphep/index.php';
-    }
+        AuthMiddleware::check($this->conn, 'xem_nghiphep');
+        $quyen = $_SESSION['quyen'] ?? [];
+        $keyword = trim((string)($_GET['keyword'] ?? ''));
+        $page = max(1, (int)($_GET['page'] ?? 1));
+        $perPage = 10;
 
-    // Tìm kiếm nghỉ phép
-    public function search() {
-        if (isset($_POST['keyword'])) {
-            $keyword = $_POST['keyword'];
-            $data = $this->model->searchNghiPhep($keyword);
-        } else {
-            $data = $this->model->getAllNghiPhep();
+        $totalItems = $this->model->countNghiPhep($keyword);
+        $totalPages = max(1, (int)ceil($totalItems / $perPage));
+        if ($page > $totalPages) {
+            $page = $totalPages;
         }
+
+        $offset = ($page - 1) * $perPage;
+        $data = $this->model->getNghiPhepPage($keyword, $perPage, $offset);
         include './views/nghiphep/index.php';
     }
 
+    /* ================= TÌM KIẾM ================= */
+    public function search() {
+        AuthMiddleware::check($this->conn, 'timkiem_nghiphep');
+        $quyen = $_SESSION['quyen'] ?? [];
+        $keyword = trim((string)($_POST['keyword'] ?? ''));
+        header('Location: index.php?controller=nghiphep&action=index&keyword=' . urlencode($keyword));
+        exit;
+    }
 
-    // Form thêm nghỉ phép
+    /* ================= FORM THÊM ================= */
     public function them() {
+        AuthMiddleware::check($this->conn, 'them_nghiphep');
+        $quyen = $_SESSION['quyen'] ?? [];
         $nhanvien = $this->model->getAllNhanVien();
         include './views/nghiphep/them.php';
     }
 
-    // Lưu nghỉ phép mới
+    /* ================= LƯU THÊM ================= */
     public function luu() {
+        AuthMiddleware::check($this->conn, 'them_nghiphep');
+        $quyen = $_SESSION['quyen'] ?? [];
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $manp = $_POST['MaNP'];
-            $manv = $_POST['MaNV'];
-            $tungay = $_POST['TuNgay'];
-            $denngay = $_POST['DenNgay'];
-            $lydo = $_POST['LyDo'] ?? '';
-            $trangthai = $_POST['TrangThai'] ?? 'Chờ duyệt';
-            $ngaydangky = $_POST['NgayDangKy'];
+            $validator = new RequestValidator($_POST);
+            $manv   = $validator->requiredInt('MaNV', 'Nhân viên', 1);
+            $tungay = $validator->requiredDate('TuNgay', 'Từ ngày');
+            $denngay = $validator->requiredDate('DenNgay', 'Đến ngày');
+            $lydo   = $validator->optionalString('LyDo', 1000);
+            $loai   = $validator->in('LoaiNghi', 'Loại nghỉ', ['Nghỉ phép', 'Nghỉ không phép', 'Nghỉ ốm']);
 
-            if ($this->model->checkma($manp)) {
-                echo "<script>alert('❌ Mã nghỉ phép đã tồn tại!');
-                      window.history.back();</script>";
-                exit;
+            if (!$validator->isValid()) {
+                AppLogger::warning('Validation failed in NghiPhepController::luu', ['errors' => $validator->allErrors()]);
+                WebResponder::backWithMessage($validator->firstError(), 'error', 'index.php?controller=nghiphep&action=them');
             }
 
-            if ($this->model->insertNghiPhep($manp, $manv, $tungay, $denngay, $lydo, $trangthai, $ngaydangky)) {
-                echo "<script>alert('✅ Thêm nghỉ phép thành công!');
-                      window.location='index.php?controller=nghiphep&action=index';</script>";
+            if (strtotime($denngay) < strtotime($tungay)) {
+                WebResponder::backWithMessage('Đến ngày phải lớn hơn hoặc bằng Từ ngày.', 'error', 'index.php?controller=nghiphep&action=them');
+            }
+
+            // Tính số ngày nghỉ
+            $start = new DateTime($tungay);
+            $end   = new DateTime($denngay);
+            $songay = $start->diff($end)->days + 1;
+
+            if ($this->model->insertNghiPhep(
+                $manv, $tungay, $denngay, $songay, $lydo, $loai
+            )) {
+                WebResponder::redirectWithMessage('index.php?controller=nghiphep&action=index', 'Gửi đơn nghỉ phép thành công!', 'success');
             } else {
-                echo "<script>alert('❌ Lỗi khi thêm dữ liệu!');
-                      window.history.back();</script>";
+                WebResponder::backWithMessage('Lỗi khi gửi đơn!', 'error', 'index.php?controller=nghiphep&action=them');
             }
         }
     }
 
-    // Form sửa nghỉ phép
+    /* ================= FORM SỬA ================= */
     public function sua() {
-        $manp = $_GET['id'] ?? '';
-        if (!$manp) { echo "Không tìm thấy bản ghi."; exit; }
+        AuthMiddleware::check($this->conn, 'sua_nghiphep');
+        $quyen = $_SESSION['quyen'] ?? [];
+        $id = $_GET['id'] ?? '';
+        if (!$id) {
+            $_SESSION['error'] = 'Không tìm thấy đơn';
+            header('Location: index.php?controller=nghiphep&action=index');
+            exit;
+        }
 
-        $result = $this->model->getNghiPhepById($manp);
-        if (!$result || $result->num_rows == 0) {
-            echo "Không tìm thấy bản ghi."; exit;
+        $result = $this->model->getNghiPhepById($id);
+        if ($result->num_rows == 0) {
+            $_SESSION['error'] = 'Không tìm thấy đơn';
+            header('Location: index.php?controller=nghiphep&action=index');
+            exit;
         }
 
         $row = $result->fetch_assoc();
@@ -76,61 +111,73 @@ class NghiPhepController {
         include './views/nghiphep/sua.php';
     }
 
-    // Lưu sửa nghỉ phép
+    /* ================= LƯU SỬA ================= */
     public function luuSua() {
+        AuthMiddleware::check($this->conn, 'sua_nghiphep');
+        $quyen = $_SESSION['quyen'] ?? [];
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $manp = $_POST['MaNP'];
-            $manv = $_POST['MaNV'];
-            $tungay = $_POST['TuNgay'];
-            $denngay = $_POST['DenNgay'];
-            $lydo = $_POST['LyDo'];
-            $trangthai = $_POST['TrangThai'];
+            $validator = new RequestValidator($_POST);
+            $id      = $validator->requiredInt('MaNP', 'Mã nghỉ phép', 1);
+            $manv    = $validator->requiredInt('MaNV', 'Nhân viên', 1);
+            $tungay  = $validator->requiredDate('TuNgay', 'Từ ngày');
+            $denngay = $validator->requiredDate('DenNgay', 'Đến ngày');
+            $lydo    = $validator->optionalString('LyDo', 1000);
+            $loai    = $validator->in('LoaiNghi', 'Loại nghỉ', ['Nghỉ phép', 'Nghỉ không phép', 'Nghỉ ốm']);
 
-            if ($this->model->updateNghiPhep($manp, $manv, $tungay, $denngay, $lydo, $trangthai)) {
-                echo "<script>alert('✅ Cập nhật nghỉ phép thành công!');
-                      window.location='index.php?controller=nghiphep&action=index';</script>";
+            if (!$validator->isValid()) {
+                AppLogger::warning('Validation failed in NghiPhepController::luuSua', ['errors' => $validator->allErrors()]);
+                WebResponder::backWithMessage($validator->firstError(), 'error', 'index.php?controller=nghiphep&action=index');
+            }
+
+            if (strtotime($denngay) < strtotime($tungay)) {
+                WebResponder::backWithMessage('Đến ngày phải lớn hơn hoặc bằng Từ ngày.', 'error', 'index.php?controller=nghiphep&action=index');
+            }
+
+            $start = new DateTime($tungay);
+            $end   = new DateTime($denngay);
+            $songay = $start->diff($end)->days + 1;
+
+            if ($this->model->updateNghiPhep(
+                $id, $manv, $tungay, $denngay, $songay, $lydo, $loai
+            )) {
+                WebResponder::redirectWithMessage('index.php?controller=nghiphep&action=index', 'Cập nhật thành công!', 'success');
             } else {
-                echo "<script>alert('❌ Lỗi khi cập nhật!');
-                      window.history.back();</script>";
+                WebResponder::backWithMessage('Lỗi cập nhật!', 'error', 'index.php?controller=nghiphep&action=index');
             }
         }
     }
 
+    /* ================= DUYỆT ================= */
     public function duyet() {
-    if (isset($_GET['id'])) {
-        $id = $_GET['id'];
-
-        if ($this->model->duyet($id)) {
-            echo "<script>
-                    alert('✅ Đã duyệt đơn nghỉ phép!');
-                    window.location='index.php?controller=nghiphep&action=index';
-                  </script>";
-        } else {
-            echo "<script>
-                    alert('❌ Lỗi khi duyệt!');
-                    window.history.back();
-                  </script>";
+        AuthMiddleware::check($this->conn, 'duyet_nghiphep');
+        $quyen = $_SESSION['quyen'] ?? [];
+        $id = (int)($_GET['id'] ?? 0);
+        if ($id > 0 && $this->model->duyet($id)) {
+            WebResponder::redirectWithMessage('index.php?controller=nghiphep&action=index', 'Đã duyệt đơn!', 'success');
         }
+        WebResponder::redirectWithMessage('index.php?controller=nghiphep&action=index', 'Không thể duyệt đơn.', 'error');
     }
-}
 
+    /* ================= TỪ CHỐI ================= */
     public function tuchoi() {
-        if (isset($_GET['id'])) {
-            $id = $_GET['id'];
-
-            if ($this->model->tuchoi($id)) {
-                echo "<script>
-                        alert('❌ Đã từ chối đơn nghỉ phép!');
-                        window.location='index.php?controller=nghiphep&action=index';
-                    </script>";
-            } else {
-                echo "<script>
-                        alert('❌ Lỗi khi từ chối!');
-                        window.history.back();
-                    </script>";
-            }
+        AuthMiddleware::check($this->conn, 'tuchoi_nghiphep');
+        $quyen = $_SESSION['quyen'] ?? [];
+        $id = (int)($_GET['id'] ?? 0);
+        if ($id > 0 && $this->model->tuchoi($id)) {
+            WebResponder::redirectWithMessage('index.php?controller=nghiphep&action=index', 'Đã từ chối đơn!', 'success');
         }
+        WebResponder::redirectWithMessage('index.php?controller=nghiphep&action=index', 'Không thể từ chối đơn.', 'error');
     }
 
+    /* ================= XÓA ================= */
+    public function xoa() {
+        AuthMiddleware::check($this->conn, 'xoa_nghiphep');
+        $quyen = $_SESSION['quyen'] ?? [];
+        $id = (int)($_GET['id'] ?? 0);
+        if ($id > 0 && $this->model->xoa($id)) {
+            WebResponder::redirectWithMessage('index.php?controller=nghiphep&action=index', 'Đã xóa đơn!', 'success');
+        }
+        WebResponder::redirectWithMessage('index.php?controller=nghiphep&action=index', 'Không thể xóa đơn.', 'error');
+    }
 }
 ?>

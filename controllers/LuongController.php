@@ -1,179 +1,74 @@
 <?php
 require_once 'models/LuongModel.php';
-
+require_once 'core/AuthMiddleware.php';
+require_once 'core/RequestValidator.php';
+require_once 'core/WebResponder.php';
+require_once 'core/AppLogger.php';
 class LuongController {
     private $model;
+    private $conn;
 
     public function __construct($conn) {
+        $this->conn = $conn;
         $this->model = new LuongModel($conn);
     }
 
-    
     public function index() {
+        AuthMiddleware::check($this->conn, 'xem_luong');
+        $quyen = $_SESSION['quyen'] ?? [];
         $luong = $this->model->getAll();
         include './views/luong/index.php';
     }
 
-    public function timkiem() {
-        $keyword = $_GET['keyword'] ?? '';
-        $luong = $this->model->timkiem($keyword);
-        include './views/luong/timkiem.php';
-    }
-    public function them() {
-        $dsNV = $this->model->getNhanVien();
-        $luongcb = 0;
-        include './views/luong/them.php';
-    }
+    /* ================= TÍNH LƯƠNG THÁNG ================= */
+   public function tinhLuongThang() {
+        AuthMiddleware::check($this->conn, 'tinh_luong_thang');
+$quyen = $_SESSION['quyen'] ?? [];
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $validator = new RequestValidator($_POST);
 
-   
-    public function store() {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $maluong = $_POST['maluong'];
-            if($this->model->checkma($maluong)){
-                echo "<script>alert('❌ Mã lương đã tồn tại!'); window.history.back();</script>";
-                exit;
-            }
-            $data = $_POST;
-            $success = $this->model->insertLuong($data);
-            if ($success) {
-                echo "<script>alert('✅ Thêm lương thành công!'); window.location='index.php?controller=luong&action=index';</script>";
-            } else {
-                echo "<script>alert('❌ Lỗi thêm lương!'); window.history.back();</script>";
-            }
-        }
-    }
-    public function sua() {
-        if (!isset($_GET['maluong'])) {
-            echo "<script>alert('Thiếu ID lương!'); window.location='index.php?controller=luong&action=index';</script>";
-            exit;
+        $thang = $validator->requiredInt('thang', 'Tháng', 1);
+        $nam   = $validator->requiredInt('nam', 'Năm', 2000);
+
+        if ($thang < 1 || $thang > 12) {
+            WebResponder::backWithMessage('Tháng không hợp lệ.', 'error', 'index.php?controller=luong&action=index');
         }
 
-        $maluong = $_GET['maluong'];
-        $luong = $this->model->getLuongById($maluong);
-        if (!$luong) {
-            echo "<script>alert('Không tìm thấy bản ghi lương!'); window.location='index.php?controller=luong&action=index';</script>";
-            exit;
+        if (!$validator->isValid()) {
+            AppLogger::warning('Validation failed in LuongController::tinhLuongThang', ['errors' => $validator->allErrors()]);
+            WebResponder::backWithMessage($validator->firstError(), 'error', 'index.php?controller=luong&action=index');
         }
 
-        $dsNV = $this->model->getNhanVien();
-         $luongcb = $this->model->getLuongCBFromHopDong($luong['MaNV']);
+        try {
+            // CHỈ GỌI 1 LẦN DUY NHẤT
+            $this->model->tinhLuongToanBo($thang,$nam);
+            WebResponder::redirectWithMessage('index.php?controller=luong&action=index', 'Đã tính lương toàn bộ nhân viên tháng '.$thang.'/'.$nam.'.', 'success');
 
-        include './views/luong/sua.php';
-    }
-
-   
-    public function update() {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            if ($this->model->updateLuong($_POST)) {
-                echo "<script>alert('✅ Cập nhật lương thành công!'); window.location='index.php?controller=luong&action=index';</script>";
-            } else {
-                echo "<script>alert('❌ Lỗi khi cập nhật!'); window.history.back();</script>";
-            }
-        } else {
-            echo "<script>alert('Thiếu dữ liệu!'); window.location='index.php?controller=luong&action=index';</script>";
+        } catch (Exception $e) {
+            AppLogger::error('tinhLuongThang failed', ['error' => $e->getMessage()]);
+            WebResponder::backWithMessage('Không thể tính lương. Vui lòng kiểm tra dữ liệu chấm công.', 'error', 'index.php?controller=luong&action=index');
         }
     }
-    public function delete() {
-    if (!isset($_GET['maluong'])) {
-        echo "<script>alert('Thiếu mã lương cần xóa!'); window.location='index.php?controller=luong&action=index';</script>";
-        exit;
-    }
-
-    $maluong = $_GET['maluong'];
-    $exists = $this->model->getLuongById($maluong);
-    if (!$exists) {
-        echo "<script>alert('Không tìm thấy mã lương cần xóa!'); window.location='index.php?controller=luong&action=index';</script>";
-        exit;
-    }
-
-    if ($this->model->deleteLuong($maluong)) {
-        echo "<script>alert('✅ Xóa bản ghi lương thành công!'); window.location='index.php?controller=luong&action=index';</script>";
-    } else {
-        echo "<script>alert('❌ Lỗi khi xóa!'); window.location='index.php?controller=luong&action=index';</script>";
-    }
 }
-public function exportExcel() {
-    $luong = $this->model->getAll();
-
-    $filename = "Danh_sach_luong_" . date('Ymd') . ".xls";
-
-    header("Content-Type: application/vnd.ms-excel; charset=UTF-8");
-    header("Content-Disposition: attachment; filename=\"$filename\"");
-    header("Pragma: no-cache");
-    header("Expires: 0");
-
-    echo "\xEF\xBB\xBF"; // BOM UTF-8 (tiếng Việt)
-
-    echo "<table border='1'>";
-
-    echo "<tr style='background-color:#f2f2f2; font-weight:bold;'>
-        <th>Mã Lương</th>
-        <th>Mã NV</th>
-        <th>Họ tên</th>
-        <th>Tháng</th>
-        <th>Lương cơ bản</th>
-        <th>Phụ cấp</th>
-        <th>Thưởng</th>
-        <th>Kỷ luật</th>
-        <th>Khấu trừ</th>
-        <th>Tổng lương</th>
-    </tr>";
-
-    foreach ($luong as $row) {
-        $tong = $row['LuongCB'] + $row['PhuCap'] + $row['Thuong']
-              - $row['KyLuat'] - $row['KhauTru'];
-
-        echo "<tr>
-            <td>{$row['MaLuong']}</td>
-            <td>{$row['MaNV']}</td>
-            <td>{$row['HoTen']}</td>
-            <td>{$row['Thang']}</td>
-            <td>".number_format($row['LuongCB'],0,',','.')."</td>
-            <td>".number_format($row['PhuCap'],0,',','.')."</td>
-            <td>".number_format($row['Thuong'],0,',','.')."</td>
-            <td>".number_format($row['KyLuat'],0,',','.')."</td>
-            <td>".number_format($row['KhauTru'],0,',','.')."</td>
-            <td>".number_format($tong,0,',','.')."</td>
-        </tr>";
+    public function chotLuong() {
+        AuthMiddleware::check($this->conn, 'chot_luong');
+        $quyen = $_SESSION['quyen'] ?? [];
+    $id = (int)($_GET['id'] ?? 0);
+    if ($id <= 0) {
+        WebResponder::redirectWithMessage('index.php?controller=luong&action=index', 'Thiếu mã lương.', 'error');
     }
-
-    // ✅ ĐÓNG TABLE
-    echo "</table>";
-
-    exit;
+    $this->model->updateTrangThai($id, 'Đã chốt');
+    WebResponder::redirectWithMessage('index.php?controller=luong&action=index', 'Chốt lương thành công.', 'success');
 }
 
-
-public function getLuongCoBan() {
-    $manv = $_GET['manv'] ?? '';
-    $luongcb = 0;
-
-    if ($manv) {
-        $luongcb = $this->model->getLuongCBFromHopDong($manv);
+public function moChot() {
+    AuthMiddleware::check($this->conn, 'mo_chot_luong');
+    $quyen = $_SESSION['quyen'] ?? [];
+    $id = (int)($_GET['id'] ?? 0);
+    if ($id <= 0) {
+        WebResponder::redirectWithMessage('index.php?controller=luong&action=index', 'Thiếu mã lương.', 'error');
     }
-
-    header('Content-Type: application/json');
-    echo json_encode(['LuongCoBan' => $luongcb]);
-    exit;
+    $this->model->updateTrangThai($id, 'Chưa chốt');
+    WebResponder::redirectWithMessage('index.php?controller=luong&action=index', 'Mở chốt lương thành công.', 'success');
 }
-public function getThuongKyLuat() {
-    $manv  = $_GET['manv'] ?? '';
-    $thang = $_GET['thang'] ?? '';
-
-    $data = [
-        'TongThuong' => 0,
-        'TongKyLuat' => 0
-    ];
-
-    if ($manv && $thang) {
-        $data = $this->model->getThuongVaKyLuat($manv, $thang);
-    }
-
-    header('Content-Type: application/json');
-    echo json_encode($data);
-    exit;
-}
-
-
-
 }

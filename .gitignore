@@ -1,0 +1,9 @@
+.env
+logs/
+uploads/cv/
+vendor/
+.vscode/
+
+*.log
+*.tmp
+*.cache

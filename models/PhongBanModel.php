@@ -6,55 +6,80 @@ class PhongBanModel {
         $this->conn = $conn;
     }
 
+    /* =========================
+       LẤY TẤT CẢ PHÒNG BAN
+    ========================== */
     public function getAllPhongBan() {
-        $sql = "SELECT * FROM phongban";
-        return $this->conn->query($sql);
-    }
-
-    public function searchPhongBan($keyword) {
-        $keyword = $this->conn->real_escape_string($keyword);
-        $sql = "SELECT * FROM phongban WHERE TenPB LIKE '%$keyword%' OR MaPB LIKE '%$keyword%'";
-        return $this->conn->query($sql);
-    }
-    public function getPhongBanById($mapb) {
-        $mapb = $this->conn->real_escape_string($mapb);
-        $sql = "SELECT * FROM phongban WHERE MaPB='$mapb'";
-        $result = $this->conn->query($sql);
-        return $result->num_rows > 0 ? $result->fetch_assoc() : null;
-    }
-    public function insertPhongBan($mapb, $tenpb, $mota){
-        $mapb = mysqli_real_escape_string($this->conn, $mapb);
-        $tenpb = mysqli_real_escape_string($this->conn, $tenpb);
-        $mota = mysqli_real_escape_string($this->conn, $mota);
-        $check = $this->getPhongBanById($mapb);
-        if ($check) return false;
-        $sql = "INSERT INTO phongban (MaPB, TenPB, MoTa) VALUES ('$mapb', '$tenpb', '$mota')";
+        $sql = "SELECT * FROM phongban ORDER BY MaPB DESC";
         return mysqli_query($this->conn, $sql);
-
-        
     }
+
+    /* =========================
+       TÌM KIẾM PHÒNG BAN
+    ========================== */
+    public function searchPhongBan($keyword) {
+        $keyword = mysqli_real_escape_string($this->conn, $keyword);
+
+        if (is_numeric($keyword)) {
+            $sql = "SELECT * FROM phongban 
+                    WHERE MaPB = $keyword 
+                       OR TenPB LIKE '%$keyword%'";
+        } else {
+            $sql = "SELECT * FROM phongban 
+                    WHERE TenPB LIKE '%$keyword%'";
+        }
+
+        return mysqli_query($this->conn, $sql);
+    }
+
+    /* =========================
+       LẤY PHÒNG BAN THEO ID
+    ========================== */
+    public function getPhongBanById($mapb) {
+        $mapb = (int)$mapb;
+        $sql = "SELECT * FROM phongban WHERE MaPB = $mapb";
+        $result = mysqli_query($this->conn, $sql);
+
+        return mysqli_num_rows($result) > 0
+            ? mysqli_fetch_assoc($result)
+            : null;
+    }
+
+    /* =========================
+       THÊM PHÒNG BAN
+    ========================== */
+    public function insertPhongBan($tenpb, $mota) {
+        $tenpb = mysqli_real_escape_string($this->conn, $tenpb);
+        $mota  = mysqli_real_escape_string($this->conn, $mota);
+
+        $sql = "INSERT INTO phongban (TenPB, MoTa)
+                VALUES ('$tenpb', '$mota')";
+
+        return mysqli_query($this->conn, $sql);
+    }
+
+    /* =========================
+       CẬP NHẬT PHÒNG BAN
+    ========================== */
     public function updatePhongBan($mapb, $tenpb, $mota) {
-        $mapb = $this->conn->real_escape_string($mapb);
-        $tenpb = $this->conn->real_escape_string($tenpb);
-        $mota = $this->conn->real_escape_string($mota);
+        $mapb = (int)$mapb;
+        $tenpb = mysqli_real_escape_string($this->conn, $tenpb);
+        $mota  = mysqli_real_escape_string($this->conn, $mota);
 
-        $sql = "UPDATE phongban SET TenPB='$tenpb', MoTa='$mota' WHERE MaPB='$mapb'";
-        return $this->conn->query($sql);
+        $sql = "UPDATE phongban
+                SET TenPB = '$tenpb',
+                    MoTa  = '$mota'
+                WHERE MaPB = $mapb";
+
+        return mysqli_query($this->conn, $sql);
     }
 
+    /* =========================
+       XÓA PHÒNG BAN
+    ========================== */
     public function deletePhongBan($mapb) {
-        $mapb = $this->conn->real_escape_string($mapb);
-        $sql = "DELETE FROM phongban WHERE MaPB='$mapb'";
-        return $this->conn->query($sql);
+        $mapb = (int)$mapb;
+        $sql = "DELETE FROM phongban WHERE MaPB = $mapb";
+        return mysqli_query($this->conn, $sql);
     }
-    
-    public function checkma( $mapb)
-{
-    $sql = "Select * from phongban where MaPB='$mapb'";
-    $result = mysqli_query($this->conn, $sql);
-    if (mysqli_num_rows($result) > 0) {
-        return true; //trùng mã tg
-    } else
-        return false; //ko trùng ãm
-}
 }

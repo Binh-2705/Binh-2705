@@ -1,89 +1,69 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quản lý Phòng ban</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <div class="container">
-  
-    <nav class="sidebar">
-      <h2>HỆ THỐNG <br> QUẢN LÝ NHÂN SỰ</h2>
-        <ul>
-            <ul>
-                <li><a href="index.php?controller=home&action=index" >🏠 Trang chủ</a></li>
-                <li><a href="index.php?controller=nhanvien&action=index">👥 Quản lý nhân viên</a></li>
-                <li><a href="index.php?controller=phongban&action=index" class="active">🏢 Quản lý phòng ban</a></li>
-                <li><a href="index.php?controller=luong&action=index">💰 Quản lý lương</a></li>
-                <li><a href="index.php?controller=chamcong&action=index">🕒 Quản lý chấm công</a></li>
-                <li><a href="index.php?controller=hopdong&action=index">📄 Quản lý hợp đồng</a></li>
-                <li><a href="index.php?controller=nghiphep&action=index">📆 Quản lý nghỉ phép</a></li>
-                <li><a href="index.php?controller=khenthuong&action=index">🏅 Khen thưởng - Kỷ luật</a></li>
-                <li><a href="index.php?controller=thongke&action=index">📊 Thống kê - Báo cáo</a></li>
-                <li><a href="index.php?controller=chucvu&action=index">🙍‍♂️ Quản lý chức vụ</a></li>
-                <li><a href="index.php?controller=hoso&action=index">👤 Hồ sơ cá nhân</a></li>
-                <li><a href="index.php?controller=tuyendung&action=index">💼 Quản lý tuyển dụng</a></li>
-                <li><a href="index.php?controller=daotao&action=index">📚 Quản lý đào tạo</a></li>
-                <li><a href="index.php?controller=taikhoan&action=index">🗂 Quản lý tài khoản</a></li>
-               
-                <li><a href="index.php?controller=dangnhap&action=dangxuat">🚪 Đăng xuất</a></li>
-            </ul>
-        </ul>
-    </nav>
+<?php include 'views/layout/header.php'; ?>
+<?php include 'views/layout/sidebar.php'; ?>
 
+  <!-- ===== MAIN ===== -->
+  <main class="main-content">
+    <header>
+      <h1>🏢 Quản lý Phòng ban</h1>
+    </header>
 
-    <main class="main-content">
-      <header>
-        <h1>🏢 Quản lý Phòng ban</h1>
-      </header>
+    <!-- ===== ACTIONS ===== -->
+    <div class="actions">
+      <div class="btn-group">
+        <a href="index.php?controller=phongban&action=them" class="btn add">➕ Thêm phòng ban</a>
+        <a href="index.php?controller=phongban&action=import" class="btn export">📂 Nhập CSV</a>
+        <a href="index.php?controller=phongban&action=exportExcel" class="btn export">📥 Xuất Excel</a>
+      </div>
 
-     <div class="actions">
-        <div class="btn-group">
-    <a href="index.php?controller=phongban&action=them" class="btn add">➕ Thêm phòng ban</a>
-    <a href="index.php?controller=phongban&action=import" class="btn export">📂 Import CSV</a>
-    <a href="index.php?controller=phongban&action=exportExcel" class="btn export">📥 Xuất Excel</a>
-        </div>
-    <form method="GET" action="index.php" style="display:inline-block;">
+      <form method="GET" action="index.php" class="search-form">
         <input type="hidden" name="controller" value="phongban">
         <input type="hidden" name="action" value="timkiem">
-        <input type="text" name="keyword" placeholder="🔍 Tìm kiếm phòng ban..." class="search-box"
-               value="<?php echo isset($_GET['keyword']) ? $_GET['keyword'] : ''; ?>">
+        <input type="text"
+               name="keyword"
+               class="search-box"
+               placeholder="🔍 Tìm tên phòng ban..."
+               value="<?= isset($_GET['keyword']) ? htmlspecialchars($_GET['keyword']) : '' ?>">
         <button type="submit" class="btn search">Tìm</button>
-    </form>
-</div>
+      </form>
+    </div>
 
-      <table class="table">
-    <thead>
+    <!-- ===== TABLE ===== -->
+    <table class="table">
+      <thead>
         <tr>
-            <th>Mã PB</th>
-            <th>Tên phòng ban</th>
-            <th>Mô tả</th>
-            <th>Thao tác</th>
+          <th>Mã PB</th>
+          <th>Tên phòng ban</th>
+          <th>Mô tả</th>
+          <th>Thao tác</th>
         </tr>
-    </thead>
-    <tbody>
-        <?php
-        if ($phongbans && $phongbans->num_rows > 0) {
-            while ($row = $phongbans->fetch_assoc()) {
-                echo "<tr>
-                        <td>{$row['MaPB']}</td>
-                        <td>{$row['TenPB']}</td>
-                        <td>{$row['MoTa']}</td>
-                        <td>
-                            <a href='index.php?controller=phongban&action=sua&mapb={$row['MaPB']}' class='btn edit'>✏️ Sửa</a>
-                            <a href='index.php?controller=phongban&action=xoa&mapb={$row['MaPB']}' class='btn delete' onclick='return confirm(\"Bạn có chắc muốn xóa phòng ban này không?\");'>🗑️ Xóa</a>
-                        </td>
-                      </tr>";
-            }
-        } else {
-            echo "<tr><td colspan='4'>Không có dữ liệu</td></tr>";
-        }
-        ?>
-    </tbody>
-</table>
-    </main>
-  </div>
-</body>
-</html>
+      </thead>
+      <tbody>
+        <?php if ($phongbans && $phongbans->num_rows > 0): ?>
+          <?php while ($row = $phongbans->fetch_assoc()): ?>
+            <tr>
+              <td><?= $row['MaPB'] ?></td>
+              <td><?= htmlspecialchars($row['TenPB']) ?></td>
+              <td><?= htmlspecialchars($row['MoTa']) ?></td>
+              <td>
+                <div class="table-actions">
+                <a href="index.php?controller=phongban&action=sua&mapb=<?= $row['MaPB'] ?>"
+                   class="btn edit"
+                   title="Chỉnh sửa">✏️</a>
+                <a href="index.php?controller=phongban&action=xoa&mapb=<?= $row['MaPB'] ?>"
+                   class="btn delete"
+                   title="Xóa"
+                   onclick="return confirm('Bạn có chắc muốn xóa phòng ban này?')">🗑️</a>
+                </div>
+              </td>
+            </tr>
+          <?php endwhile; ?>
+        <?php else: ?>
+          <tr>
+            <td colspan="4">Không có phòng ban</td>
+          </tr>
+        <?php endif; ?>
+      </tbody>
+    </table>
+
+  </main>
+<?php include 'views/layout/footer.php'; ?>

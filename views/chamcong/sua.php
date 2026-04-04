@@ -1,48 +1,65 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-<meta charset="UTF-8">
-<title>Sửa Chấm Công</title>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
-<div class="container">
-  <main class="main-content">
-    <h1>✏️ Sửa Chấm Công</h1>
+<?php include 'views/layout/header.php'; ?>
+<?php include 'views/layout/sidebar.php'; ?>
 
-    <form method="POST" action="index.php?controller=chamcong&action=luuSua" class="form-nv">
+  <main class="main-content">
+    <header>
+      <h1>✏️ Sửa Chấm Công</h1>
+    </header>
+
+    <form method="POST"
+          action="index.php?controller=chamcong&action=luuSua"
+          class="form-nv">
+
+      <!-- MaCC -->
       <input type="hidden" name="MaCC" value="<?= $row['MaCC'] ?>">
 
+      <!-- Nhân viên -->
       <div class="form-group">
         <label>Nhân viên:</label>
         <select name="MaNV" required>
           <option value="">-- Chọn nhân viên --</option>
           <?php while ($r = $nhanvien->fetch_assoc()): ?>
-            <option value="<?= $r['MaNV'] ?>" <?= ($r['MaNV'] == $row['MaNV']) ? "selected" : "" ?>>
-              <?= $r['MaNV'] . " - " . $r['HoTen'] ?>
+            <option value="<?= $r['MaNV'] ?>"
+              <?= ($r['MaNV'] == $row['MaNV']) ? 'selected' : '' ?>>
+              <?= $r['MaNV'] . ' - ' . $r['HoTen'] ?>
             </option>
           <?php endwhile; ?>
         </select>
       </div>
 
+      <!-- Ngày làm việc -->
       <div class="form-group">
-        <label>Tháng:</label>
-        <input type="month" name="Thang" value="<?= $row['Thang'] ?>" required>
+        <label>Ngày làm việc:</label>
+        <input type="date"
+               name="NgayLamViec"
+               value="<?= $row['NgayLamViec'] ?>"
+               required>
       </div>
 
+      <!-- Giờ vào -->
       <div class="form-group">
-        <label>Số ngày làm:</label>
-        <input type="number" name="SoNgayLam" min="0" max="31" value="<?= $row['SoNgayLam'] ?>" required>
+        <label>Giờ vào:</label>
+        <input type="time"
+               name="GioVao"
+               value="<?= $row['GioVao'] ?>">
       </div>
 
+      <!-- Giờ ra -->
       <div class="form-group">
-        <label>Số ngày nghỉ:</label>
-        <input type="number" name="SoNgayNghi" min="0" max="31" value="<?= $row['SoNgayNghi'] ?>" required>
+        <label>Giờ ra:</label>
+        <input type="time"
+               name="GioRa"
+               value="<?= $row['GioRa'] ?>">
       </div>
 
+      <!-- Trạng thái -->
       <div class="form-group">
-        <label>Ghi chú:</label>
-        <textarea name="GhiChu"><?= $row['GhiChu'] ?></textarea>
+        <label>Trạng thái:</label>
+        <select name="TrangThai" required>
+          <option value="Đi làm" <?= ($row['TrangThai']=='Đi làm')?'selected':'' ?>>Đi làm</option>
+          <option value="Nghỉ phép" <?= ($row['TrangThai']=='Nghỉ phép')?'selected':'' ?>>Nghỉ phép</option>
+          <option value="Nghỉ không phép" <?= ($row['TrangThai']=='Nghỉ không phép')?'selected':'' ?>>Nghỉ không phép</option>
+        </select>
       </div>
 
       <div class="form-buttons">
@@ -51,6 +68,4 @@
       </div>
     </form>
   </main>
-</div>
-</body>
-</html>
+<?php include 'views/layout/footer.php'; ?>

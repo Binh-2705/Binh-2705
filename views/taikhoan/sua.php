@@ -1,13 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div class="container">
+<?php include 'views/layout/header.php'; ?>
+<?php include 'views/layout/sidebar.php'; ?>
 
 <div class="main-content">
     <header>
@@ -31,7 +23,7 @@
 
         <div class="form-group">
             <label>Mã nhân viên</label>
-            <input name="manv" value="<?= $tk['MaNV'] ?>">
+            <input name="manv" maxlength="10" value="<?= $tk['MaNV'] ?>">
         </div>
 
         <div class="form-buttons">
@@ -42,7 +34,4 @@
     </form>
 </div>
 
-</div>
-
-</body>
-</html>
+<?php include 'views/layout/footer.php'; ?>

@@ -1,48 +1,17 @@
-<?php
-// views/nhanvien/timkiem.php
-// $nhanviens: mảng nhân viên (Array of associative arrays), $keyword: từ khóa tìm kiếm
-?>
-
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <title>🔍 Kết quả tìm kiếm</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-<div class="container">
-    <nav class="sidebar">
-         <h2>HỆ THỐNG <br> QUẢN LÝ NHÂN SỰ</h2>
-        <ul>
-            <ul>
-                <li><a href="index.php?controller=home&action=index" >🏠 Trang chủ</a></li>
-                <li><a href="index.php?controller=nhanvien&action=index" class="active">👥 Quản lý nhân viên</a></li>
-                <li><a href="index.php?controller=phongban&action=index">🏢 Quản lý phòng ban</a></li>
-                <li><a href="index.php?controller=luong&action=index">💰 Quản lý lương</a></li>
-                <li><a href="index.php?controller=chamcong&action=index">🕒 Quản lý chấm công</a></li>
-                <li><a href="index.php?controller=hopdong&action=index">📄 Quản lý hợp đồng</a></li>
-                <li><a href="index.php?controller=nghiphep&action=index">📆 Quản lý nghỉ phép</a></li>
-                <li><a href="index.php?controller=khenthuong&action=index">🏅 Khen thưởng - Kỷ luật</a></li>
-                <li><a href="index.php?controller=thongke&action=index">📊 Thống kê - Báo cáo</a></li>
-                <li><a href="index.php?controller=chucvu&action=index">🙍‍♂️ Quản lý chức vụ</a></li>
-                <li><a href="index.php?controller=hoso&action=index">👤 Hồ sơ cá nhân</a></li>
-                <li><a href="index.php?controller=tuyendung&action=index">💼 Quản lý tuyển dụng</a></li>
-                <li><a href="index.php?controller=daotao&action=index">📚 Quản lý đào tạo</a></li>
-                <li><a href="index.php?controller=taikhoan&action=index">🗂 Quản lý tài khoản</a></li>
-               
-               <li><a href="index.php?controller=dangnhap&action=dangxuat">🚪 Đăng xuất</a></li>
-            </ul>
-        </ul>
-    </nav>
-
+<?php include 'views/layout/header.php'; ?>
+<?php include 'views/layout/sidebar.php'; ?>
+    <!-- MAIN -->
     <main class="main-content">
         <header>
-            <h1>🔍 Kết quả tìm kiếm: "<?= htmlspecialchars($keyword) ?>"</h1>
+            <h1>🔍 Kết quả tìm kiếm</h1>
+            <p>
+                Từ khóa:
+                <strong>"<?= htmlspecialchars($keyword) ?>"</strong>
+            </p>
         </header>
 
         <div class="actions">
-            <a href="index.php?controller=nhanvien&action=index" class="btn clear">↩️ Quay lại</a>
+            <a href="index.php?controller=nhanvien&action=index" class="btn cancel">↩️ Quay lại</a>
         </div>
 
         <table class="table">
@@ -52,37 +21,46 @@
                     <th>Họ tên</th>
                     <th>Giới tính</th>
                     <th>Ngày sinh</th>
-                    <th>Phòng ban</th>
-                    <th>Chức vụ</th>
-                    <th>Mức lương</th>
+                    <th>Email</th>
+                    <th>Điện thoại</th>
+                    <th>Bậc lương</th>
+                    <th>Trạng thái</th>
                     <th>Thao tác</th>
                 </tr>
             </thead>
             <tbody>
-                <?php if(!empty($nhanviens)): ?>
-                    <?php foreach($nhanviens as $row): ?>
-                        <tr>
-                            <td><?= $row['MaNV'] ?></td>
-                            <td><?= htmlspecialchars($row['HoTen']) ?></td>
-                            <td><?= $row['GioiTinh'] ?></td>
-                            <td><?= $row['NgaySinh'] ?></td>
-                            <td><?= $row['TenPB'] ?? 'N/A' ?></td> 
-                            <td><?= $row['TenChucVu'] ?? 'N/A' ?></td> 
-                            <td><?= isset($row['Luong']) ? number_format($row['Luong'],0,',','.') . 'đ' : 'Chưa có' ?></td>
-                            <td>
-                                <a href="index.php?controller=nhanvien&action=sua&manv=<?= $row['MaNV'] ?>" class="btn edit">✏️ Sửa</a>
-                                <a href="index.php?controller=nhanvien&action=xoa&manv=<?= $row['MaNV'] ?>"
-                                   onclick="return confirm('Bạn có chắc muốn xóa nhân viên này không?');" 
-                                   class="btn delete">🗑️ Xóa</a>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <tr><td colspan="8">❌ Không tìm thấy nhân viên nào phù hợp!</td></tr>
-                <?php endif; ?>
+            <?php if ($nhanviens && mysqli_num_rows($nhanviens) > 0): ?>
+                <?php while ($row = mysqli_fetch_assoc($nhanviens)): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($row['MaNV']) ?></td>
+                        <td><?= htmlspecialchars($row['HoTen']) ?></td>
+                        <td><?= htmlspecialchars($row['GioiTinh']) ?></td>
+                        <td><?= date('d/m/Y', strtotime($row['NgaySinh'])) ?></td>
+                        <td><?= htmlspecialchars($row['Email']) ?></td>
+                        <td><?= htmlspecialchars($row['DienThoai']) ?></td>
+                        <td><?= htmlspecialchars($row['TenBac'] ?? 'Chưa có') ?></td>
+                        <td><?= htmlspecialchars($row['TrangThai']) ?></td>
+                        <td>
+                           <a href="index.php?controller=nhanvien&action=sua&manv=<?= $row['MaNV'] ?>"
+   class="btn edit">✏️</a>
+
+<a href="index.php?controller=nhanvien&action=xoa&manv=<?= $row['MaNV'] ?>"
+   class="btn delete"
+   onclick="return confirm('Bạn có chắc muốn xóa nhân viên này?')">
+   🗑️
+</a>
+                            </a>
+                        </td>
+                    </tr>
+                <?php endwhile; ?>
+            <?php else: ?>
+                <tr>
+                    <td colspan="9" style="text-align:center;">
+                        ❌ Không tìm thấy nhân viên phù hợp
+                    </td>
+                </tr>
+            <?php endif; ?>
             </tbody>
         </table>
     </main>
-</div>
-</body>
-</html>
+<?php include 'views/layout/footer.php'; ?>

@@ -1,150 +1,213 @@
 <?php
-// models/NhanVienModel.php
-
-require_once 'ketnoi.php';
-
 class NhanVienModel {
     private $conn;
 
     public function __construct($conn) {
         $this->conn = $conn;
     }
-     public function getAllPhongBan() {
-        $sql = "SELECT MaPB, TenPB FROM phongban";
-        return mysqli_query($this->conn, $sql);
+
+    /* ================== READ ================== */
+
+    public function getAll() {
+    $sql = "SELECT 
+                nv.*, 
+                bl.TenBac, 
+                bl.HeSoLuong,
+                nl.TenNgach
+            FROM nhanvien nv
+            LEFT JOIN bacluong bl ON nv.MaBac = bl.MaBac
+            LEFT JOIN ngachluong nl ON bl.MaNgach = nl.MaNgach
+            ORDER BY nv.MaNV ASC";
+    return mysqli_query($this->conn, $sql);
     }
 
-    // THÊM: Lấy danh sách Chức vụ để dùng trong Form Thêm/Sửa
-    public function getAllChucVu() {
-        $sql = "SELECT MaCV, TenChucVu FROM tbl_chucvu ORDER BY TenChucVu ASC";
+    public function countAll(): int {
+        $sql = "SELECT COUNT(*) AS total FROM nhanvien";
         $result = mysqli_query($this->conn, $sql);
-        $data = [];
-        if ($result && mysqli_num_rows($result) > 0) {
-            while ($row = mysqli_fetch_assoc($result)) {
-                $data[] = $row;
-            }
-        }
-        return $data;
+        $row = $result ? mysqli_fetch_assoc($result) : ['total' => 0];
+        return (int)($row['total'] ?? 0);
     }
 
-    // READ: Lấy danh sách nhân viên (Sử dụng MaPB và MaCV, JOIN để lấy Tên)
-    public function getAllNhanVien() {
+    public function getPage(int $page = 1, int $perPage = 10) {
+        $page = max(1, $page);
+        $perPage = max(1, $perPage);
+        $offset = ($page - 1) * $perPage;
+
         $sql = "SELECT 
-                nv.MaNV, 
-                nv.HoTen, 
-                nv.GioiTinh, 
-                nv.NgaySinh, 
-                pb.TenPB, 
-                cv.TenChucVu, 
-                l.LuongCB
-            FROM 
-                nhanvien nv
-            LEFT JOIN 
-                phongban pb ON nv.PhongBan = pb.MaPB 
-            LEFT JOIN 
-                tbl_chucvu cv ON nv.ChucVu = cv.MaCV
-            LEFT JOIN (
-                SELECT l1.MaNV, l1.LuongCB
-                FROM luong l1
-                INNER JOIN (
-                    SELECT MaNV, MAX(Thang) AS ThangMoiNhat
-                    FROM luong
-                    GROUP BY MaNV
-                ) l2 ON l1.MaNV = l2.MaNV AND l1.Thang = l2.ThangMoiNhat
-            ) l ON nv.MaNV = l.MaNV";
+                    nv.*, 
+                    bl.TenBac, 
+                    bl.HeSoLuong,
+                    nl.TenNgach
+                FROM nhanvien nv
+                LEFT JOIN bacluong bl ON nv.MaBac = bl.MaBac
+                LEFT JOIN ngachluong nl ON bl.MaNgach = nl.MaNgach
+                ORDER BY nv.MaNV ASC
+                LIMIT $offset, $perPage";
 
         return mysqli_query($this->conn, $sql);
-        
     }
+    public function getById($maNV) {
+        $maNV = (int)$maNV;
+        $sql = "SELECT * FROM nhanvien WHERE MaNV = $maNV";
+        $rs = mysqli_query($this->conn, $sql);
+        return ($rs && mysqli_num_rows($rs) > 0) ? mysqli_fetch_assoc($rs) : null;
+    }
+    public function getBacByNgach($maNgach) {
+    // Bảo mật tránh SQL Injection
+    $maNgach = mysqli_real_escape_string($this->conn, $maNgach);
     
-    // READ: Lấy danh sách Phòng ban
-   
-    
+    $sql = "SELECT MaBac, TenBac, HeSoLuong 
+            FROM bacluong 
+            WHERE MaNgach = '$maNgach' 
+            ORDER BY HeSoLuong ASC";
+            
+    return mysqli_query($this->conn, $sql);
+}
+public function getAllNgachLuong() {
+    $sql = "SELECT MaNgach, TenNgach FROM ngachluong ORDER BY TenNgach ASC";
+    return mysqli_query($this->conn, $sql);
+}
 
-    // CREATE: Thêm mới Nhân viên
-    public function insertNhanVien($manv, $hoten, $gioitinh, $ngaysinh, $maPB, $maCV) {
-        $manv = mysqli_real_escape_string($this->conn, $manv);
-        $hoten = mysqli_real_escape_string($this->conn, $hoten);
-        $gioitinh = mysqli_real_escape_string($this->conn, $gioitinh);
-        $ngaysinh = mysqli_real_escape_string($this->conn, $ngaysinh);
-        $maPB = mysqli_real_escape_string($this->conn, $maPB); 
-        $maCV = mysqli_real_escape_string($this->conn, $maCV); 
-
-        $sql = "INSERT INTO nhanvien (MaNV, HoTen, GioiTinh, NgaySinh, PhongBan, ChucVu)
-                VALUES ('$manv', '$hoten', '$gioitinh', '$ngaysinh', '$maPB', '$maCV')";
+    public function getAllBacLuong() {
+        $sql = "SELECT MaBac, TenBac FROM bacluong ORDER BY MaBac";
         return mysqli_query($this->conn, $sql);
     }
-    
-    // READ: Lấy thông tin Nhân viên theo ID
-    public function getNhanVienById($manv) {
-        $manv = mysqli_real_escape_string($this->conn, $manv);
-        $sql = "SELECT * FROM nhanvien WHERE MaNV='$manv'";
-        $result = mysqli_query($this->conn, $sql);
-        if ($result && mysqli_num_rows($result) > 0) {
-            return mysqli_fetch_assoc($result);
-        }
-        return null;
-    }
-    
-    // UPDATE: Cập nhật Nhân viên (Bỏ $luong vì nó thuộc bảng luong)
-    public function updateNhanVien($manv, $hoten, $gioitinh, $ngaysinh, $maPB, $maCV) {
-        $manv = mysqli_real_escape_string($this->conn, $manv);
-        $hoten = mysqli_real_escape_string($this->conn, $hoten);
-        $gioitinh = mysqli_real_escape_string($this->conn, $gioitinh);
-        $ngaysinh = mysqli_real_escape_string($this->conn, $ngaysinh);
-        $maPB = mysqli_real_escape_string($this->conn, $maPB); 
-        $maCV = mysqli_real_escape_string($this->conn, $maCV); 
+public function getNgachByBac($maBac) {
+    $maBac = (int)$maBac;
+    $sql = "SELECT MaNgach FROM bacluong WHERE MaBac = $maBac";
+    $rs = mysqli_query($this->conn, $sql);
+    return mysqli_fetch_assoc($rs);
+}
+    /* ================== CREATE ================== */
 
-        $sql = "UPDATE nhanvien 
-                SET HoTen='$hoten', GioiTinh='$gioitinh', NgaySinh='$ngaysinh',
-                    PhongBan='$maPB', ChucVu='$maCV'
-                WHERE MaNV='$manv'";
-        return mysqli_query($this->conn, $sql);
-    }
-    
-    // DELETE: Xóa Nhân viên
-    public function deleteNhanVien($manv) {
-        $manv = mysqli_real_escape_string($this->conn, $manv);
-        $sql = "DELETE FROM nhanvien WHERE MaNV='$manv'";
+    public function insert($data) {
+        $hoTen     = mysqli_real_escape_string($this->conn, $data['HoTen']);
+        $gioiTinh  = mysqli_real_escape_string($this->conn, $data['GioiTinh']);
+        $ngaySinh  = mysqli_real_escape_string($this->conn, $data['NgaySinh']);
+        $email     = mysqli_real_escape_string($this->conn, $data['Email']);
+        $dienThoai = mysqli_real_escape_string($this->conn, $data['DienThoai']);
+        $trangThai = mysqli_real_escape_string($this->conn, $data['TrangThai']);
+        $maBac     = (int)$data['MaBac'];
+        $mahs = (int)$data['MaHS'];
+
+        $sql = "INSERT INTO nhanvien
+                (HoTen, GioiTinh, NgaySinh, Email, DienThoai, TrangThai, MaBac, MaHS)
+                VALUES
+                ('$hoTen','$gioiTinh','$ngaySinh','$email','$dienThoai','$trangThai',$maBac,$mahs)";
+
         return mysqli_query($this->conn, $sql);
     }
 
-    // READ: Tìm kiếm Nhân viên
-    public function searchNhanVien($keyword) {
-        $keyword = mysqli_real_escape_string($this->conn, $keyword);
-        
-        $sql = "SELECT 
-                    nv.MaNV, nv.HoTen, nv.GioiTinh, nv.NgaySinh, pb.TenPB, cv.TenChucVu,
-                    l.LuongCB AS Luong
-                FROM 
-                    nhanvien nv
-                LEFT JOIN 
-                    phongban pb ON nv.PhongBan = pb.MaPB
-                LEFT JOIN 
-                    tbl_chucvu cv ON nv.ChucVu = cv.MaCV
-                LEFT JOIN (s
-                    SELECT MaNV, LuongCB
-                    FROM luong
-                    WHERE (MaNV, Thang) IN (
-                        SELECT MaNV, MAX(Thang)
-                        FROM luong
-                        GROUP BY MaNV
-                    )
-                ) l ON nv.MaNV = l.MaNV
-                WHERE 
-                    nv.MaNV LIKE '%$keyword%' 
-                    OR nv.HoTen LIKE '%$keyword%' 
-                    OR pb.TenPB LIKE '%$keyword%'";
-        return mysqli_query($this->conn, $sql);
-    }
+    /* ================== UPDATE ================== */
 
-    // CHECK: Kiểm tra trùng Mã Nhân viên
-    function checkma( $manv) {
-        $sql = "Select * from nhanvien where MaNV='$manv'";
-        $result = mysqli_query($this->conn, $sql);
-        if (mysqli_num_rows($result) > 0) {
-            return true;
-        } else
-            return false;
+   public function update($data) {
+    $sql = "UPDATE nhanvien SET 
+            HoTen = ?, GioiTinh = ?, NgaySinh = ?, 
+            Email = ?, DienThoai = ?, TrangThai = ?, MaBac = ?, MaHS = ? 
+            WHERE MaNV = ?";
+
+    $stmt = mysqli_prepare($this->conn, $sql);
+
+    mysqli_stmt_bind_param($stmt, "ssssssiii",
+        $data['HoTen'],
+        $data['GioiTinh'],
+        $data['NgaySinh'],
+        $data['Email'],
+        $data['DienThoai'],
+        $data['TrangThai'],
+        $data['MaBac'],
+        $data['MaHS'],
+        $data['MaNV']
+    );
+
+    mysqli_stmt_execute($stmt);
+
+    $affected = mysqli_stmt_affected_rows($stmt);
+
+    mysqli_stmt_close($stmt); // ⭐ phải đóng
+
+    return $affected;
+}
+    /* ================== DELETE ================== */
+
+   public function delete($maNV) {
+    $sql = "DELETE FROM nhanvien WHERE MaNV = ?";
+    $stmt = mysqli_prepare($this->conn, $sql);
+
+    mysqli_stmt_bind_param($stmt, "i", $maNV);
+    mysqli_stmt_execute($stmt);
+
+    $affected = mysqli_stmt_affected_rows($stmt);
+
+    mysqli_stmt_close($stmt); // ⭐ phải đóng
+
+    return $affected;
+}
+
+    /* ================== CHECK ================== */
+
+    public function exists($maNV) {
+        $maNV = (int)$maNV;
+        $sql = "SELECT MaNV FROM nhanvien WHERE MaNV = $maNV";
+        $rs = mysqli_query($this->conn, $sql);
+        return $rs && mysqli_num_rows($rs) > 0;
     }
+    // Lấy hợp đồng đang còn hiệu lực của nhân viên
+public function getHopDongConHieuLuc($maNV) {
+    $maNV = (int)$maNV;
+    $sql = "SELECT MaHopDong, MaBac FROM hopdong 
+            WHERE MaNV = $maNV AND TrangThai = 'Còn hiệu lực' 
+            LIMIT 1";
+    $rs = mysqli_query($this->conn, $sql);
+    return mysqli_fetch_assoc($rs);
+}
+
+// Lấy giá trị lương thực tế dựa trên MaBac
+public function getLuongThucTeByBac($maBac) {
+    $maBac = (int)$maBac;
+    $sql = "SELECT (LuongCoSo * HeSoLuong) as Luong FROM bacluong WHERE MaBac = $maBac";
+    $rs = mysqli_query($this->conn, $sql);
+    $row = mysqli_fetch_assoc($rs);
+    return $row['Luong'] ?? 0;
+}
+
+// Cập nhật MaBac cho Hợp đồng
+public function updateMaBacHopDong($maHD, $maBac) {
+    $sql = "UPDATE hopdong SET MaBac = ? WHERE MaHopDong = ?";
+    $stmt = mysqli_prepare($this->conn, $sql);
+    mysqli_stmt_bind_param($stmt, "ii", $maBac, $maHD);
+    return mysqli_stmt_execute($stmt);
+}
+
+// Ghi lịch sử lương
+public function insertLichSuLuong($data) {
+    $sql = "INSERT INTO lichsu_luong (MaHopDong, LuongCu, LuongMoi, NgayApDung, LyDo) 
+            VALUES (?, ?, ?, ?, ?)";
+    $stmt = mysqli_prepare($this->conn, $sql);
+    mysqli_stmt_bind_param($stmt, "iddss", 
+        $data['MaHopDong'], $data['LuongCu'], $data['LuongMoi'], 
+        $data['NgayApDung'], $data['LyDo']
+    );
+    return mysqli_stmt_execute($stmt);
+}
+public function search($keyword) {
+    $keyword = "%" . $keyword . "%";
+
+    $sql = "SELECT nv.*, bl.TenBac, bl.HeSoLuong, nl.TenNgach
+            FROM nhanvien nv
+            LEFT JOIN bacluong bl ON nv.MaBac = bl.MaBac
+            LEFT JOIN ngachluong nl ON bl.MaNgach = nl.MaNgach
+            WHERE nv.HoTen LIKE ? OR nv.MaNV LIKE ?
+            ORDER BY nv.MaNV ASC";
+
+    $stmt = mysqli_prepare($this->conn, $sql);
+    mysqli_stmt_bind_param($stmt, "ss", $keyword, $keyword);
+    mysqli_stmt_execute($stmt);
+
+    $result = mysqli_stmt_get_result($stmt);
+
+    mysqli_stmt_close($stmt); // ⭐ QUAN TRỌNG
+
+    return $result;
+}
 }

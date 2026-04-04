@@ -1,13 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div class="container">
+<?php include 'views/layout/header.php'; ?>
+<?php include 'views/layout/sidebar.php'; ?>
 
 <div class="main-content">
     <header>
@@ -18,27 +10,26 @@
 
         <div class="form-group">
             <label>Tên đăng nhập</label>
-            <input name="user" required>
+            <input name="user" required maxlength="50" minlength="3" placeholder="VD: nguyenvana">
         </div>
 
         <div class="form-group">
             <label>Mật khẩu</label>
-            <input type="password" name="pass" required>
+            <input type="password" name="pass" required minlength="6" maxlength="50" placeholder="Tối thiểu 6 ký tự">
         </div>
 
         <div class="form-group">
             <label>Vai trò</label>
-            <select name="vaitro">
+            <select name="vaitro" required>
+                <option value="">-- Chọn vai trò --</option>
                 <option value="Admin">Admin</option>
                 <option value="NhanVien">Nhân viên</option>
-               
-                
             </select>
         </div>
 
         <div class="form-group">
             <label>Mã nhân viên</label>
-            <input name="manv">
+            <input name="manv" maxlength="10" placeholder="VD: NV001">
         </div>
 
         <div class="form-buttons">
@@ -49,7 +40,4 @@
     </form>
 </div>
 
-</div>
-
-</body>
-</html>
+<?php include 'views/layout/footer.php'; ?>

@@ -1,94 +1,76 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🙍‍♂️ Quản lý Chức vụ</title>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
-<div class="container">
-<nav class="sidebar">
-     <h2>HỆ THỐNG <br> QUẢN LÝ NHÂN SỰ</h2>
-        <ul>
-            <ul>
-                <li><a href="index.php?controller=home&action=index" >🏠 Trang chủ</a></li>
-                <li><a href="index.php?controller=nhanvien&action=index">👥 Quản lý nhân viên</a></li>
-                <li><a href="index.php?controller=phongban&action=index">🏢 Quản lý phòng ban</a></li>
-                <li><a href="index.php?controller=luong&action=index">💰 Quản lý lương</a></li>
-                <li><a href="index.php?controller=chamcong&action=index">🕒 Quản lý chấm công</a></li>
-                <li><a href="index.php?controller=hopdong&action=index">📄 Quản lý hợp đồng</a></li>
-                <li><a href="index.php?controller=nghiphep&action=index">📆 Quản lý nghỉ phép</a></li>
-                <li><a href="index.php?controller=khenthuong&action=index">🏅 Khen thưởng - Kỷ luật</a></li>
-                <li><a href="index.php?controller=thongke&action=index">📊 Thống kê - Báo cáo</a></li>
-                <li><a href="index.php?controller=chucvu&action=index" class="active">🙍‍♂️ Quản lý chức vụ</a></li>
-                <li><a href="index.php?controller=hoso&action=index">👤 Hồ sơ cá nhân</a></li>
-                <li><a href="index.php?controller=tuyendung&action=index">💼 Quản lý tuyển dụng</a></li>
-                <li><a href="index.php?controller=daotao&action=index">📚 Quản lý đào tạo</a></li>
-                <li><a href="index.php?controller=taikhoan&action=index">🗂 Quản lý tài khoản</a></li>
-                
-                <li><a href="index.php?controller=dangnhap&action=dangxuat">🚪 Đăng xuất</a></li>
-            </ul>
-        </ul>
-</nav>
-
+<?php include 'views/layout/header.php'; ?>
+<?php include 'views/layout/sidebar.php'; ?>
 <main class="main-content">
-    <header><h1>🙍‍♂️ Quản lý Chức vụ</h1></header>
+<header>
+    <h1>🙍‍♂️ Quản lý Chức vụ</h1>
+</header>
 
-    <?php 
-        $keyword = $keyword ?? '';
-        $danhSachChucVu = $danhSachChucVu ?? [];
-        if (isset($_GET['msg'])): ?>
-            <p style="color: green; font-weight: bold; margin-bottom: 15px;"><?php echo htmlspecialchars($_GET['msg']); ?></p>
-    <?php endif; ?>
+<?php
+$keyword = isset($keyword) ? $keyword : '';
+$danhSachChucVu = isset($danhSachChucVu) ? $danhSachChucVu : [];
 
-    <div class="actions">
-        <div class="btn-group">
-            <a href="index.php?controller=chucvu&action=add" class="btn add">➕ Thêm Chức vụ mới</a>
-            <a href="index.php?controller=chucvu&action=exportExcel" class="btn export">⬇️ Xuất Excel </a>
-        </div>
-        
-        <form action="index.php" method="GET" style="display: flex; gap: 10px;">
-            <input type="hidden" name="controller" value="chucvu">
-            <input type="hidden" name="action" value="index">
-            <input type="text" name="search" class="search-box" placeholder="🔍 Tìm theo Mã/Tên chức vụ..." 
-                   value="<?php echo htmlspecialchars($keyword); ?>">
-            <button type="submit" class="btn search">Tìm</button>
-        </form>
+if (isset($_GET['msg'])) {
+    echo '<p style="color: green; font-weight: bold; margin-bottom: 15px;">'
+        . htmlspecialchars($_GET['msg']) .
+        '</p>';
+}
+?>
+
+<div class="actions">
+    <div class="btn-group">
+        <a href="index.php?controller=chucvu&action=add" class="btn add">➕ Thêm chức vụ</a>
+        <a href="index.php?controller=chucvu&action=exportExcel" class="btn export">⬇️ Xuất Excel</a>
     </div>
-    
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Mã CV</th>
-                <th>Tên Chức vụ</th>
-                <th>Số lượng NV</th>
-                <th>Thao tác</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php if (empty($danhSachChucVu)): ?>
-                <tr><td colspan="4">Không có dữ liệu chức vụ nào.</td></tr>
-            <?php else: ?>
-                <?php foreach ($danhSachChucVu as $cv): ?>
-                    <tr>
-                        <td><?php echo $cv['MaCV']; ?></td>
-                        <td><?php echo $cv['TenChucVu']; ?></td> 
-                        <td><?php echo $cv['SoLuongNV']; ?></td>
-                        <td>
-                            <div class="btn-group">
-                                <a href="index.php?controller=chucvu&action=edit&id=<?php echo $cv['MaCV']; ?>" class="btn edit">✏️ Sửa</a>
-                                <a href="index.php?controller=chucvu&action=delete&id=<?php echo $cv['MaCV']; ?>" 
-                                   class="btn delete" 
-                                   onclick="return confirm('Xác nhận xóa Chức vụ Mã: <?php echo $cv['MaCV']; ?>?');">🗑️ Xóa</a>
-                            </div>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-            <?php endif; ?>
-        </tbody>
-    </table>
-</main>
+
+    <form action="index.php" method="GET" style="display:flex; gap:10px;">
+        <input type="hidden" name="controller" value="chucvu">
+        <input type="hidden" name="action" value="index">
+        <input type="text"
+               name="search"
+               class="search-box"
+               placeholder="🔍 Tìm theo mã / tên chức vụ..."
+               value="<?php echo htmlspecialchars($keyword); ?>">
+        <button type="submit" class="btn search">Tìm</button>
+    </form>
 </div>
-</body>
-</html>
+
+<table class="table">
+<thead>
+<tr>
+    <th>Mã CV</th>
+    <th>Tên chức vụ</th>
+    <th>Hệ số</th>
+    <th>Phụ cấp</th>
+    <th>Thao tác</th>
+</tr>
+</thead>
+
+<tbody>
+<?php if (empty($danhSachChucVu)) { ?>
+    <tr>
+        <td colspan="5" style="text-align:center;">Không có dữ liệu chức vụ.</td>
+    </tr>
+<?php } else { ?>
+    <?php foreach ($danhSachChucVu as $cv) { ?>
+        <tr>
+            <td><?php echo $cv['MaCV']; ?></td>
+            <td><?php echo htmlspecialchars($cv['TenCV']); ?></td>
+            <td><?php echo $cv['HeSoChucVu']; ?></td>
+            <td><?php echo number_format($cv['PhuCap'], 0, ',', '.'); ?> đ</td>
+            <td>
+                <div class="table-actions">
+                    <a href="index.php?controller=chucvu&action=edit&id=<?php echo $cv['MaCV']; ?>" class="btn edit" title="Chỉnh sửa">✏️</a>
+                    <a href="index.php?controller=chucvu&action=delete&id=<?php echo $cv['MaCV']; ?>"
+                       class="btn delete"
+                       title="Xóa"
+                       onclick="return confirm('Xác nhận xóa chức vụ mã <?php echo $cv['MaCV']; ?>?');">🗑️</a>
+                </div>
+            </td>
+        </tr>
+    <?php } ?>
+<?php } ?>
+</tbody>
+</table>
+
+</main>
+<?php include 'views/layout/footer.php'; ?>

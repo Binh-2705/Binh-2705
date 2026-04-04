@@ -1,44 +1,42 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div class="container">
-
-    <!-- SIDEBAR -->
-    <div class="sidebar">
-        <h2>HỆ THỐNG <br> QUẢN LÝ NHÂN SỰ</h2>
-        <ul>
-            <ul>
-                <li><a href="index.php?controller=home&action=index" >🏠 Trang chủ</a></li>
-                <li><a href="index.php?controller=nhanvien&action=index">👥 Quản lý nhân viên</a></li>
-                <li><a href="index.php?controller=phongban&action=index" >🏢 Quản lý phòng ban</a></li>
-                <li><a href="index.php?controller=luong&action=index">💰 Quản lý lương</a></li>
-                <li><a href="index.php?controller=chamcong&action=index">🕒 Quản lý chấm công</a></li>
-                <li><a href="index.php?controller=hopdong&action=index">📄 Quản lý hợp đồng</a></li>
-                <li><a href="index.php?controller=nghiphep&action=index">📆 Quản lý nghỉ phép</a></li>
-                <li><a href="index.php?controller=khenthuong&action=index">🏅 Khen thưởng - Kỷ luật</a></li>
-                <li><a href="index.php?controller=thongke&action=index">📊 Thống kê - Báo cáo</a></li>
-                <li><a href="index.php?controller=chucvu&action=index">🙍‍♂️ Quản lý chức vụ</a></li>
-                <li><a href="index.php?controller=hoso&action=index">👤 Hồ sơ cá nhân</a></li>
-                <li><a href="index.php?controller=tuyendung&action=index">💼 Quản lý tuyển dụng</a></li>
-                <li><a href="index.php?controller=daotao&action=index">📚 Quản lý đào tạo</a></li>
-                <li><a href="index.php?controller=taikhoan&action=index" class="active">🗂 Quản lý tài khoản</a></li>
-              
-                <li><a href="index.php?controller=dangnhap&action=dangxuat">🚪 Đăng xuất</a></li>
-            </ul>
-        </ul>
-    </div>
+<?php include 'views/layout/header.php'; ?>
+<?php include 'views/layout/sidebar.php'; ?>
 
     <!-- MAIN -->
     <div class="main-content">
         <header>
             <h1>QUẢN LÝ TÀI KHOẢN</h1>
         </header>
+
+        <?php if (!empty($tempPasswordNotice)): ?>
+        <section class="security-notice-panel">
+            <div class="security-notice-header">
+                <div>
+                    <h2>Mật khẩu tạm vừa được cấp</h2>
+                    <p>Chỉ hiển thị một lần. Hãy chuyển cho người dùng qua kênh nội bộ an toàn và yêu cầu đổi ngay sau khi đăng nhập.</p>
+                </div>
+                <span class="status-badge warning">Bắt buộc đổi mật khẩu</span>
+            </div>
+
+            <div class="security-notice-grid">
+                <div>
+                    <span class="security-notice-label">Tài khoản</span>
+                    <strong><?= htmlspecialchars($tempPasswordNotice['username'] ?? '', ENT_QUOTES, 'UTF-8') ?></strong>
+                </div>
+                <div>
+                    <span class="security-notice-label">Mã nhân sự</span>
+                    <strong><?= htmlspecialchars(($tempPasswordNotice['employee_code'] ?? '') !== '' ? $tempPasswordNotice['employee_code'] : 'Chưa gán', ENT_QUOTES, 'UTF-8') ?></strong>
+                </div>
+                <div>
+                    <span class="security-notice-label">Mật khẩu tạm</span>
+                    <code class="security-secret"><?= htmlspecialchars($tempPasswordNotice['password'] ?? '', ENT_QUOTES, 'UTF-8') ?></code>
+                </div>
+                <div>
+                    <span class="security-notice-label">Thời điểm cấp</span>
+                    <strong><?= htmlspecialchars($tempPasswordNotice['issued_at'] ?? '', ENT_QUOTES, 'UTF-8') ?></strong>
+                </div>
+            </div>
+        </section>
+        <?php endif; ?>
 
         <div class="actions">
             <form>
@@ -57,6 +55,7 @@
                     <th>Tên đăng nhập</th>
                     <th>Vai trò</th>
                     <th>Mã NV</th>
+                    <th>Bảo mật</th>
                     <th>Hành động</th>
                 </tr>
             </thead>
@@ -68,10 +67,24 @@
                     <td><?= $r['VaiTro'] ?></td>
                     <td><?= $r['MaNV'] ?></td>
                     <td>
-                        <a class="btn edit" href="?controller=taikhoan&action=sua&id=<?= $r['MaTK'] ?>">Sửa</a>
+                        <?php if (!empty($r['BuocDoiMatKhau'])): ?>
+                            <span class="status-badge warning">Đang dùng mật khẩu tạm</span>
+                        <?php else: ?>
+                            <span class="status-badge success">Ổn định</span>
+                        <?php endif; ?>
+                    </td>
+                    <td>
+                        <div class="table-actions">
+                        <a class="btn edit" href="?controller=taikhoan&action=sua&id=<?= $r['MaTK'] ?>" title="Chỉnh sửa">✏️</a>
+                                <form method="post" action="?controller=taikhoan&action=resetTamThoi&id=<?= $r['MaTK'] ?>" class="inline-action-form" onsubmit="return confirm('Cấp lại mật khẩu tạm cho tài khoản này?')">
+                                    <input type="hidden" name="_csrf_token" value="<?= htmlspecialchars($_SESSION['_csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                                    <button class="btn search" type="submit" title="Cấp mật khẩu tạm">🔐</button>
+                                </form>
                         <a class="btn delete" 
+                           title="Xóa"
                            onclick="return confirm('Xóa tài khoản?')"
-                           href="?controller=taikhoan&action=xoa&id=<?= $r['MaTK'] ?>">Xóa</a>
+                           href="?controller=taikhoan&action=xoa&id=<?= $r['MaTK'] ?>">🗑️</a>
+                        </div>
                     </td>
                 </tr>
                 <?php endwhile; ?>
@@ -81,5 +94,4 @@
     </div>
 </div>
 
-</body>
-</html>
+<?php include 'views/layout/footer.php'; ?>

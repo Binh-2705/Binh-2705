@@ -1,36 +1,5 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thêm Nhân Viên</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-<div class="container">
-    <nav class="sidebar">
-         <h2>HỆ THỐNG <br> QUẢN LÝ NHÂN SỰ</h2>
-        <ul>
-            <ul>
-                <li><a href="index.php?controller=home&action=index" >🏠 Trang chủ</a></li>
-                <li><a href="index.php?controller=nhanvien&action=index" class="active">👥 Quản lý nhân viên</a></li>
-                <li><a href="index.php?controller=phongban&action=index">🏢 Quản lý phòng ban</a></li>
-                <li><a href="index.php?controller=luong&action=index">💰 Quản lý lương</a></li>
-                <li><a href="index.php?controller=chamcong&action=index">🕒 Quản lý chấm công</a></li>
-                <li><a href="index.php?controller=hopdong&action=index">📄 Quản lý hợp đồng</a></li>
-                <li><a href="index.php?controller=nghiphep&action=index">📆 Quản lý nghỉ phép</a></li>
-                <li><a href="index.php?controller=khenthuong&action=index">🏅 Khen thưởng - Kỷ luật</a></li>
-                <li><a href="index.php?controller=thongke&action=index">📊 Thống kê - Báo cáo</a></li>
-                <li><a href="index.php?controller=chucvu&action=index">🙍‍♂️ Quản lý chức vụ</a></li>
-                <li><a href="index.php?controller=hoso&action=index">👤 Hồ sơ cá nhân</a></li>
-                <li><a href="index.php?controller=tuyendung&action=index">💼 Quản lý tuyển dụng</a></li>
-                <li><a href="index.php?controller=daotao&action=index">📚 Quản lý đào tạo</a></li>
-                <li><a href="index.php?controller=taikhoan&action=index">🗂 Quản lý tài khoản</a></li>
-               
-               <li><a href="index.php?controller=dangnhap&action=dangxuat">🚪 Đăng xuất</a></li>
-            </ul>
-        </ul>
-    </nav>
+<?php include 'views/layout/header.php'; ?>
+<?php include 'views/layout/sidebar.php'; ?>
 
     <main class="main-content">
         <header>
@@ -38,19 +7,15 @@
         </header>
 
         <form action="index.php?controller=nhanvien&action=luuThem" method="POST" class="form-nv">
+
             <div class="form-group">
-                <label for="manv">Mã nhân viên:</label>
-                <input type="text" id="manv" name="manv" required>
+                <label>Họ và tên:</label>
+                <input type="text" name="HoTen" required maxlength="120" placeholder="VD: Nguyễn Văn A" minlength="2">
             </div>
 
             <div class="form-group">
-                <label for="hoten">Họ và tên:</label>
-                <input type="text" id="hoten" name="hoten" required>
-            </div>
-
-            <div class="form-group">
-                <label for="gioitinh">Giới tính:</label>
-                <select id="gioitinh" name="gioitinh" required>
+                <label>Giới tính:</label>
+                <select name="GioiTinh" required>
                     <option value="">-- Chọn giới tính --</option>
                     <option value="Nam">Nam</option>
                     <option value="Nữ">Nữ</option>
@@ -58,50 +23,53 @@
             </div>
 
             <div class="form-group">
-                <label for="ngaysinh">Ngày sinh:</label>
-                <input type="date" id="ngaysinh" name="ngaysinh" required>
+                <label>Ngày sinh:</label>
+                <input type="date" name="NgaySinh" required>
             </div>
 
             <div class="form-group">
-                <label for="phongban">Phòng ban:</label>
-                <select id="phongban" name="phongban" required>
-                    <option value="">-- Chọn phòng ban --</option>
-                    <?php
-                    // Lặp qua $phongbans (ResultSet)
-                    if (isset($phongbans) && $phongbans && mysqli_num_rows($phongbans) > 0) {
-                        while ($row = mysqli_fetch_assoc($phongbans)) {
-                            echo "<option value='{$row['MaPB']}'>{$row['TenPB']}</option>";
-                        }
-                    } else {
-                        echo "<option value=''>Không có phòng ban</option>";
-                    }
-                    ?>
+                <label>Email:</label>
+                <input type="email" name="Email" maxlength="150" placeholder="VD: nguyenvana@example.com">
+            </div>
+
+            <div class="form-group">
+                <label>Điện thoại:</label>
+                <input type="tel" name="DienThoai" pattern="[0-9]{9,11}" placeholder="VD: 0901234567" maxlength="11">
+            </div>
+
+            <div class="form-group">
+                <label>Trạng thái:</label>
+                <select name="TrangThai" required>
+                    <option value="Đang làm">Đang làm</option>
+                    <option value="Nghỉ">Nghỉ</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label for="chucvu">Chức vụ:</label>
-                <select id="chucvu" name="chucvu" required>
-                    <option value="">-- Chọn chức vụ --</option>
-                    <?php 
-                    // Lặp qua $chucvus (Array) đã được Controller truyền từ Model
-                    $chucvus = $chucvus ?? [];
-                    if (!empty($chucvus)):
-                        foreach ($chucvus as $cv): ?>
-                            <option value="<?php echo $cv['MaCV']; ?>">
-                                <?php echo htmlspecialchars($cv['TenChucVu']); ?>
+                <label>Ngạch lương:</label>
+                <select id="select-ngach" class="form-control" required>
+                    <option value="">-- Chọn ngạch lương --</option>
+                    <?php if (isset($dsNgach) && mysqli_num_rows($dsNgach) > 0): ?>
+                        <?php while ($row_n = mysqli_fetch_assoc($dsNgach)): ?>
+                            <option value="<?= $row_n['MaNgach'] ?>">
+                                <?= $row_n['TenNgach'] ?>
                             </option>
-                        <?php endforeach; 
-                    endif;
-                    ?>
+                        <?php endwhile; ?>
+                    <?php endif; ?>
                 </select>
             </div>
+
+            <div class="form-group">
+                <label>Bậc lương:</label>
+                <select id="select-bac" name="MaBac" class="form-control" required disabled>
+                    <option value="">-- Vui lòng chọn ngạch trước --</option>
+                </select>
+            </div>
+
             <div class="form-buttons">
                 <button type="submit" class="btn add">💾 Lưu</button>
                 <a href="index.php?controller=nhanvien&action=index" class="btn cancel">↩️ Quay lại</a>
             </div>
         </form>
     </main>
-</div>
-</body>
-</html>
+<?php include 'views/layout/footer.php'; ?>

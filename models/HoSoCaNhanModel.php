@@ -1,82 +1,164 @@
 <?php
 class HoSoCaNhanModel {
-
     private $conn;
 
     public function __construct($conn) {
         $this->conn = $conn;
-    }
-
-    // ===== DANH SÁCH NHÂN VIÊN =====
-    public function getAllNhanVien() {
-        $sql = "SELECT MaNV, HoTen, PhongBan, ChucVu 
-                FROM nhanvien
-                ORDER BY MaNV";
-        return mysqli_query($this->conn, $sql);
-    }
-
-    // ===== THÔNG TIN NHÂN VIÊN =====
-    public function getChiTietNhanVien($manv) {
-    $manv = mysqli_real_escape_string($this->conn, $manv);
-
-    $sql = "SELECT nv.*,
-                   pb.TenPB,
-                   cv.TenChucVu
-            FROM nhanvien nv
-            LEFT JOIN phongban pb 
-                ON nv.PhongBan = pb.MaPB
-            LEFT JOIN tbl_chucvu cv 
-                ON nv.ChucVu = cv.MaCV
-            WHERE nv.MaNV = '$manv'";
-
-    return mysqli_fetch_assoc(mysqli_query($this->conn, $sql));
+}
+public function getALL(){
+    $sql = "SELECT hs.*, nv.HoTen, pb.TenPB, cv.TenCV
+                FROM hosonhanvien hs
+                LEFT JOIN nhanvien nv ON hs.MaNV = nv.MaNV
+                LEFT JOIN phongban pb ON hs.MaPB = pb.MaPB
+                LEFT JOIN chucvu cv ON hs.MaCV = cv.MaCV
+                ORDER BY hs.MaHoSo DESC";
+    $result = mysqli_query($this->conn, $sql);
+    return $result;
 }
 
+public function countAll(): int {
+    $sql = "SELECT COUNT(*) AS total FROM hosonhanvien";
+    $result = mysqli_query($this->conn, $sql);
+    $row = $result ? mysqli_fetch_assoc($result) : ['total' => 0];
+    return (int)($row['total'] ?? 0);
+}
 
-    // ===== LƯƠNG GẦN NHẤT =====
-    public function getLuongGanNhat($manv) {
-    $manv = mysqli_real_escape_string($this->conn, $manv);
+public function getPage(int $page = 1, int $perPage = 10){
+    $page = max(1, $page);
+    $perPage = max(1, $perPage);
+    $offset = ($page - 1) * $perPage;
 
-    $sql = "SELECT 
-                l.*,
-                (l.LuongCB + l.PhuCap + l.Thuong - l.KyLuat - l.KhauTru) AS TongLuong
-            FROM luong l
-            WHERE l.MaNV = '$manv'
-            ORDER BY STR_TO_DATE(CONCAT(l.Thang, '-01'), '%Y-%m-%d') DESC
+    $sql = "SELECT hs.*, nv.HoTen, pb.TenPB, cv.TenCV
+                FROM hosonhanvien hs
+                LEFT JOIN nhanvien nv ON hs.MaNV = nv.MaNV
+                LEFT JOIN phongban pb ON hs.MaPB = pb.MaPB
+                LEFT JOIN chucvu cv ON hs.MaCV = cv.MaCV
+                ORDER BY hs.MaHoSo DESC
+                LIMIT $offset, $perPage";
+    return mysqli_query($this->conn, $sql);
+}
+public function getById($id){
+    $sql = "SELECT hs.*, nv.HoTen, pb.TenPB, cv.TenCV
+            FROM hosonhanvien hs
+            LEFT JOIN nhanvien nv ON hs.MaNV = nv.MaNV
+            LEFT JOIN phongban pb ON hs.MaPB = pb.MaPB
+            LEFT JOIN chucvu cv ON hs.MaCV = cv.MaCV
+            WHERE hs.MaHoSo = ?";
+
+    $stmt = $this->conn->prepare($sql);
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+
+    return $stmt->get_result()->fetch_assoc(); // 🔥 TRẢ LUÔN ARRAY
+}
+  public function themHoSo($data){
+
+    $sql = "INSERT INTO hosonhanvien(
+                MaNV, CCCD, NoiCap, NgayCap, DiaChi,
+                DanToc, TonGiao, TrinhDo, ChuyenMon,
+                NgayVaoLam, MaPB, MaCV, TrangThaiHonNhan, Anh
+            )
+            VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+    $stmt = $this->conn->prepare($sql);
+
+    $stmt->bind_param(
+        "issssssssiisss",
+        $data['MaNV'],
+        $data['CCCD'],
+        $data['NoiCap'],
+        $data['NgayCap'],
+        $data['DiaChi'],
+        $data['DanToc'],
+        $data['TonGiao'],
+        $data['TrinhDo'],
+        $data['ChuyenMon'],
+        $data['NgayVaoLam'],
+        $data['MaPB'],
+        $data['MaCV'],
+        $data['TrangThaiHonNhan'],
+        $data['Anh']
+    );
+
+    return $stmt->execute();
+}
+    public function capNhatHoSo($id,$data){
+
+        $sql = "UPDATE hosonhanvien SET
+                    CCCD=?,
+                    NoiCap=?,
+                    NgayCap=?,
+                    DiaChi=?,
+                    DanToc=?,
+                    TonGiao=?,
+                    TrinhDo=?,
+                    ChuyenMon=?,
+                    NgayVaoLam=?,
+                    MaPB=?,
+                    MaCV=?,
+                    TrangThaiHonNhan=?
+                WHERE MaHoSo=?";
+
+        $stmt = $this->conn->prepare($sql);
+
+        $stmt->bind_param(
+            "sssssssssiisi",
+            $data['CCCD'],
+            $data['NoiCap'],
+            $data['NgayCap'],
+            $data['DiaChi'],
+            $data['DanToc'],
+            $data['TonGiao'],
+            $data['TrinhDo'],
+            $data['ChuyenMon'],
+            $data['NgayVaoLam'],
+            $data['MaPB'],
+            $data['MaCV'],
+            $data['TrangThaiHonNhan'],
+            $id
+        );
+
+        return $stmt->execute();
+    }
+    public function xoaHoSo($id){
+
+        $sql = "DELETE FROM hosonhanvien WHERE MaHoSo=?";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i",$id);
+
+        return $stmt->execute();
+    }
+    public function getPhongBan(){
+        $sql = "SELECT * FROM phongban ORDER BY TenPB";
+        $result = mysqli_query($this->conn, $sql);
+        return $result;
+    }
+    public function getChucVu(){
+        $sql = "SELECT * FROM chucvu ORDER BY TenCV";
+        $result = mysqli_query($this->conn, $sql);
+        return $result;
+    }
+    public function getNhanVien(){
+        $sql = "SELECT * FROM nhanvien ORDER BY HoTen";
+        $result = mysqli_query($this->conn, $sql);
+        return $result;
+    }
+    public function getThongTinNhanVien($maNV){
+    $sql = "SELECT pc.MaNV, pb.MaPB, pb.TenPB, cv.MaCV, cv.TenCV
+            FROM phancong pc
+            LEFT JOIN phongban pb ON pc.MaPB = pb.MaPB
+            LEFT JOIN chucvu cv ON pc.MaCV = cv.MaCV
+            WHERE pc.MaNV = ?
+            ORDER BY pc.NgayBatDau DESC
             LIMIT 1";
 
-    $result = mysqli_query($this->conn, $sql);
-    return $result ? mysqli_fetch_assoc($result) : null;
+    $stmt = $this->conn->prepare($sql);
+    $stmt->bind_param("i", $maNV);
+    $stmt->execute();
+
+    return $stmt->get_result();
 }
 
 
-    // ===== HỢP ĐỒNG HIỆN TẠI =====
-    public function getHopDongHienTai($manv) {
-        $sql = "SELECT *
-                FROM tbl_hopdong
-                WHERE MaNV = '$manv'
-                AND TrangThai = 'Còn hiệu lực'
-                ORDER BY NgayBatDau DESC
-                LIMIT 1";
-        return mysqli_fetch_assoc(mysqli_query($this->conn, $sql));
-    }
-
-    // ===== CHẤM CÔNG GẦN NHẤT =====
-    public function getChamCongThangGanNhat($manv) {
-        $sql = "SELECT *
-                FROM chamcong
-                WHERE MaNV = '$manv'
-                ORDER BY Thang DESC
-                LIMIT 1";
-        return mysqli_fetch_assoc(mysqli_query($this->conn, $sql));
-    }
-
-    // ===== KHEN THƯỞNG / KỶ LUẬT =====
-    public function getKTKL($manv) {
-        $sql = "SELECT *
-                FROM tbl_khenthuongkyluat
-                WHERE MaNV = '$manv'
-                ORDER BY NgayRaQD DESC";
-        return mysqli_query($this->conn, $sql);
-    }
 }

@@ -1,61 +1,54 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>➕ Thêm Chức vụ mới</title>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
-<div class="container">
-<nav class="sidebar">
-    <h2>HỆ THỐNG <br> QUẢN LÝ NHÂN SỰ</h2>
-        <ul>
-            <ul>
-                <li><a href="index.php?controller=home&action=index" >🏠 Trang chủ</a></li>
-                <li><a href="index.php?controller=nhanvien&action=index">👥 Quản lý nhân viên</a></li>
-                <li><a href="index.php?controller=phongban&action=index">🏢 Quản lý phòng ban</a></li>
-                <li><a href="index.php?controller=luong&action=index">💰 Quản lý lương</a></li>
-                <li><a href="index.php?controller=chamcong&action=index">🕒 Quản lý chấm công</a></li>
-                <li><a href="index.php?controller=hopdong&action=index">📄 Quản lý hợp đồng</a></li>
-                <li><a href="index.php?controller=nghiphep&action=index">📆 Quản lý nghỉ phép</a></li>
-                <li><a href="index.php?controller=khenthuong&action=index">🏅 Khen thưởng - Kỷ luật</a></li>
-                <li><a href="index.php?controller=thongke&action=index">📊 Thống kê - Báo cáo</a></li>
-                <li><a href="index.php?controller=chucvu&action=index" class="active">🙍‍♂️ Quản lý chức vụ</a></li>
-                <li><a href="index.php?controller=hoso&action=index">👤 Hồ sơ cá nhân</a></li>
-                <li><a href="index.php?controller=tuyendung&action=index">💼 Quản lý tuyển dụng</a></li>
-                <li><a href="index.php?controller=daotao&action=index">📚 Quản lý đào tạo</a></li>
-                <li><a href="index.php?controller=taikhoan&action=index">🗂 Quản lý tài khoản</a></li>
-               
-                <li><a href="index.php?controller=dangnhap&action=dangxuat">🚪 Đăng xuất</a></li>
-            </ul>
-        </ul>
-</nav>
+<?php include 'views/layout/header.php'; ?>
+<?php include 'views/layout/sidebar.php'; ?>
 
 <main class="main-content">
-<header><h1>➕ Thêm Chức vụ mới</h1></header>
+<header>
+    <h1>➕ Thêm Chức vụ mới</h1>
+</header>
 
 <form action="index.php?controller=chucvu&action=add" method="POST" class="form-nv">
-    <?php if (isset($message)): ?>
-        <p style="color: red; font-weight: bold; margin-bottom: 15px;"><?php echo htmlspecialchars($message); ?></p>
-    <?php endif; ?>
 
-    <div class="form-group">
-        <label for="MaCV">Mã Chức vụ:</label>
-        <input type="text" id="MaCV" name="MaCV" required maxlength="10" value="<?php echo htmlspecialchars($maCV ?? ''); ?>">
-    </div>
+<?php if (!empty($message)): ?>
+    <p style="color:red; font-weight:bold; margin-bottom:15px;">
+        <?= htmlspecialchars($message) ?>
+    </p>
+<?php endif; ?>
 
-    <div class="form-group">
-        <label for="TenChucVu">Tên Chức vụ:</label>
-        <input type="text" id="TenChucVu" name="TenChucVu" required value="<?php echo htmlspecialchars($tenChucVu ?? ''); ?>">
-    </div>
+<div class="form-group">
+    <label for="TenChucVu">Tên chức vụ</label>
+    <input type="text"
+           id="TenChucVu"
+           name="TenChucVu"
+           required
+           placeholder="VD: Trưởng phòng"
+           value="<?= htmlspecialchars($_POST['TenChucVu'] ?? '') ?>">
+</div>
 
-    <div class="form-buttons">
-        <button type="submit" class="btn add">💾 Lưu</button>
-        <a href="index.php?controller=chucvu&action=index" class="btn cancel">↩️ Quay lại</a>
-    </div>
+<div class="form-group">
+    <label for="HeSoChucVu">Hệ số chức vụ</label>
+    <input type="number"
+           step="0.01"
+           min="0"
+           id="HeSoChucVu"
+           name="HeSoChucVu"
+           value="<?= htmlspecialchars($_POST['HeSoChucVu'] ?? '1.00') ?>">
+</div>
+
+<div class="form-group">
+    <label for="PhuCap">Phụ cấp (VNĐ)</label>
+    <input type="number"
+           step="1000"
+           min="0"
+           id="PhuCap"
+           name="PhuCap"
+           value="<?= htmlspecialchars($_POST['PhuCap'] ?? '0') ?>">
+</div>
+
+<div class="form-buttons">
+    <button type="submit" class="btn add">💾 Lưu</button>
+    <a href="index.php?controller=chucvu&action=index" class="btn cancel">↩️ Quay lại</a>
+</div>
+
 </form>
 </main>
-</div>
-</body>
-</html>
+<?php include 'views/layout/footer.php'; ?>

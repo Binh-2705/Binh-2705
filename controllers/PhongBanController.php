@@ -1,171 +1,201 @@
 <?php
 require_once 'models/PhongBanModel.php';
+require_once 'core/AuthMiddleware.php';
+require_once 'core/RequestValidator.php';
+require_once 'core/AppLogger.php';
+require_once 'core/WebResponder.php';
 
 class PhongBanController {
     private $model;
+    private $conn;
 
     public function __construct($conn) {
+        $this->conn = $conn;
         $this->model = new PhongBanModel($conn);
     }
 
+    /* ======================
+       DANH SÁCH PHÒNG BAN
+    ====================== */
     public function index() {
+            AuthMiddleware::check($this->conn, 'xem_phongban');
+            $quyen = $_SESSION['quyen'] ?? [];
         $phongbans = $this->model->getAllPhongBan();
         include 'views/phongban/index.php';
-        
     }
+
+    /* ======================
+       FORM THÊM
+    ====================== */
     public function them() {
+        AuthMiddleware::check($this->conn, 'them_phongban');
+        $quyen = $_SESSION['quyen'] ?? [];
         include 'views/phongban/them.php';
     }
-    public function import() {
-    include 'views/phongban/import.php';
-}
 
+    /* ======================
+       LƯU THÊM
+    ====================== */
+    public function luuThem() {
+        AuthMiddleware::check($this->conn, 'them_phongban');
+        $quyen = $_SESSION['quyen'] ?? [];
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $validator = new RequestValidator($_POST);
+            $tenpb = $validator->requiredString('tenpb', 'Tên phòng ban', 2, 120);
+            $mota  = $validator->optionalString('mota', 1000);
 
+            if (!$validator->isValid()) {
+                AppLogger::warning('Validation failed in PhongBanController::luuThem', ['errors' => $validator->allErrors()]);
+                WebResponder::backWithMessage($validator->firstError(), 'error', 'index.php?controller=phongban&action=them');
+            }
+
+            if ($this->model->insertPhongBan($tenpb, $mota)) {
+                WebResponder::redirectWithMessage('index.php?controller=phongban&action=index', 'Thêm phòng ban thành công!', 'success');
+            } else {
+                WebResponder::backWithMessage('Lỗi khi thêm phòng ban!', 'error', 'index.php?controller=phongban&action=them');
+            }
+        }
+    }
+
+    /* ======================
+       TÌM KIẾM
+    ====================== */
     public function timkiem() {
-        $keyword = isset($_GET['keyword']) ? $_GET['keyword'] : '';
+        AuthMiddleware::check($this->conn, 'timkiem_phongban');
+        $quyen = $_SESSION['quyen'] ?? [];
+        $keyword = $_GET['keyword'] ?? '';
         $phongbans = $this->model->searchPhongBan($keyword);
         include 'views/phongban/index.php';
     }
-     public function luuThem() {
-        if ($_SERVER["REQUEST_METHOD"] == "POST") {
-            $mapb = trim($_POST['mapb']);
-            $tenpb = trim($_POST['tenpb']);
-            $mota = trim($_POST['mota']);
 
-             if($this->model->checkma($mapb)){
-                echo "<script>alert('❌ Mã phòng ban đã tồn tại!'); window.history.back();</script>";
-                exit;
-            }
-
-            if ($mapb == "" || $tenpb == "") {
-                echo "<script>alert('Vui lòng nhập đầy đủ thông tin!'); window.history.back();</script>";
-                exit;
-            }
-
-            if ($this->model->insertPhongBan($mapb, $tenpb, $mota)) {
-                echo "<script>alert('Thêm phòng ban thành công!'); window.location='index.php?controller=phongban&action=index';</script>";
-            } else {
-                echo "<script>alert('Mã phòng ban đã tồn tại hoặc lỗi!'); window.history.back();</script>";
-            }
-        }
-    }
-     public function sua() {
-        if (!isset($_GET['mapb'])) {
-            echo "<script>alert('Không có mã phòng ban!'); window.location='index.php?controller=phongban&action=index';</script>";
-            exit;
+    /* ======================
+       FORM SỬA
+    ====================== */
+    public function sua() {
+        AuthMiddleware::check($this->conn, 'sua_phongban');
+        $quyen = $_SESSION['quyen'] ?? [];
+        $mapb = (int)($_GET['mapb'] ?? 0);
+        if ($mapb <= 0) {
+            WebResponder::redirectWithMessage('index.php?controller=phongban&action=index', 'Thiếu mã phòng ban!', 'error');
         }
 
-        $mapb = $_GET['mapb'];
         $phongban = $this->model->getPhongBanById($mapb);
 
         if (!$phongban) {
-            echo "<script>alert('Không tìm thấy phòng ban!'); window.location='index.php?controller=phongban&action=index';</script>";
-            exit;
+            WebResponder::redirectWithMessage('index.php?controller=phongban&action=index', 'Không tìm thấy phòng ban!', 'error');
         }
 
         include 'views/phongban/sua.php';
     }
 
+    /* ======================
+       LƯU SỬA
+    ====================== */
     public function luuSua() {
-        if ($_SERVER["REQUEST_METHOD"] == "POST") {
-            $mapb = $_POST['mapb'];
-            $tenpb = $_POST['tenpb'];
-            $mota = $_POST['mota'];
+        AuthMiddleware::check($this->conn, 'sua_phongban');
+        $quyen = $_SESSION['quyen'] ?? [];
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $validator = new RequestValidator($_POST);
+            $mapb  = $validator->requiredInt('mapb', 'Mã phòng ban', 1);
+            $tenpb = $validator->requiredString('tenpb', 'Tên phòng ban', 2, 120);
+            $mota  = $validator->optionalString('mota', 1000);
+
+            if (!$validator->isValid()) {
+                AppLogger::warning('Validation failed in PhongBanController::luuSua', ['errors' => $validator->allErrors()]);
+                WebResponder::backWithMessage($validator->firstError(), 'error', 'index.php?controller=phongban&action=index');
+            }
 
             if ($this->model->updatePhongBan($mapb, $tenpb, $mota)) {
-                echo "<script>alert('Cập nhật phòng ban thành công!'); window.location='index.php?controller=phongban&action=index';</script>";
+                WebResponder::redirectWithMessage('index.php?controller=phongban&action=index', 'Cập nhật thành công!', 'success');
             } else {
-                echo "<script>alert('Lỗi khi cập nhật!'); window.history.back();</script>";
+                WebResponder::backWithMessage('Lỗi cập nhật!', 'error', 'index.php?controller=phongban&action=index');
             }
         }
     }
+
+    /* ======================
+       XÓA
+    ====================== */
     public function xoa() {
-        if (isset($_GET['mapb'])) {
-            $manv = $_GET['mapb'];
-            if ($this->model->deletePhongBan($manv)) {
-                echo "<script>
-                        alert('✅ Xóa thành công!');
-                        window.location='index.php?controller=phongban&action=index';
-                      </script>";
-            } else {
-                echo "<script>
-                        alert('❌ Lỗi khi xóa');
-                        window.location='index.php?controller=phongban&action=index';
-                      </script>";
-            }
+        AuthMiddleware::check($this->conn, 'xoa_phongban');
+        $quyen = $_SESSION['quyen'] ?? [];
+        $mapb = (int)($_GET['mapb'] ?? 0);
+        if ($mapb <= 0) {
+            WebResponder::redirectWithMessage('index.php?controller=phongban&action=index', 'Thiếu mã phòng ban!', 'error');
+        }
+
+        if ($this->model->deletePhongBan($mapb)) {
+            WebResponder::redirectWithMessage('index.php?controller=phongban&action=index', 'Xóa phòng ban thành công!', 'success');
         } else {
-            echo "<script>
-                    alert('⚠️ Không có mã để xóa!');
-                    window.location='index.php?controller=phongban&action=index';
-                  </script>";
+            WebResponder::redirectWithMessage('index.php?controller=phongban&action=index', 'Không thể xóa!', 'error');
         }
     }
+
+    /* ======================
+       XUẤT EXCEL
+    ====================== */
     public function exportExcel() {
-    $result = $this->model->getAllPhongBan();
+            AuthMiddleware::check($this->conn, 'xuat_excel_phongban');
+            $quyen = $_SESSION['quyen'] ?? [];
+        $result = $this->model->getAllPhongBan();
+        $filename = "Danh_sach_phong_ban_" . date('Ymd') . ".xls";
 
-    $filename = "Danh_sach_phong_ban_" . date('Ymd') . ".xls";
+        header("Content-Type: application/vnd.ms-excel; charset=UTF-8");
+        header("Content-Disposition: attachment; filename=\"$filename\"");
+        echo "\xEF\xBB\xBF";
 
-    header("Content-Type: application/vnd.ms-excel; charset=UTF-8");
-    header("Content-Disposition: attachment; filename=\"$filename\"");
-    echo "\xEF\xBB\xBF"; // BOM UTF-8
+        echo "<table border='1'>
+                <tr>
+                    <th>Mã PB</th>
+                    <th>Tên phòng ban</th>
+                    <th>Mô tả</th>
+                </tr>";
 
-    echo "<table border='1'>";
-    echo "<tr style='background-color:#f2f2f2; font-weight:bold;'>
-            <th>Mã PB</th>
-            <th>Tên phòng ban</th>
-            <th>Mô tả</th>
-            
-          </tr>";
+        while ($row = mysqli_fetch_assoc($result)) {
+            echo "<tr>
+                    <td>{$row['MaPB']}</td>
+                    <td>{$row['TenPB']}</td>
+                    <td>{$row['MoTa']}</td>
+                  </tr>";
+        }
 
-    while ($row = mysqli_fetch_assoc($result)) {
-        echo "<tr>
-                <td>{$row['MaPB']}</td>
-                <td>{$row['TenPB']}</td>
-                <td>{$row['MoTa']}</td>
-              </tr>";
+        echo "</table>";
+        exit;
     }
 
-    echo "</table>";
-    exit;
-}
+    /* ======================
+       IMPORT CSV (KHÔNG MaPB)
+    ====================== */
     public function docFile() {
-    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        AuthMiddleware::check($this->conn, 'import_csv_phongban');
+        $quyen = $_SESSION['quyen'] ?? [];
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
-        if (!isset($_FILES['filecsv']) || $_FILES['filecsv']['error'] != 0) {
-            echo "<script>alert('❌ Vui lòng chọn file CSV'); window.history.back();</script>";
-            exit;
-        }
-
-        $fileTmp = $_FILES['filecsv']['tmp_name'];
-        $handle = fopen($fileTmp, "r");
-
-        if ($handle === false) {
-            echo "<script>alert('❌ Không thể đọc file'); window.history.back();</script>";
-            exit;
-        }
-
-        $count = 0;
-        fgetcsv($handle); // bỏ dòng tiêu đề
-
-        while (($data = fgetcsv($handle, 1000, ",")) !== false) {
-            $mapb = trim($data[0]);
-            $tenpb = trim($data[1]);
-            $mota  = trim($data[2]);
-
-            if ($mapb != "" && !$this->model->checkma($mapb)) {
-                $this->model->insertPhongBan($mapb, $tenpb, $mota);
-                $count++;
+            if (!isset($_FILES['filecsv']) || $_FILES['filecsv']['error'] != 0) {
+                WebResponder::backWithMessage('Chưa chọn file CSV', 'error', 'index.php?controller=phongban&action=index');
             }
+
+            $ext = strtolower(pathinfo($_FILES['filecsv']['name'], PATHINFO_EXTENSION));
+            if ($ext !== 'csv') {
+                WebResponder::backWithMessage('Chỉ hỗ trợ file .csv', 'error', 'index.php?controller=phongban&action=index');
+            }
+
+            $handle = fopen($_FILES['filecsv']['tmp_name'], 'r');
+            fgetcsv($handle); // bỏ header
+
+            $count = 0;
+            while (($data = fgetcsv($handle, 1000, ",")) !== false) {
+                $tenpb = trim($data[0]);
+                $mota  = trim($data[1]);
+
+                if ($tenpb != '') {
+                    $this->model->insertPhongBan($tenpb, $mota);
+                    $count++;
+                }
+            }
+
+            fclose($handle);
+                        WebResponder::redirectWithMessage('index.php?controller=phongban&action=index', "Đã import $count phòng ban!", 'success');
         }
-
-        fclose($handle);
-
-        echo "<script>
-                alert('✅ Đã import $count phòng ban!');
-                window.location='index.php?controller=phongban&action=index';
-              </script>";
     }
-}
-
-   
 }

@@ -1,157 +1,255 @@
 <?php
 require_once 'models/NhanVienModel.php';
+require_once 'core/AuthMiddleware.php';
+require_once 'core/RequestValidator.php';
+require_once 'core/AppLogger.php';
 
 class NhanVienController {
     private $model;
+    private $conn;
 
     public function __construct($conn) {
+        $this->conn = $conn;
         $this->model = new NhanVienModel($conn);
     }
 
+    /* ================== DANH SÁCH ================== */
     public function index() {
-        $result = $this->model->getAllNhanVien();
-        include 'views/nhanvien/index.php';  
+         AuthMiddleware::check($this->conn, 'xem_nhanvien');
+        $page = max(1, (int)($_GET['page'] ?? 1));
+        $perPage = 10;
+        $totalItems = $this->model->countAll();
+        $totalPages = max(1, (int)ceil($totalItems / $perPage));
+        if ($page > $totalPages) {
+            $page = $totalPages;
+        }
+
+        $nhanviens = $this->model->getPage($page, $perPage);
+        $sttStart = ($page - 1) * $perPage + 1;
+        $quyen = $_SESSION['quyen'] ?? [];
+        require 'views/nhanvien/index.php';
     }
+
+    /* ================== THÊM (ĐÃ SỬA) ================== */
     public function them() {
-        $phongbans = $this->model->getAllPhongBan();
-        $chucvus = $this->model->getAllChucVu();
-        include 'views/nhanvien/them.php';
+        // Lấy Ngạch thay vì lấy Bậc như cũ
+         AuthMiddleware::check($this->conn, 'them_nhanvien');
+        $dsNgach = $this->model->getAllNgachLuong(); 
+        $quyen = $_SESSION['quyen'] ?? [];
+        require 'views/nhanvien/them.php';
     }
 
     public function luuThem() {
-        if ($_SERVER["REQUEST_METHOD"] == "POST") {
-            $manv = $_POST['manv'];
-            $hoten = $_POST['hoten'];
-            $gioitinh = $_POST['gioitinh'];
-            $ngaysinh = $_POST['ngaysinh'];
-            $phongban = $_POST['phongban'];
-            $chucvu = $_POST['chucvu'];
+        AuthMiddleware::check($this->conn, 'them_nhanvien');
+        $quyen = $_SESSION['quyen'] ?? [];
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $validator = new RequestValidator($_POST);
+            $data = [
+                'HoTen'     => $validator->requiredString('HoTen', 'Họ tên', 2, 120),
+                'GioiTinh'  => $validator->in('GioiTinh', 'Giới tính', ['Nam', 'Nữ']),
+                'NgaySinh'  => $validator->requiredDate('NgaySinh', 'Ngày sinh'),
+                'Email'     => $validator->optionalEmail('Email', 'Email', 150),
+                'DienThoai' => $validator->optionalPattern('DienThoai', 'Điện thoại', '/^\d{9,11}$/'),
+                'TrangThai' => $validator->in('TrangThai', 'Trạng thái', ['Đang làm', 'Nghỉ']),
+                'MaBac'     => $validator->requiredInt('MaBac', 'Bậc lương', 1),
+                'MaHS'      => 0,
+            ];
 
-            //kiểm tra trùng
-            if($this->model->checkma($manv)){
-                echo "<script>alert('❌ Mã nhân viên đã tồn tại!'); window.history.back();</script>";
+            if (!$validator->isValid()) {
+                $_SESSION['error'] = $validator->firstError();
+                AppLogger::warning('Validation failed in NhanVienController::luuThem', ['errors' => $validator->allErrors()]);
+                header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? 'index.php?controller=nhanvien&action=them'));
                 exit;
             }
 
-            if ($this->model->insertNhanVien($manv, $hoten, $gioitinh, $ngaysinh, $phongban, $chucvu)) {
-                echo "<script>alert('Thêm nhân viên thành công!'); 
-                      window.location='index.php?controller=nhanvien&action=index';</script>";
-            } else {
-                echo "<script>alert('Lỗi khi thêm nhân viên!'); window.history.back();</script>";
+            if ($this->model->insert($data)) {
+                $_SESSION['success'] = "Thêm nhân viên thành công!";
+                header("Location: index.php?controller=nhanvien&action=index");
+                exit;
             }
+
+            $_SESSION['error'] = "Lỗi: Không thể lưu dữ liệu.";
+            header("Location: " . ($_SERVER['HTTP_REFERER'] ?? 'index.php?controller=nhanvien&action=them'));
+            exit;
         }
     }
+
+    /* ================== SỬA (ĐÃ SỬA) ================== */
     public function sua() {
-        if (!isset($_GET['manv'])) {
-            echo "<script>alert('Thiếu mã nhân viên!'); window.location='index.php?controller=nhanvien&action=index';</script>";
+        AuthMiddleware::check($this->conn, 'sua_nhanvien');
+        $quyen = $_SESSION['quyen'] ?? [];
+    if (!isset($_GET['manv'])) {
+            $_SESSION['error'] = "Thiếu mã nhân viên";
+            header("Location: index.php?controller=nhanvien&action=index");
+            exit;
+    }
+
+    $maNV = (int)$_GET['manv'];
+
+    $nhanvien = $this->model->getById($maNV);
+
+    if (!$nhanvien) {
+        $_SESSION['error'] = "Không tìm thấy nhân viên";
+        header("Location: index.php?controller=nhanvien&action=index");
+        exit;
+    }
+
+    // Lấy danh sách ngạch
+    $dsNgach = $this->model->getAllNgachLuong();
+
+    // Lấy ngạch hiện tại từ bậc lương của nhân viên
+    $ngachHienTai = $this->model->getNgachByBac($nhanvien['MaBac']);
+
+    // ⚠️ PHẢI gán biến này (view đang dùng)
+    $maNgachHienTai = $ngachHienTai['MaNgach'] ?? null;
+
+    // Lấy danh sách bậc theo ngạch hiện tại
+    $bacluongs = $this->model->getBacByNgach($maNgachHienTai);
+
+    require 'views/nhanvien/sua.php';
+}
+   public function luuSua() {
+    AuthMiddleware::check($this->conn, 'sua_nhanvien');
+    $quyen = $_SESSION['quyen'] ?? [];
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $validator = new RequestValidator($_POST);
+        $maNV = $validator->requiredInt('MaNV', 'Mã nhân viên', 1);
+        $maBacMoi = $validator->requiredInt('MaBac', 'Bậc lương', 1);
+
+        $data = [
+            'MaNV'      => $maNV,
+            'HoTen'     => $validator->requiredString('HoTen', 'Họ tên', 2, 120),
+            'GioiTinh'  => $validator->in('GioiTinh', 'Giới tính', ['Nam', 'Nữ']),
+            'NgaySinh'  => $validator->requiredDate('NgaySinh', 'Ngày sinh'),
+            'Email'     => $validator->optionalEmail('Email', 'Email', 150),
+            'DienThoai' => $validator->optionalPattern('DienThoai', 'Điện thoại', '/^\d{9,11}$/'),
+            'TrangThai' => $validator->in('TrangThai', 'Trạng thái', ['Đang làm', 'Nghỉ']),
+            'MaBac'     => $maBacMoi,
+        ];
+
+        if (!$validator->isValid()) {
+            $_SESSION['error'] = $validator->firstError();
+            AppLogger::warning('Validation failed in NhanVienController::luuSua', ['errors' => $validator->allErrors()]);
+            header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? 'index.php?controller=nhanvien&action=index'));
             exit;
         }
 
-        $manv = $_GET['manv'];
-        $nhanvien = $this->model->getNhanVienById($manv);
-        $phongbans = $this->model->getAllPhongBan();
-        $chucvus   = $this->model->getAllChucVu();
+        // Lấy dữ liệu cũ
+        $nvCu = $this->model->getById($maNV);
+        if (!$nvCu) {
+            $_SESSION['error'] = "Không tìm thấy nhân viên";
+            header("Location: index.php?controller=nhanvien&action=index");
+            exit;
+        }
+        $maBacCu = (int)$nvCu['MaBac'];
 
-        if (!$nhanvien) {
-            echo "<script>alert('Không tìm thấy nhân viên!'); window.location='index.php?controller=nhanvien&action=index';</script>";
+        /* =============================
+           🚨 KIỂM TRA HỢP ĐỒNG HIỆU LỰC
+        ============================== */
+
+        $hdHienTai = $this->model->getHopDongConHieuLuc($maNV);
+
+        // Nếu đang đổi bậc mà KHÔNG có hợp đồng -> chặn
+        if ($maBacCu !== $maBacMoi && !$hdHienTai) {
+            $_SESSION['error'] =
+                "❌ Không thể thay đổi bậc lương vì nhân viên chưa có hợp đồng còn hiệu lực!";
+            header("Location: " . $_SERVER['HTTP_REFERER']);
             exit;
         }
 
-        include 'views/nhanvien/sua.php';
-    }
+        /* =============================
+           CẬP NHẬT NHÂN VIÊN
+        ============================== */
 
-   
-    public function luuSua() {
-        if ($_SERVER["REQUEST_METHOD"] == "POST") {
-            $success = $this->model->updateNhanVien(
-                $_POST['manv'],
-                $_POST['hoten'],
-                $_POST['gioitinh'],
-                $_POST['ngaysinh'],
-                $_POST['phongban'],
-                $_POST['chucvu'],
-                $_POST['luong']
-            );
+        $data['MaHS'] = (int)($nvCu['MaHS'] ?? 0);
 
-            if ($success) {
-                echo "<script>alert('✅ Cập nhật thành công!'); window.location='index.php?controller=nhanvien&action=index';</script>";
-            } else {
-                echo "<script>alert('❌ Lỗi khi cập nhật'); window.history.back();</script>";
-            }
-        } else {
-            echo "<script>alert('Thiếu dữ liệu!'); window.location='index.php?controller=nhanvien&action=index';</script>";
-        }
-    }
-     public function xoa() {
-        if (isset($_GET['manv'])) {
-            $manv = $_GET['manv'];
-            if ($this->model->deleteNhanVien($manv)) {
-                echo "<script>
-                        alert('✅ Xóa nhân viên thành công!');
-                        window.location='index.php?controller=nhanvien&action=index';
-                      </script>";
-            } else {
-                echo "<script>
-                        alert('❌ Lỗi khi xóa nhân viên');
-                        window.location='index.php?controller=nhanvien&action=index';
-                      </script>";
-            }
-        } else {
-            echo "<script>
-                    alert('⚠️ Không có mã nhân viên để xóa!');
-                    window.location='index.php?controller=nhanvien&action=index';
-                  </script>";
-        }
-    }
-     public function timkiem() {
-        $keyword = isset($_GET['keyword']) ? $_GET['keyword'] : '';
-        $result = $this->model->searchNhanVien($keyword);
+        if ($this->model->update($data)) {
 
-      
-        $nhanviens = [];
-        if ($result && mysqli_num_rows($result) > 0) {
-            while ($row = mysqli_fetch_assoc($result)) {
-                $nhanviens[] = $row;
+            /* =============================
+               GHI LỊCH SỬ LƯƠNG (NẾU ĐỔI BẬC)
+            ============================== */
+            if ($maBacCu !== $maBacMoi && $hdHienTai) {
+
+                $maHD = $hdHienTai['MaHopDong'];
+
+                $luongCu  = $this->model->getLuongThucTeByBac($maBacCu);
+                $luongMoi = $this->model->getLuongThucTeByBac($maBacMoi);
+
+                $this->model->insertLichSuLuong([
+                    'MaHopDong'  => $maHD,
+                    'LuongCu'    => $luongCu,
+                    'LuongMoi'   => $luongMoi,
+                    'NgayApDung' => date('Y-m-d'),
+                    'LyDo'       => 'Điều chỉnh bậc lương từ hồ sơ nhân viên'
+                ]);
+
+                // Đồng bộ lại hợp đồng
+                $this->model->updateMaBacHopDong($maHD, $maBacMoi);
             }
+
+            $_SESSION['success'] = "Cập nhật nhân viên thành công!";
+            header("Location: index.php?controller=nhanvien&action=index");
+            exit;
         }
 
-        require 'views/nhanvien/timkiem.php';
+        $_SESSION['error'] = "Cập nhật nhân viên thất bại.";
+        header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? 'index.php?controller=nhanvien&action=index'));
+        exit;
     }
-
-   public function exportExcel() {
-    $result = $this->model->getAllNhanVien();
-
-    $filename = "Danh_sach_nhan_vien_" . date('Ymd') . ".xls";
-
-    header("Content-Type: application/vnd.ms-excel; charset=UTF-8");
-    header("Content-Disposition: attachment; filename=\"$filename\"");
-    echo "\xEF\xBB\xBF"; // BOM UTF-8
-
-    echo "<table border='1'>";
-    echo "<tr style='background-color:#f2f2f2; font-weight:bold;'>
-            <th>Mã NV</th>
-            <th>Họ tên</th>
-            <th>Giới tính</th>
-            <th>Ngày sinh</th>
-            <th>Phòng ban</th>
-            <th>Chức vụ</th>
-            <th>Mức lương</th>
-          </tr>";
-
-    while ($row = mysqli_fetch_assoc($result)) {
-        echo "<tr>
-                <td>{$row['MaNV']}</td>
-                <td>{$row['HoTen']}</td>
-                <td>{$row['GioiTinh']}</td>
-                <td>{$row['NgaySinh']}</td>
-                <td>".($row['TenPB'] ?? '')."</td>
-                <td>".($row['TenChucVu'] ?? '')."</td>
-                <td>".(isset($row['LuongCB']) ? number_format($row['LuongCB'],0,',','.') : '')."</td>
-              </tr>";
-    }
-
-    echo "</table>";
-    exit;
 }
 
+    /* ================== XÓA ================== */
+public function xoa() {
+    AuthMiddleware::check($this->conn, 'xoa_nhanvien');
+    $quyen = $_SESSION['quyen'] ?? [];
+    if (!isset($_GET['manv'])) {
+        $_SESSION['error'] = "Thiếu mã nhân viên";
+        header("Location: index.php?controller=nhanvien&action=index");
+        exit;
+    }
+
+    $maNV = (int)$_GET['manv'];
+
+    if ($this->model->delete($maNV)) {
+        header("Location: index.php?controller=nhanvien&action=index");
+        exit;
+    } else {
+        $_SESSION['error'] = "Xóa thất bại!";
+        header("Location: index.php?controller=nhanvien&action=index");
+        exit;
+    }
+}
+
+    /* ================== AJAX (ĐÃ SỬA) ================== */
+    public function getBacLuongByNgach() {
+        $maNgach = $_GET['ma_ngach'] ?? '';
+        if ($maNgach) {
+            $dsBac = $this->model->getBacByNgach($maNgach);
+            
+            echo '<option value="">-- Chọn bậc lương --</option>';
+            if ($dsBac && mysqli_num_rows($dsBac) > 0) {
+                while ($row = mysqli_fetch_assoc($dsBac)) {
+                    echo '<option value="' . $row['MaBac'] . '">' 
+                         . $row['TenBac'] . ' (HS: ' . $row['HeSoLuong'] . ')' 
+                         . '</option>';
+                }
+            } else {
+                echo '<option value="">Chưa có bậc lương cho ngạch này</option>';
+            }
+        }
+        exit; 
+    }
+   public function timkiem() {
+    AuthMiddleware::check($this->conn, 'timkiem_nhanvien');
+    $quyen = $_SESSION['quyen'] ?? [];
+    $keyword = $_GET['keyword'] ?? '';
+
+    if ($keyword != '') {
+        $nhanviens = $this->model->search($keyword);
+    } else {
+        $nhanviens = $this->model->getAll();
+    }
+
+    require 'views/nhanvien/timkiem.php'; // phải gọi file này
+}
 }
