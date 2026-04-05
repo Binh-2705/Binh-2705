@@ -7,13 +7,13 @@
 <div class="header-top">
 
 <div>
-<h1>Dashboard</h1>
-<p>Quản lý tổng quan hệ thống nhân sự</p>
+<h1 data-i18n="home.dashboard_title">Dashboard</h1>
+<p data-i18n="home.dashboard_subtitle">Quản lý tổng quan hệ thống nhân sự</p>
 </div>
 
 <div class="header-actions">
   <div class="search-box">
-    <input type="text" id="search" placeholder="🔎 Tìm nhân viên..."><div id="result"></div>
+    <input type="text" id="search" placeholder="🔎 Tìm nhân viên..." data-i18n-placeholder="home.search_employee_placeholder"><div id="result"></div>
   </div>
 
   <div class="action-group">
@@ -24,15 +24,15 @@
       data-unread-contract="<?php echo (int)($unreadHopDong ?? 0); ?>"
       data-unread-candidate="<?php echo (int)($unreadUngVien ?? 0); ?>"
     >
-      <button type="button" class="notification-icon" id="notificationToggle" title="Thông báo" aria-controls="notificationDropdown" aria-expanded="false">
+      <button type="button" class="notification-icon" id="notificationToggle" title="Thông báo" data-i18n-title="home.notifications_title" aria-controls="notificationDropdown" aria-expanded="false">
         🔔
         <span class="badge"><?php echo (int)($unreadNghiPhep ?? 0) + (int)($unreadHopDong ?? 0) + (int)($unreadUngVien ?? 0); ?></span>
       </button>
 
       <div class="notification-dropdown" id="notificationDropdown" aria-hidden="true">
         <div class="notification-dropdown-header">
-          <h4>Thông báo mới</h4>
-          <button type="button" class="mark-all-read" id="markAllReadBtn">Đánh dấu đã đọc tất cả</button>
+          <h4 data-i18n="home.notifications_new">Thông báo mới</h4>
+          <button type="button" class="mark-all-read" id="markAllReadBtn" data-i18n="home.notifications_mark_all_read">Đánh dấu đã đọc tất cả</button>
         </div>
         <div class="notification-dropdown-list">
           <?php if ($tbNghiPhep > 0) { ?>
@@ -48,7 +48,7 @@
           <?php } ?>
 
           <?php if ($tbNghiPhep == 0 && $tbHopDong == 0 && $tbUngVien == 0) { ?>
-            <div class="notification-mini-item neutral">✅ Không có thông báo</div>
+            <div class="notification-mini-item neutral" data-i18n="home.no_notifications">✅ Không có thông báo</div>
           <?php } ?>
         </div>
       </div>
@@ -86,30 +86,30 @@
 <div class="stats">
 
 <div class="stat-box">
-  <div class="stat-top"><span class="stat-icon">👥</span><span class="stat-label">Nhân sự</span></div>
+  <div class="stat-top"><span class="stat-icon">👥</span><span class="stat-label" data-i18n="home.stats.staff">Nhân sự</span></div>
   <h2><?php echo $tongNhanVien ?></h2>
-  <p>Tổng nhân viên</p>
+  <p data-i18n="home.stats.total_staff">Tổng nhân viên</p>
   <span class="stat-note success">▲ 4.8% so với tuần trước</span>
 </div>
 
 <div class="stat-box">
-  <div class="stat-top"><span class="stat-icon">🏢</span><span class="stat-label">Phòng ban</span></div>
+  <div class="stat-top"><span class="stat-icon">🏢</span><span class="stat-label" data-i18n="home.stats.departments">Phòng ban</span></div>
   <h2><?php echo $tongPhongBan ?></h2>
-  <p>Phòng ban</p>
+  <p data-i18n="home.stats.departments">Phòng ban</p>
   <span class="stat-note info">● 6 phòng đang mở</span>
 </div>
 
 <div class="stat-box">
-  <div class="stat-top"><span class="stat-icon">📝</span><span class="stat-label">Đơn phép</span></div>
+  <div class="stat-top"><span class="stat-icon">📝</span><span class="stat-label" data-i18n="home.stats.leave_requests">Đơn phép</span></div>
   <h2><?php echo $donNghiChoDuyet ?></h2>
-  <p>Đơn nghỉ chờ duyệt</p>
+  <p data-i18n="home.stats.pending_leave">Đơn nghỉ chờ duyệt</p>
   <span class="stat-note warning">↔ 2 đơn mới</span>
 </div>
 
 <div class="stat-box">
-  <div class="stat-top"><span class="stat-icon">💼</span><span class="stat-label">Ứng viên</span></div>
+  <div class="stat-top"><span class="stat-icon">💼</span><span class="stat-label" data-i18n="home.stats.candidates">Ứng viên</span></div>
   <h2><?php echo $tongUngVien ?></h2>
-  <p>Ứng viên</p>
+  <p data-i18n="home.stats.candidates">Ứng viên</p>
   <span class="stat-note success">▲ 7.3% so với tháng trước</span>
 </div>
 
@@ -119,17 +119,17 @@
 <div class="chart-container">
 
 <div class="chart-box">
-<h3>📊 Nhân viên theo phòng ban</h3>
+<h3 data-i18n="home.chart.staff_by_dept">📊 Nhân viên theo phòng ban</h3>
 <canvas id="nhanVienChart"></canvas>
 </div>
 
 <div class="chart-box">
-<h3>👨‍💼 Nhân viên theo giới tính</h3>
+<h3 data-i18n="home.chart.staff_by_gender">👨‍💼 Nhân viên theo giới tính</h3>
 <canvas id="gioiTinhChart"></canvas>
 </div>
 
 <div class="chart-box">
-<h3>💰 Lương trung bình phòng ban</h3>
+<h3 data-i18n="home.chart.avg_salary_by_dept">💰 Lương trung bình phòng ban</h3>
 <canvas id="luongChart"></canvas>
 </div>
 
@@ -138,7 +138,7 @@
 <!-- THÔNG BÁO -->
 <div class="notification-box">
 
-<h2>🔔 Thông báo</h2>
+<h2 data-i18n="home.notifications_title">🔔 Thông báo</h2>
 <div class="notification-grid">
   <?php if($tbNghiPhep > 0){ ?>
   <div class="notification-item warning <?php echo ((int)$unreadNghiPhep > 0) ? 'unread' : 'read'; ?>" data-summary-key="leave">
@@ -171,7 +171,7 @@
   <?php } ?>
 
   <?php if($tbNghiPhep == 0 && $tbHopDong == 0 && $tbUngVien == 0){ ?>
-  <div class="notification-item neutral">✅ Không có thông báo</div>
+  <div class="notification-item neutral" data-i18n="home.no_notifications">✅ Không có thông báo</div>
   <?php } ?>
 </div>
 
@@ -181,39 +181,39 @@
 <section class="dashboard">
 
 <div class="card">
-<div class="card-title"><span class="card-icon">👥</span><h3>Nhân viên</h3></div>
-<p class="card-meta">Tổng <?php echo $tongNhanVien ?> nhân viên</p>
-<a href="index.php?controller=nhanvien&action=index">Xem chi tiết</a>
+<div class="card-title"><span class="card-icon">👥</span><h3 data-i18n="home.dashboard.employee">Nhân viên</h3></div>
+<p class="card-meta"><span data-i18n="home.dashboard.total_prefix">Tổng</span> <?php echo $tongNhanVien ?> <span data-i18n="home.dashboard.employee">nhân viên</span></p>
+<a href="index.php?controller=nhanvien&action=index" data-i18n="home.view_details">Xem chi tiết</a>
 </div>
 
 <div class="card">
-<div class="card-title"><span class="card-icon">🏢</span><h3>Phòng ban</h3></div>
-<p class="card-meta"><?php echo $tongPhongBan ?> phòng ban</p>
-<a href="index.php?controller=phongban&action=index">Xem chi tiết</a>
+<div class="card-title"><span class="card-icon">🏢</span><h3 data-i18n="home.dashboard.department">Phòng ban</h3></div>
+<p class="card-meta"><?php echo $tongPhongBan ?> <span data-i18n="home.dashboard.department">phòng ban</span></p>
+<a href="index.php?controller=phongban&action=index" data-i18n="home.view_details">Xem chi tiết</a>
 </div>
 
 <div class="card">
-<div class="card-title"><span class="card-icon">💰</span><h3>Lương</h3></div>
-<p class="card-meta">Kiểm tra bảng lương</p>
-<a href="index.php?controller=luong&action=index">Xem chi tiết</a>
+<div class="card-title"><span class="card-icon">💰</span><h3 data-i18n="home.dashboard.salary">Lương</h3></div>
+<p class="card-meta" data-i18n="home.dashboard.salary_meta">Kiểm tra bảng lương</p>
+<a href="index.php?controller=luong&action=index" data-i18n="home.view_details">Xem chi tiết</a>
 </div>
 
 <div class="card">
-<div class="card-title"><span class="card-icon">🕒</span><h3>Chấm công</h3></div>
-<p class="card-meta">Quản lý ngày công</p>
-<a href="index.php?controller=chamcong&action=index">Xem chi tiết</a>
+<div class="card-title"><span class="card-icon">🕒</span><h3 data-i18n="home.dashboard.attendance">Chấm công</h3></div>
+<p class="card-meta" data-i18n="home.dashboard.attendance_meta">Quản lý ngày công</p>
+<a href="index.php?controller=chamcong&action=index" data-i18n="home.view_details">Xem chi tiết</a>
 </div>
 
 <div class="card">
-<div class="card-title"><span class="card-icon">📄</span><h3>Hợp đồng</h3></div>
-<p class="card-meta">Theo dõi hợp đồng</p>
-<a href="index.php?controller=hopdong&action=index">Xem chi tiết</a>
+<div class="card-title"><span class="card-icon">📄</span><h3 data-i18n="home.dashboard.contract">Hợp đồng</h3></div>
+<p class="card-meta" data-i18n="home.dashboard.contract_meta">Theo dõi hợp đồng</p>
+<a href="index.php?controller=hopdong&action=index" data-i18n="home.view_details">Xem chi tiết</a>
 </div>
 
 <div class="card">
-<div class="card-title"><span class="card-icon">📊</span><h3>Báo cáo</h3></div>
-<p class="card-meta">Báo cáo hiệu suất</p>
-<a href="index.php?controller=baocao&action=index">Xem chi tiết</a>
+<div class="card-title"><span class="card-icon">📊</span><h3 data-i18n="home.dashboard.report">Báo cáo</h3></div>
+<p class="card-meta" data-i18n="home.dashboard.report_meta">Báo cáo hiệu suất</p>
+<a href="index.php?controller=baocao&action=index" data-i18n="home.view_details">Xem chi tiết</a>
 </div>
 
 </section>
@@ -227,6 +227,27 @@
 
 <script>
 
+const homeLang = document.documentElement.getAttribute('data-language') === 'en' ? 'en' : 'vi';
+const homeText = {
+  vi: {
+    chartEmployee: 'Nhân viên',
+    chartMale: 'Nam',
+    chartFemale: 'Nữ',
+    chartAvgSalary: 'Lương TB',
+    unread: 'Chưa đọc',
+    read: 'Đã đọc'
+  },
+  en: {
+    chartEmployee: 'Employees',
+    chartMale: 'Male',
+    chartFemale: 'Female',
+    chartAvgSalary: 'Avg Salary',
+    unread: 'Unread',
+    read: 'Read'
+  }
+};
+const txt = homeText[homeLang];
+
 // CHART NHÂN VIÊN
 var labels=[];
 var data=[];
@@ -237,13 +258,13 @@ data.push(<?php echo (int)$row['SoLuong']; ?>);
 
 new Chart(document.getElementById('nhanVienChart'),{
 type:'bar',
-data:{labels:labels,datasets:[{label:'Nhân viên',data:data,backgroundColor:'#3498db'}]}
+data:{labels:labels,datasets:[{label:txt.chartEmployee,data:data,backgroundColor:'#3498db'}]}
 });
 
 // CHART GIỚI TÍNH
 new Chart(document.getElementById('gioiTinhChart'),{
 type:'pie',
-data:{labels:['Nam','Nữ'],datasets:[{data:[<?php echo (int)$tongNam ?>,<?php echo (int)$tongNu ?>],backgroundColor:['#3498db','#e84393']}]}
+data:{labels:[txt.chartMale,txt.chartFemale],datasets:[{data:[<?php echo (int)$tongNam ?>,<?php echo (int)$tongNu ?>],backgroundColor:['#3498db','#e84393']}]}
 });
 
 // CHART LƯƠNG
@@ -256,7 +277,7 @@ dataLuong.push(<?php echo (float)$row['LuongTB']; ?>);
 
 new Chart(document.getElementById('luongChart'),{
 type:'bar',
-data:{labels:labelsLuong,datasets:[{label:'Lương TB',data:dataLuong,backgroundColor:'#2ecc71'}]}
+data:{labels:labelsLuong,datasets:[{label:txt.chartAvgSalary,data:dataLuong,backgroundColor:'#2ecc71'}]}
 });
 
 // SEARCH AJAX
@@ -371,7 +392,7 @@ function syncSummaryReadState(unread) {
     if (state) {
       state.classList.remove('read', 'unread');
       state.classList.add(hasUnread ? 'unread' : 'read');
-      state.textContent = hasUnread ? 'Chưa đọc' : 'Đã đọc';
+      state.textContent = hasUnread ? txt.unread : txt.read;
     }
   });
 }

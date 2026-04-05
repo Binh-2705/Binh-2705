@@ -1,5 +1,10 @@
 <?php include 'views/layout/header.php'; ?>
 <?php include 'views/layout/sidebar.php'; ?>
+<?php
+$quyen = $quyen ?? [];
+$canChamCongNhanh = in_array('cham_cong_nhanh', $quyen, true);
+$canXuatBangChamCong = in_array('xuat_bang_cham_cong', $quyen, true);
+?>
 <main class="main-content">
 
 <header>
@@ -20,8 +25,10 @@
 </div>
 
 <button type="submit" class="btn search">🔍 Xem</button>
+<?php if ($canXuatBangChamCong): ?>
 <a href="index.php?controller=chamcong&action=exportExcel&thang=<?= $thang ?>&nam=<?= $nam ?>"
    class="btn add">📥 Xuất Excel</a>
+<?php endif; ?>
 
 </form>
 
@@ -80,7 +87,7 @@ $tt = $nv['Ngay'][$key] ?? '';
 <td class="cell"
     data-manv="<?= $nv['MaNV'] ?>"
     data-day="<?= $d ?>"
-    style="cursor:pointer">
+  style="cursor:<?= $canChamCongNhanh ? 'pointer' : 'default' ?>">
 
 <?php
 if($tt=='X') echo '<span class="status dilam">✔</span>';
@@ -116,7 +123,8 @@ M Đi muộn
 <script>
 const CHAMCONG_CONFIG = {
     thang: <?= $thang ?>,
-    nam: <?= $nam ?>
+  nam: <?= $nam ?>,
+  canChamNhanh: <?= $canChamCongNhanh ? 'true' : 'false' ?>
 };
 </script>
 <?php include 'views/layout/footer.php'; ?>

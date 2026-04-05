@@ -2,21 +2,39 @@
 <?php include 'views/layout/sidebar.php'; ?>
 
     <!-- CONTENT -->
-    <main class="main-content">
-        <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
-            <h1>👥 Danh sách hồ sơ nhân viên</h1>
+    <main class="main-content hoso-page">
+        <header class="hoso-page-header">
+            <h1 data-i18n="profile_page.title">👥 Danh sách hồ sơ nhân viên</h1>
+            <div class="hoso-page-tools">
+            <form method="GET" action="index.php" class="search-form hoso-search-form">
+                <input type="hidden" name="controller" value="hosocanhan">
+                <input type="hidden" name="action" value="index">
+                <input
+                    type="text"
+                    name="keyword"
+                    class="search-box"
+                    placeholder="🔍 Tìm theo mã NV, tên, phòng ban..."
+                    data-i18n-placeholder="profile_page.search_placeholder"
+                    value="<?= htmlspecialchars((string)($keyword ?? ''), ENT_QUOTES, 'UTF-8') ?>"
+                >
+                <button type="submit" class="btn search" data-i18n="common.search">Tìm kiếm</button>
+                <?php if (!empty($keyword)): ?>
+                    <a href="index.php?controller=hosocanhan&action=index" class="btn hoso-reset-btn" data-i18n="common.refresh">Làm mới</a>
+                <?php endif; ?>
+            </form>
             <?php if(in_array('them_hoso', $quyen)): ?>
-            <a href="index.php?controller=hosocanhan&action=them" class="btn add">➕ Thêm hồ sơ</a>
+            <a href="index.php?controller=hosocanhan&action=them" class="btn add" data-i18n="profile_page.add">➕ Thêm hồ sơ</a>
             <?php endif; ?>
+            </div>
         </header>
 
         <table class="table">
             <thead>
                 <tr>
-                    <th>Mã NV</th>
-                    <th>Nhân viên</th> <th>Phòng Ban</th>
-                    <th>Chức Vụ</th>
-                    <th style="text-align:center;">Thao tác</th>
+                    <th data-i18n="common.employee_code">Mã NV</th>
+                    <th data-i18n="common.employee">Nhân viên</th> <th data-i18n="common.department">Phòng Ban</th>
+                    <th data-i18n="common.position">Chức Vụ</th>
+                    <th style="text-align:center;" data-i18n="common.actions">Thao tác</th>
                 </tr>
             </thead>
 
@@ -42,18 +60,19 @@
                                 <div class="table-actions">
                                 <?php if(in_array('xem_hoso', $quyen)): ?>
                                     <a href="index.php?controller=hosocanhan&action=xem&id=<?= $row['MaHoSo'] ?>" 
-                                       class="btn search" title="Xem chi tiết">👁️</a>
+                                                    class="btn search" title="Xem chi tiết" data-i18n-title="profile_page.view_title">👁️</a>
                                 <?php endif; ?>
 
                                 <?php if(in_array('sua_hoso', $quyen)): ?>
                                     <a href="index.php?controller=hosocanhan&action=sua&id=<?= $row['MaHoSo'] ?>" 
-                                       class="btn edit" title="Chỉnh sửa">✏️</a>
+                                                    class="btn edit" title="Chỉnh sửa" data-i18n-title="profile_page.edit_title">✏️</a>
                                 <?php endif; ?>
 
                                 <?php if(in_array('xoa_hoso', $quyen)): ?>
                                     <a href="index.php?controller=hosocanhan&action=xoa&id=<?= $row['MaHoSo'] ?>" 
                                        class="btn delete" title="Xóa"
-                                       onclick="return confirm('Bạn có chắc muốn xóa hồ sơ của <?= $row['HoTen'] ?>?')">🗑️</a>
+                                                    data-i18n-title="profile_page.delete_title"
+                                                    onclick="return confirm((window.HRMSettings && window.HRMSettings.get().language === 'en') ? 'Are you sure you want to delete this profile?' : 'Bạn có chắc muốn xóa hồ sơ của <?= $row['HoTen'] ?>?')">🗑️</a>
                                 <?php endif; ?>
                                 </div>
                             </td>
@@ -61,7 +80,7 @@
                     <?php endwhile; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="5" style="text-align:center; padding: 20px;">Không có dữ liệu hồ sơ nào.</td>
+                        <td colspan="5" style="text-align:center; padding: 20px;" data-i18n="profile_page.empty">Không có dữ liệu hồ sơ nào.</td>
                     </tr>
                 <?php endif; ?>
             </tbody>
@@ -70,9 +89,10 @@
         <?php if (($totalPages ?? 1) > 1): ?>
         <div class="pagination-wrap">
             <?php $currentPage = (int)($page ?? 1); ?>
-            <a class="page-link <?= $currentPage <= 1 ? 'disabled' : '' ?>" href="index.php?controller=hosocanhan&action=index&page=<?= max(1, $currentPage - 1) ?>">← Trước</a>
-            <span class="page-indicator">Trang <?= $currentPage ?> / <?= (int)$totalPages ?></span>
-            <a class="page-link <?= $currentPage >= (int)$totalPages ? 'disabled' : '' ?>" href="index.php?controller=hosocanhan&action=index&page=<?= min((int)$totalPages, $currentPage + 1) ?>">Sau →</a>
+            <?php $keywordQuery = !empty($keyword) ? '&keyword=' . urlencode((string)$keyword) : ''; ?>
+            <a class="page-link <?= $currentPage <= 1 ? 'disabled' : '' ?>" href="index.php?controller=hosocanhan&action=index&page=<?= max(1, $currentPage - 1) ?><?= $keywordQuery ?>" data-i18n="common.prev">← Trước</a>
+            <span class="page-indicator"><span data-i18n="common.page">Trang</span> <?= $currentPage ?> / <?= (int)$totalPages ?></span>
+            <a class="page-link <?= $currentPage >= (int)$totalPages ? 'disabled' : '' ?>" href="index.php?controller=hosocanhan&action=index&page=<?= min((int)$totalPages, $currentPage + 1) ?><?= $keywordQuery ?>" data-i18n="common.next">Sau →</a>
         </div>
         <?php endif; ?>
     </main>

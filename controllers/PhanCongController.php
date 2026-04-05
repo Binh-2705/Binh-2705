@@ -18,8 +18,8 @@ class PhanCongController {
     public function index() {
         AuthMiddleware::check($this->conn, 'xem_phancong');
         $quyen = $_SESSION['quyen'] ?? [];
-        $phancongs = $this->model->getAll();
-        $quyen = $_SESSION['quyen'] ?? [];
+        $keyword = trim((string)($_GET['keyword'] ?? ''));
+        $phancongs = $this->model->getAll($keyword);
 
         require 'views/phancong/index.php';
     }

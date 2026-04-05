@@ -1,5 +1,12 @@
 <?php include 'views/layout/header.php'; ?>
 <?php include 'views/layout/sidebar.php'; ?>
+<?php
+$quyen = $quyen ?? [];
+$canThemHopDong = in_array('them_hopdong', $quyen, true);
+$canGiaHanHopDong = in_array('giahan_hopdong', $quyen, true);
+$canChamDutHopDong = in_array('chamdut_hopdong', $quyen, true);
+$canXemLichSuLuong = in_array('xem_lich_su_luong', $quyen, true);
+?>
     <!-- MAIN -->
     <main class="main-content">
 
@@ -7,7 +14,9 @@
 
         <!-- ACTION -->
         <div class="actions">
+            <?php if ($canThemHopDong): ?>
             <a href="index.php?controller=hopdong&action=them" class="btn add">➕ Thêm hợp đồng</a>
+            <?php endif; ?>
 
             <form method="get" class="filter-form">
                 <input type="hidden" name="controller" value="hopdong">
@@ -116,18 +125,28 @@ if ($row['TrangThai'] === 'Hết hiệu lực') {
 <?php if ($row['TrangThai'] === 'Hết hiệu lực'): ?>
     <span class="muted-inline-note">Không khả dụng</span>
 <?php else: ?>
+    <?php if ($canGiaHanHopDong): ?>
     <a class="btn edit"
        href="index.php?controller=hopdong&action=giahan&MaHopDong=<?= $row['MaHopDong'] ?>"
        title="Gia hạn">🔁</a>
+    <?php endif; ?>
 
+    <?php if ($canChamDutHopDong): ?>
     <a class="btn delete"
        href="index.php?controller=hopdong&action=chamdut&MaHopDong=<?= $row['MaHopDong'] ?>"
        title="Chấm dứt"
        onclick="return confirm('⚠️ Chấm dứt hợp đồng này?')">⛔</a>
+    <?php endif; ?>
 
+    <?php if ($canXemLichSuLuong): ?>
     <a href="index.php?controller=hopdong&action=lichsu_luong&MaHopDong=<?= $row['MaHopDong'] ?>" 
        class="btn search"
        title="Lịch sử lương">📊</a>
+    <?php endif; ?>
+
+    <?php if (!$canGiaHanHopDong && !$canChamDutHopDong && !$canXemLichSuLuong): ?>
+    <span class="muted-inline-note">Chỉ xem</span>
+    <?php endif; ?>
 <?php endif; ?>
 </div>
 </td>

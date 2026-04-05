@@ -15,13 +15,18 @@ class HoSoCaNhanController {
         AuthMiddleware::check($this->conn, 'xem_hoso');
         $quyen = $_SESSION['quyen'] ?? [];
         $page = max(1, (int)($_GET['page'] ?? 1));
+        $keyword = trim((string)($_GET['keyword'] ?? ''));
         $perPage = 10;
-        $totalItems = $this->model->countAll();
+        $totalItems = $keyword !== ''
+            ? $this->model->countSearch($keyword)
+            : $this->model->countAll();
         $totalPages = max(1, (int)ceil($totalItems / $perPage));
         if ($page > $totalPages) {
             $page = $totalPages;
         }
-        $hosos = $this->model->getPage($page, $perPage);
+        $hosos = $keyword !== ''
+            ? $this->model->searchPage($keyword, $page, $perPage)
+            : $this->model->getPage($page, $perPage);
         include 'views/hosocanhan/index.php';
     }
 

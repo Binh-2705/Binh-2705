@@ -12,11 +12,39 @@ class BaoHiemController {
         $this->model = new BaoHiemModel($conn);
     }
 
+    private function currentEmployeeId(): ?int {
+        $account = $_SESSION['taikhoan'] ?? [];
+        $maNVRef = (int)($account['MaNVRef'] ?? 0);
+        if ($maNVRef > 0) {
+            return $maNVRef;
+        }
+
+        $maNVRaw = (string)($account['MaNV'] ?? '');
+        $digits = preg_replace('/\D+/', '', $maNVRaw);
+        if ($digits === '') {
+            return null;
+        }
+
+        $maNV = (int)$digits;
+        return $maNV > 0 ? $maNV : null;
+    }
+
+    private function isEmployeeRole(): bool {
+        $account = $_SESSION['taikhoan'] ?? [];
+        $role = strtolower(trim((string)($account['VaiTro'] ?? '')));
+        return $role === 'nhanvien';
+    }
+
     /* ================= DANH SÁCH ================= */
     public function index(){
         AuthMiddleware::check($this->conn, 'xem_baohiem');
-         $quyen = $_SESSION['quyen'] ?? [];
-        $ds = $this->model->getAll();
+        $quyen = $_SESSION['quyen'] ?? [];
+        if ($this->isEmployeeRole()) {
+            $maNV = $this->currentEmployeeId();
+            $ds = ($maNV !== null) ? $this->model->getAllByMaNV($maNV) : false;
+        } else {
+            $ds = $this->model->getAll();
+        }
         include 'views/baohiem/index.php';
     }
 
@@ -167,18 +195,27 @@ $quyen = $_SESSION['quyen'] ?? [];
 $quyen = $_SESSION['quyen'] ?? [];
         $keyword = $_GET['keyword'] ?? '';
 
-        $sql = "SELECT bh.*, nv.HoTen
-                FROM baohiem bh
-                JOIN nhanvien nv ON bh.MaNV = nv.MaNV
-                WHERE nv.HoTen LIKE ?
-                ORDER BY bh.MaBH DESC";
+        if ($this->isEmployeeRole()) {
+            $maNV = $this->currentEmployeeId();
+            if ($maNV === null) {
+                $ds = false;
+            } else {
+                $ds = $this->model->searchByKeywordAndMaNV((string)$keyword, $maNV);
+            }
+        } else {
+            $sql = "SELECT bh.*, nv.HoTen
+                    FROM baohiem bh
+                    JOIN nhanvien nv ON bh.MaNV = nv.MaNV
+                    WHERE nv.HoTen LIKE ?
+                    ORDER BY bh.MaBH DESC";
 
-        $stmt = $this->conn->prepare($sql);
-        $like = "%$keyword%";
-        $stmt->bind_param("s", $like);
-        $stmt->execute();
+            $stmt = $this->conn->prepare($sql);
+            $like = "%$keyword%";
+            $stmt->bind_param("s", $like);
+            $stmt->execute();
 
-        $ds = $stmt->get_result();
+            $ds = $stmt->get_result();
+        }
 
         include 'views/baohiem/index.php';
     }

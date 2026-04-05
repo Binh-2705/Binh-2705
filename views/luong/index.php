@@ -1,5 +1,13 @@
 <?php include 'views/layout/header.php'; ?>
 <?php include 'views/layout/sidebar.php'; ?>
+<?php
+$quyen = $quyen ?? [];
+$canTinhLuong = in_array('tinh_luong_thang', $quyen, true);
+$canChotLuong = in_array('chot_luong', $quyen, true);
+$canMoChotLuong = in_array('mo_chot_luong', $quyen, true);
+$canXuatExcelLuong = in_array('xuat_excel_luong', $quyen, true) || $canTinhLuong || $canChotLuong || $canMoChotLuong;
+$showQuanTriLuong = $canChotLuong || $canMoChotLuong;
+?>
   <!-- MAIN -->
   <main class="main-content">
     <header>
@@ -8,6 +16,7 @@
 
     <!-- ====== FORM TÍNH LƯƠNG ====== -->
     <div class="actions">
+      <?php if ($canTinhLuong): ?>
         <form method="POST" action="index.php?controller=luong&action=tinhLuongThang">
             <label>Tháng:</label>
             <input type="number" name="thang" min="1" max="12" required>
@@ -19,10 +28,13 @@
                 ⚙️ Tính lương tháng
             </button>
         </form>
+          <?php endif; ?>
 
+          <?php if ($canXuatExcelLuong): ?>
         <a href="index.php?controller=luong&action=exportExcel" class="btn export">
             📥 Xuất Excel
         </a>
+          <?php endif; ?>
     </div>
 
     <!-- ====== BẢNG LƯƠNG ====== -->
@@ -41,8 +53,10 @@
           <th>Bảo hiểm</th>
           <th><b>Thực nhận</b></th>
           <th><b>Tổng lương</b></th>
+          <?php if ($showQuanTriLuong): ?>
           <th>Trạng thái</th>
           <th>Thao tác</th>
+          <?php endif; ?>
         </tr>
       </thead>
 
@@ -76,6 +90,7 @@
                 </b>
               </td>
 
+              <?php if ($showQuanTriLuong): ?>
               <!-- TRẠNG THÁI -->
               <td>
                 <?php if ($row['TrangThai'] == 'Đã chốt'): ?>
@@ -88,25 +103,28 @@
               <!-- THAO TÁC -->
               <td>
                 <div class="table-actions">
-                <?php if ($row['TrangThai'] != 'Đã chốt'): ?>
+                <?php if ($row['TrangThai'] != 'Đã chốt' && $canChotLuong): ?>
                     <a href="index.php?controller=luong&action=chotLuong&id=<?= $row['MaBL'] ?>"
                        class="btn add"
                        title="Chốt"
                        onclick="return confirm('Chốt lương tháng này? Sau khi chốt sẽ KHÔNG sửa được!')">🔒</a>
-                <?php else: ?>
+                <?php elseif ($row['TrangThai'] == 'Đã chốt' && $canMoChotLuong): ?>
                     <a href="index.php?controller=luong&action=moChot&id=<?= $row['MaBL'] ?>"
                        class="btn delete"
                        title="Mở"
                        onclick="return confirm('Mở chốt lương?')">🔓</a>
+                <?php else: ?>
+                    <span class="muted-inline-note">Chỉ xem</span>
                 <?php endif; ?>
                 </div>
               </td>
+              <?php endif; ?>
 
             </tr>
           <?php endforeach; ?>
         <?php else: ?>
           <tr>
-            <td colspan="12">Chưa có dữ liệu lương</td>
+            <td colspan="<?= $showQuanTriLuong ? 14 : 12 ?>">Chưa có dữ liệu lương</td>
           </tr>
         <?php endif; ?>
       </tbody>

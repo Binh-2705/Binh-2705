@@ -15,6 +15,28 @@ class ChamCongController {
         $this->model = new ChamCongModel($conn);
     }
 
+    private function currentEmployeeId(): ?int {
+        $account = $_SESSION['taikhoan'] ?? [];
+        $maNVRef = (int)($account['MaNVRef'] ?? 0);
+        if ($maNVRef > 0) {
+            return $maNVRef;
+        }
+
+        $maNVRaw = (string)($account['MaNV'] ?? '');
+        $digits = preg_replace('/\D+/', '', $maNVRaw);
+        if ($digits === '') {
+            return null;
+        }
+
+        $maNV = (int)$digits;
+        return $maNV > 0 ? $maNV : null;
+    }
+
+    private function isEmployeeRole(): bool {
+        $account = $_SESSION['taikhoan'] ?? [];
+        return strtolower(trim((string)($account['VaiTro'] ?? ''))) === 'nhanvien';
+    }
+
     /* =====================================================
        TRANG CHÍNH = BÁO CÁO CÔNG THÁNG (KHÔNG PHẢI FORM CHẤM)
        ===================================================== */
@@ -33,7 +55,8 @@ $quyen = $_SESSION['quyen'] ?? [];
     $phongBanList = $this->model->getAllPhongBan_Array();
 
     // ===== Lấy dữ liệu chấm công dạng ma trận
-    $data = $this->model->bangChamCongThang($thang,$nam);
+    $currentMaNV = $this->isEmployeeRole() ? $this->currentEmployeeId() : null;
+    $data = $this->model->bangChamCongThang($thang, $nam, $currentMaNV);
 
     // ===== Load view
     include './views/chamcong/index.php';

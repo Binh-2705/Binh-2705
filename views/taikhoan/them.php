@@ -7,10 +7,11 @@
     </header>
 
     <form method="post" class="form-nv">
+        <input type="hidden" name="_csrf_token" value="<?= htmlspecialchars($_SESSION['_csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
 
         <div class="form-group">
             <label>Tên đăng nhập</label>
-            <input name="user" required maxlength="50" minlength="3" placeholder="VD: nguyenvana">
+            <input name="user" required maxlength="50" minlength="4" placeholder="VD: nguyenvana">
         </div>
 
         <div class="form-group">
@@ -24,6 +25,9 @@
                 <option value="">-- Chọn vai trò --</option>
                 <option value="Admin">Admin</option>
                 <option value="NhanVien">Nhân viên</option>
+                <option value="HR">HR</option>
+                <option value="KeToan">Kế toán</option>
+                <option value="QuanLy">Quản lý</option>
             </select>
         </div>
 

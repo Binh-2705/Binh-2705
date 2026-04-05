@@ -16,6 +16,24 @@ class BaoHiemModel {
         return $this->conn->query($sql);
     }
 
+    public function getAllByMaNV(int $maNV){
+        $maNV = (int)$maNV;
+        $sql = "SELECT bh.*, nv.HoTen
+                FROM baohiem bh
+                JOIN nhanvien nv ON bh.MaNV = nv.MaNV
+                WHERE bh.MaNV = ?
+                ORDER BY bh.MaBH DESC";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            return false;
+        }
+
+        $stmt->bind_param("i", $maNV);
+        $stmt->execute();
+        return $stmt->get_result();
+    }
+
     /* ================= LẤY 1 ================= */
     public function getById($id){
         $stmt = $this->conn->prepare("
@@ -121,5 +139,23 @@ public function getExportData() {
             FROM baohiem bh
             JOIN nhanvien nv ON bh.MaNV = nv.MaNV";
     return $this->conn->query($sql);
+}
+
+public function searchByKeywordAndMaNV(string $keyword, int $maNV) {
+    $sql = "SELECT bh.*, nv.HoTen
+            FROM baohiem bh
+            JOIN nhanvien nv ON bh.MaNV = nv.MaNV
+            WHERE nv.HoTen LIKE ? AND bh.MaNV = ?
+            ORDER BY bh.MaBH DESC";
+
+    $stmt = $this->conn->prepare($sql);
+    if (!$stmt) {
+        return false;
+    }
+
+    $like = "%$keyword%";
+    $stmt->bind_param("si", $like, $maNV);
+    $stmt->execute();
+    return $stmt->get_result();
 }
 }

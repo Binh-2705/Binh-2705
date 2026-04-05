@@ -12,6 +12,17 @@
 	try {
 		var root = document.documentElement;
 
+		function getCookie(name) {
+			var parts = (document.cookie || '').split(';');
+			for (var i = 0; i < parts.length; i++) {
+				var part = parts[i].trim();
+				if (part.indexOf(name + '=') === 0) {
+					return decodeURIComponent(part.substring(name.length + 1));
+				}
+			}
+			return '';
+		}
+
 		var theme = localStorage.getItem('hrm-theme') || 'light';
 		root.setAttribute('data-theme', theme === 'dark' ? 'dark' : 'light');
 
@@ -23,7 +34,7 @@
 			root.classList.add('notifications-off');
 		}
 
-		var language = localStorage.getItem('hrm-language') || 'vi';
+		var language = localStorage.getItem('hrm-language') || getCookie('hrm-language') || 'vi';
 		root.setAttribute('data-language', language === 'en' ? 'en' : 'vi');
 	} catch (e) {}
 })();
@@ -32,11 +43,12 @@
 <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['_csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
 
 <link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="public/css/sidebar.css">
+	<link rel="stylesheet" href="public/css/sidebar.css?v=20260404-5">
 <link rel="stylesheet" href="public/css/dashboard.css">
 <link rel="stylesheet" href="public/css/baocao.css">
 <link rel="stylesheet" href="public/css/phanquyen.css">
 <link rel="stylesheet" href="public/css/security.css">
+<link rel="stylesheet" href="public/css/chatbot.css?v=20260405-3">
 
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

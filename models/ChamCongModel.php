@@ -174,7 +174,7 @@ class ChamCongModel {
     }
     return $data;
 }
-public function bangChamCongThang($thang, $nam)
+public function bangChamCongThang($thang, $nam, $maNV = null)
 {
     $config = $this->getCauHinhChamCong();
 
@@ -198,6 +198,14 @@ $gioChuan = strtotime($config['GioChuanVao']);
             AND YEAR(cc.Ngay)=?
 
         WHERE nv.TrangThai='Đang làm'
+
+    ";
+
+    if ($maNV !== null) {
+        $sql .= " AND nv.MaNV = ?";
+    }
+
+    $sql .= "
         ORDER BY pb.TenPB, nv.MaNV, cc.Ngay
     ";
 
@@ -207,7 +215,11 @@ $gioChuan = strtotime($config['GioChuanVao']);
         die("SQL ERROR: ".$this->conn->error); // giúp debug nếu sau này sai nữa
     }
 
-    $stmt->bind_param("ii",$thang,$nam);
+    if ($maNV !== null) {
+        $stmt->bind_param("iii", $thang, $nam, $maNV);
+    } else {
+        $stmt->bind_param("ii",$thang,$nam);
+    }
     $stmt->execute();
     $rs = $stmt->get_result();
 

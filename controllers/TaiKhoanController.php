@@ -54,7 +54,7 @@ class TaiKhoanController {
             }
 
             $vaitro = trim((string)($_POST['vaitro'] ?? ''));
-            if (!in_array($vaitro, ['Admin', 'NhanVien'], true)) {
+            if (!in_array($vaitro, ['Admin', 'NhanVien', 'HR', 'KeToan', 'QuanLy'], true)) {
                 $_SESSION['error'] = 'Vai trò không hợp lệ.';
                 header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? 'index.php?controller=taikhoan&action=them'));
                 exit;
@@ -101,7 +101,7 @@ class TaiKhoanController {
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST'){
             $vaitro = trim((string)($_POST['vaitro'] ?? ''));
-            if (!in_array($vaitro, ['Admin', 'NhanVien'], true)) {
+            if (!in_array($vaitro, ['Admin', 'NhanVien', 'HR', 'KeToan', 'QuanLy'], true)) {
                 $_SESSION['error'] = 'Vai trò không hợp lệ.';
                 header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? 'index.php?controller=taikhoan&action=sua&id=' . $id));
                 exit;

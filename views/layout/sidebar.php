@@ -45,6 +45,13 @@ $show_hethong   = $can_phongban || $can_chucvu || $can_ngachluong || $can_bacluo
 
 // --- Báo cáo ---
 $can_baocao = AuthMiddleware::has('xem_baocao');
+
+$loggedAccount = $_SESSION['taikhoan'] ?? [];
+$sidebarUsername = trim((string)($loggedAccount['TenDangNhap'] ?? 'Người dùng'));
+$sidebarRole = trim((string)($loggedAccount['VaiTro'] ?? 'Nhân viên'));
+$sidebarEmployeeCode = trim((string)($loggedAccount['MaNV'] ?? ''));
+$avatarSeed = $sidebarUsername !== '' ? $sidebarUsername : 'U';
+$avatarInitial = strtoupper(substr($avatarSeed, 0, 1));
 ?>
 
 <nav class="sidebar">
@@ -59,11 +66,7 @@ $can_baocao = AuthMiddleware::has('xem_baocao');
     </a>
 </li>
 
-<li>
-    <a href="?controller=home&action=settings" class="<?= ($current_controller === 'home' && $current_action === 'settings') ? 'active' : '' ?>">
-        ⚙ <span data-i18n="menu.settings">Cài đặt</span>
-    </a>
-</li>
+
 
 <?php if ($show_nhansu): ?>
 <li class="has-submenu <?= isGroupOpen(['nhanvien','hosocanhan','phancong','hopdong','tuyendung','daotao'],$current_controller) ?>">
@@ -93,7 +96,7 @@ $can_baocao = AuthMiddleware::has('xem_baocao');
 <?php endif; ?>
 
 <?php if ($show_hethong): ?>
-<li class="has-submenu <?= isGroupOpen(['phongban','chucvu','ngachluong','bacluong','taikhoan','phanquyen','auditlog'],$current_controller) ?>">
+<li class="has-submenu <?= isGroupOpen(['phongban','chucvu','ngachluong','bacluong','taikhoan','phanquyen','auditlog','chatbot'],$current_controller) ?>">
     <a href="#" class="menu-toggle">⚙ <span data-i18n="menu.system">Hệ thống</span> <span class="arrow">▼</span></a>
     <ul class="submenu">
         <?php if ($can_phongban): ?><li><a href="?controller=phongban" data-i18n="menu.department">Phòng ban</a></li><?php endif; ?>
@@ -103,6 +106,7 @@ $can_baocao = AuthMiddleware::has('xem_baocao');
         <?php if ($can_taikhoan): ?><li><a href="?controller=taikhoan" data-i18n="menu.account">Tài khoản</a></li><?php endif; ?>
         <?php if ($can_phanquyen): ?><li><a href="?controller=phanquyen" data-i18n="menu.permission">Phân quyền</a></li><?php endif; ?>
         <?php if ($can_taikhoan): ?><li><a href="?controller=auditlog">Nhật ký hệ thống</a></li><?php endif; ?>
+        <?php if ($can_taikhoan): ?><li><a href="?controller=chatbot&action=audit" class="<?= ($current_controller === 'chatbot' && $current_action === 'audit') ? 'active' : '' ?>">Nhật ký Chatbot</a></li><?php endif; ?>
         <?php if ($can_admin_only): ?><li><a href="?controller=systemhealth">Sức khỏe hệ thống</a></li><?php endif; ?>
     </ul>
 </li>
@@ -113,15 +117,53 @@ $can_baocao = AuthMiddleware::has('xem_baocao');
     <a href="?controller=baocao">📊 <span data-i18n="menu.report">Báo cáo</span></a>
 </li>
 <?php endif; ?>
-
+<li>
+    <a href="?controller=home&action=settings" class="<?= ($current_controller === 'home' && $current_action === 'settings') ? 'active' : '' ?>">
+        ⚙ <span data-i18n="menu.settings">Cài đặt</span>
+    </a>
+</li>
 </ul>
 
-<div class="dark-mode-toggle-wrap">
-    <button class="dark-mode-btn" id="darkModeToggle" title="Chuyển chế độ sáng/tối" data-i18n-title="theme.switch_title">
-        <span class="icon-moon">🌙</span>
-        <span class="icon-sun">☀️</span>
-        <span class="toggle-label" data-i18n="theme.dark_mode">Chế độ tối</span>
+<div class="sidebar-account" id="sidebarAccountWidget">
+    <button type="button" class="sidebar-account-trigger" id="sidebarAccountTrigger" aria-expanded="false">
+        <span class="sidebar-avatar"><?php echo htmlspecialchars($avatarInitial, ENT_QUOTES, 'UTF-8'); ?></span>
+        <span class="sidebar-account-text">
+            <strong><?php echo htmlspecialchars($sidebarUsername, ENT_QUOTES, 'UTF-8'); ?></strong>
+            <small>
+                <span class="sidebar-status-dot"></span>
+                <span>Đang hoạt động</span>
+            </small>
+        </span>
+        <span class="sidebar-account-caret">▾</span>
     </button>
+
+    <div class="sidebar-account-panel" id="sidebarAccountPanel">
+        <div class="sidebar-account-header">
+            <span class="sidebar-avatar sidebar-avatar-large"><?php echo htmlspecialchars($avatarInitial, ENT_QUOTES, 'UTF-8'); ?></span>
+            <div class="sidebar-account-identity">
+                <div class="sidebar-account-name"><?php echo htmlspecialchars($sidebarUsername, ENT_QUOTES, 'UTF-8'); ?></div>
+                <div class="sidebar-account-role"><?php echo htmlspecialchars($sidebarRole, ENT_QUOTES, 'UTF-8'); ?></div>
+            </div>
+        </div>
+
+        <div class="sidebar-account-meta">
+            <span class="sidebar-account-meta-label">Mã nhân sự</span>
+            <strong><?php echo htmlspecialchars($sidebarEmployeeCode !== '' ? $sidebarEmployeeCode : 'Chưa gán', ENT_QUOTES, 'UTF-8'); ?></strong>
+        </div>
+
+        <div class="sidebar-account-actions">
+            <a href="?controller=home&action=settings">
+                <span class="sidebar-action-icon">⚙</span>
+                <span>Cài đặt tài khoản</span>
+            </a>
+            <a href="?controller=dangnhap&action=dangxuat" class="sidebar-account-logout">
+                <span class="sidebar-action-icon">↪</span>
+                <span>Đăng xuất</span>
+            </a>
+        </div>
+    </div>
 </div>
+
+
 
 </nav>

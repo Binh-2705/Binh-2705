@@ -1,10 +1,12 @@
 document.addEventListener("DOMContentLoaded", function () {
 
+    const canChamNhanh = !!CHAMCONG_CONFIG?.canChamNhanh;
+
     /* ================= CHẤM CÔNG NHANH (TABLE) ================= */
 
     const cells = document.querySelectorAll('.cell');
 
-    if (cells.length) {
+    if (canChamNhanh && cells.length) {
         cells.forEach(td => {
 
             td.addEventListener('click', function () {

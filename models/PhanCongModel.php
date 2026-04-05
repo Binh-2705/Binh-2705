@@ -8,38 +8,41 @@ class PhanCongModel {
 
     /* ================== READ ================== */
     public function getAll($keyword = '') {
-    $keyword = mysqli_real_escape_string($this->conn, $keyword);
+        $keyword = trim((string)$keyword);
 
-    $sql = "SELECT 
-                pc.MaQT,
-                nv.MaNV,
-                nv.HoTen,
-                pb.TenPB,
-                cv.TenCV,
-                pc.NgayBatDau,
-                pc.NgayKetThuc,
-                pc.LoaiDieuChuyen
-            FROM phancong pc
-            INNER JOIN nhanvien nv ON pc.MaNV = nv.MaNV
-            INNER JOIN phongban pb ON pc.MaPB = pb.MaPB
-            INNER JOIN chucvu cv ON pc.MaCV = cv.MaCV";
+        $sql = "SELECT 
+                    pc.MaQT,
+                    nv.MaNV,
+                    nv.HoTen,
+                    pb.TenPB,
+                    cv.TenCV,
+                    pc.NgayBatDau,
+                    pc.NgayKetThuc,
+                    pc.LoaiDieuChuyen
+                FROM phancong pc
+                INNER JOIN nhanvien nv ON pc.MaNV = nv.MaNV
+                INNER JOIN phongban pb ON pc.MaPB = pb.MaPB
+                INNER JOIN chucvu cv ON pc.MaCV = cv.MaCV";
 
-    if ($keyword !== '') {
-        $sql .= " WHERE nv.HoTen LIKE '%$keyword%'
-                  OR pb.TenPB LIKE '%$keyword%'
-                  OR cv.TenCV LIKE '%$keyword%'";
+        if ($keyword === '') {
+            $sql .= " ORDER BY pc.NgayBatDau DESC";
+            return mysqli_query($this->conn, $sql);
+        }
+
+        $sql .= " WHERE CAST(nv.MaNV AS CHAR) LIKE ?
+                  OR nv.HoTen LIKE ?
+                  OR pb.TenPB LIKE ?
+                  OR cv.TenCV LIKE ?
+                  OR pc.LoaiDieuChuyen LIKE ?
+                  ORDER BY pc.NgayBatDau DESC";
+
+        $search = '%' . $keyword . '%';
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param('sssss', $search, $search, $search, $search, $search);
+        $stmt->execute();
+
+        return $stmt->get_result();
     }
-
-    $sql .= " ORDER BY pc.NgayBatDau DESC";
-
-    $rs = mysqli_query($this->conn, $sql);
-
-    if (!$rs) {
-        die("SQL ERROR: " . mysqli_error($this->conn));
-    }
-
-    return $rs;
-}
 
 
 

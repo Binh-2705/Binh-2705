@@ -188,6 +188,10 @@ switch ($controller) {
         require_once 'controllers/SystemHealthController.php';
         $controllerObj = new SystemHealthController($conn);
         break;
+    case 'chatbot':
+        require_once 'controllers/ChatbotController.php';
+        $controllerObj = new ChatbotController($conn);
+        break;
     case 'baohiem':
     require_once 'controllers/BaoHiemController.php';
     $controllerObj = new BaoHiemController($conn);

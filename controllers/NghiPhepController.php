@@ -15,22 +15,48 @@ class NghiPhepController {
         $this->model = new NghiPhepModel($conn);
     }
 
+    private function currentEmployeeId(): ?int {
+        $account = $_SESSION['taikhoan'] ?? [];
+        $maNVRef = (int)($account['MaNVRef'] ?? 0);
+        if ($maNVRef > 0) {
+            return $maNVRef;
+        }
+
+        $maNVRaw = (string)($account['MaNV'] ?? '');
+        $digits = preg_replace('/\D+/', '', $maNVRaw);
+        if ($digits === '') {
+            return null;
+        }
+
+        $maNV = (int)$digits;
+        return $maNV > 0 ? $maNV : null;
+    }
+
+    private function isEmployeeScope(array $quyen): bool {
+        return !in_array('duyet_nghiphep', $quyen, true)
+            && !in_array('tuchoi_nghiphep', $quyen, true)
+            && !in_array('sua_nghiphep', $quyen, true)
+            && !in_array('xoa_nghiphep', $quyen, true);
+    }
+
     /* ================= DANH SÁCH ================= */
     public function index() {
         AuthMiddleware::check($this->conn, 'xem_nghiphep');
         $quyen = $_SESSION['quyen'] ?? [];
+        $employeeScope = $this->isEmployeeScope($quyen);
+        $currentMaNV = $employeeScope ? $this->currentEmployeeId() : null;
         $keyword = trim((string)($_GET['keyword'] ?? ''));
         $page = max(1, (int)($_GET['page'] ?? 1));
         $perPage = 10;
 
-        $totalItems = $this->model->countNghiPhep($keyword);
+        $totalItems = $this->model->countNghiPhep($keyword, $currentMaNV);
         $totalPages = max(1, (int)ceil($totalItems / $perPage));
         if ($page > $totalPages) {
             $page = $totalPages;
         }
 
         $offset = ($page - 1) * $perPage;
-        $data = $this->model->getNghiPhepPage($keyword, $perPage, $offset);
+        $data = $this->model->getNghiPhepPage($keyword, $perPage, $offset, $currentMaNV);
         include './views/nghiphep/index.php';
     }
 
@@ -47,7 +73,16 @@ class NghiPhepController {
     public function them() {
         AuthMiddleware::check($this->conn, 'them_nghiphep');
         $quyen = $_SESSION['quyen'] ?? [];
-        $nhanvien = $this->model->getAllNhanVien();
+        $isEmployeeScope = $this->isEmployeeScope($quyen);
+        if ($isEmployeeScope) {
+            $maNV = $this->currentEmployeeId();
+            if ($maNV === null) {
+                WebResponder::backWithMessage('Không xác định được mã nhân viên của tài khoản hiện tại.', 'error', 'index.php?controller=nghiphep&action=index');
+            }
+            $nhanvien = $this->model->getNhanVienById($maNV);
+        } else {
+            $nhanvien = $this->model->getAllNhanVien();
+        }
         include './views/nghiphep/them.php';
     }
 
@@ -57,15 +92,22 @@ class NghiPhepController {
         $quyen = $_SESSION['quyen'] ?? [];
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $validator = new RequestValidator($_POST);
-            $manv   = $validator->requiredInt('MaNV', 'Nhân viên', 1);
+            $employeeScope = $this->isEmployeeScope($quyen);
+            $manv = $employeeScope
+                ? ($this->currentEmployeeId() ?? 0)
+                : $validator->requiredInt('MaNV', 'Nhân viên', 1);
             $tungay = $validator->requiredDate('TuNgay', 'Từ ngày');
             $denngay = $validator->requiredDate('DenNgay', 'Đến ngày');
             $lydo   = $validator->optionalString('LyDo', 1000);
-            $loai   = $validator->in('LoaiNghi', 'Loại nghỉ', ['Nghỉ phép', 'Nghỉ không phép', 'Nghỉ ốm']);
+            $loai   = $validator->in('LoaiNghi', 'Loại nghỉ', ['Nghỉ phép năm', 'Nghỉ ốm', 'Nghỉ không lương', 'Nghỉ việc riêng']);
 
-            if (!$validator->isValid()) {
+            if ($manv <= 0 || !$validator->isValid()) {
                 AppLogger::warning('Validation failed in NghiPhepController::luu', ['errors' => $validator->allErrors()]);
-                WebResponder::backWithMessage($validator->firstError(), 'error', 'index.php?controller=nghiphep&action=them');
+                $errorMessage = $validator->firstError();
+                if ($errorMessage === '' || $errorMessage === null) {
+                    $errorMessage = 'Không xác định được nhân viên hợp lệ cho đơn nghỉ phép.';
+                }
+                WebResponder::backWithMessage($errorMessage, 'error', 'index.php?controller=nghiphep&action=them');
             }
 
             if (strtotime($denngay) < strtotime($tungay)) {
@@ -122,7 +164,7 @@ class NghiPhepController {
             $tungay  = $validator->requiredDate('TuNgay', 'Từ ngày');
             $denngay = $validator->requiredDate('DenNgay', 'Đến ngày');
             $lydo    = $validator->optionalString('LyDo', 1000);
-            $loai    = $validator->in('LoaiNghi', 'Loại nghỉ', ['Nghỉ phép', 'Nghỉ không phép', 'Nghỉ ốm']);
+            $loai    = $validator->in('LoaiNghi', 'Loại nghỉ', ['Nghỉ phép năm', 'Nghỉ ốm', 'Nghỉ không lương', 'Nghỉ việc riêng']);
 
             if (!$validator->isValid()) {
                 AppLogger::warning('Validation failed in NghiPhepController::luuSua', ['errors' => $validator->allErrors()]);

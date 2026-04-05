@@ -1,5 +1,6 @@
 <?php include 'views/layout/header.php'; ?>
 <?php include 'views/layout/sidebar.php'; ?>
+<?php $isEmployeeScope = $isEmployeeScope ?? false; ?>
 
   <main class="main-content">
     <header>
@@ -13,6 +14,11 @@
       <!-- NHÂN VIÊN -->
       <div class="form-group">
         <label>Nhân viên:</label>
+        <?php if ($isEmployeeScope): ?>
+        <?php $nv = $nhanvien ? $nhanvien->fetch_assoc() : null; ?>
+        <input type="hidden" name="MaNV" value="<?= (int)($nv['MaNV'] ?? 0) ?>">
+        <input type="text" value="<?= htmlspecialchars(((string)($nv['MaNV'] ?? '')) . ' - ' . ((string)($nv['HoTen'] ?? '')), ENT_QUOTES, 'UTF-8') ?>" readonly>
+        <?php else: ?>
         <select name="MaNV" required>
           <option value="">-- Chọn nhân viên --</option>
           <?php while ($r = $nhanvien->fetch_assoc()): ?>
@@ -21,6 +27,7 @@
             </option>
           <?php endwhile; ?>
         </select>
+        <?php endif; ?>
       </div>
 
       <!-- TỪ NGÀY -->

@@ -23,6 +23,27 @@ public function countAll(): int {
     return (int)($row['total'] ?? 0);
 }
 
+public function countSearch(string $keyword): int {
+    $search = '%' . $keyword . '%';
+    $sql = "SELECT COUNT(*) AS total
+            FROM hosonhanvien hs
+            LEFT JOIN nhanvien nv ON hs.MaNV = nv.MaNV
+            LEFT JOIN phongban pb ON hs.MaPB = pb.MaPB
+            LEFT JOIN chucvu cv ON hs.MaCV = cv.MaCV
+            WHERE CAST(hs.MaNV AS CHAR) LIKE ?
+               OR nv.HoTen LIKE ?
+               OR pb.TenPB LIKE ?
+               OR cv.TenCV LIKE ?";
+
+    $stmt = $this->conn->prepare($sql);
+    $stmt->bind_param("ssss", $search, $search, $search, $search);
+    $stmt->execute();
+
+    $result = $stmt->get_result();
+    $row = $result ? $result->fetch_assoc() : ['total' => 0];
+    return (int)($row['total'] ?? 0);
+}
+
 public function getPage(int $page = 1, int $perPage = 10){
     $page = max(1, $page);
     $perPage = max(1, $perPage);
@@ -37,6 +58,32 @@ public function getPage(int $page = 1, int $perPage = 10){
                 LIMIT $offset, $perPage";
     return mysqli_query($this->conn, $sql);
 }
+
+public function searchPage(string $keyword, int $page = 1, int $perPage = 10) {
+    $page = max(1, $page);
+    $perPage = max(1, $perPage);
+    $offset = ($page - 1) * $perPage;
+    $search = '%' . $keyword . '%';
+
+    $sql = "SELECT hs.*, nv.HoTen, pb.TenPB, cv.TenCV
+            FROM hosonhanvien hs
+            LEFT JOIN nhanvien nv ON hs.MaNV = nv.MaNV
+            LEFT JOIN phongban pb ON hs.MaPB = pb.MaPB
+            LEFT JOIN chucvu cv ON hs.MaCV = cv.MaCV
+            WHERE CAST(hs.MaNV AS CHAR) LIKE ?
+               OR nv.HoTen LIKE ?
+               OR pb.TenPB LIKE ?
+               OR cv.TenCV LIKE ?
+            ORDER BY hs.MaHoSo DESC
+            LIMIT ?, ?";
+
+    $stmt = $this->conn->prepare($sql);
+    $stmt->bind_param("ssssii", $search, $search, $search, $search, $offset, $perPage);
+    $stmt->execute();
+
+    return $stmt->get_result();
+}
+
 public function getById($id){
     $sql = "SELECT hs.*, nv.HoTen, pb.TenPB, cv.TenCV
             FROM hosonhanvien hs

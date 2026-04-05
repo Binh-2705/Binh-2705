@@ -16,8 +16,11 @@
         <div class="form-group">
             <label>Vai trò</label>
             <select name="vaitro">
-                <option <?= $tk['VaiTro']=='Admin'?'selected':'' ?>>Admin</option>
-                <option <?= $tk['VaiTro']=='NhanVien'?'selected':'' ?>>NhanVien</option>
+                <option value="Admin" <?= $tk['VaiTro']=='Admin'?'selected':'' ?>>Admin</option>
+                <option value="NhanVien" <?= $tk['VaiTro']=='NhanVien'?'selected':'' ?>>Nhân viên</option>
+                <option value="HR" <?= $tk['VaiTro']=='HR'?'selected':'' ?>>HR</option>
+                <option value="KeToan" <?= $tk['VaiTro']=='KeToan'?'selected':'' ?>>Kế toán</option>
+                <option value="QuanLy" <?= $tk['VaiTro']=='QuanLy'?'selected':'' ?>>Quản lý</option>
             </select>
         </div>
 

@@ -26,15 +26,24 @@ class NghiPhepModel {
         return mysqli_query($this->conn, $sql);
     }
 
-    public function countNghiPhep($keyword = '') {
+    public function countNghiPhep($keyword = '', $maNV = null) {
         $keyword = trim((string)$keyword);
         $sql = "SELECT COUNT(*) AS total
                 FROM nghiphep np
                 JOIN nhanvien nv ON np.MaNV = nv.MaNV";
 
+        $where = [];
+        if ($maNV !== null) {
+            $where[] = "np.MaNV = " . (int)$maNV;
+        }
+
         if ($keyword !== '') {
             $kw = mysqli_real_escape_string($this->conn, $keyword);
-            $sql .= " WHERE nv.HoTen LIKE '%$kw%' OR np.MaNV LIKE '%$kw%'";
+            $where[] = "(nv.HoTen LIKE '%$kw%' OR np.MaNV LIKE '%$kw%')";
+        }
+
+        if (!empty($where)) {
+            $sql .= " WHERE " . implode(' AND ', $where);
         }
 
         $rs = mysqli_query($this->conn, $sql);
@@ -42,7 +51,7 @@ class NghiPhepModel {
         return (int)($row['total'] ?? 0);
     }
 
-    public function getNghiPhepPage($keyword = '', $limit = 10, $offset = 0) {
+    public function getNghiPhepPage($keyword = '', $limit = 10, $offset = 0, $maNV = null) {
         $keyword = trim((string)$keyword);
         $limit = max(1, (int)$limit);
         $offset = max(0, (int)$offset);
@@ -62,9 +71,18 @@ class NghiPhepModel {
                 FROM nghiphep np
                 JOIN nhanvien nv ON np.MaNV = nv.MaNV";
 
+        $where = [];
+        if ($maNV !== null) {
+            $where[] = "np.MaNV = " . (int)$maNV;
+        }
+
         if ($keyword !== '') {
             $kw = mysqli_real_escape_string($this->conn, $keyword);
-            $sql .= " WHERE nv.HoTen LIKE '%$kw%' OR np.MaNV LIKE '%$kw%'";
+            $where[] = "(nv.HoTen LIKE '%$kw%' OR np.MaNV LIKE '%$kw%')";
+        }
+
+        if (!empty($where)) {
+            $sql .= " WHERE " . implode(' AND ', $where);
         }
 
         $sql .= " ORDER BY np.NgayNopDon DESC LIMIT $limit OFFSET $offset";
@@ -101,11 +119,30 @@ class NghiPhepModel {
         return mysqli_query($this->conn, $sql);
     }
 
+    public function getNghiPhepRowById($maNP) {
+        $maNP = (int)$maNP;
+        $sql = "SELECT np.*, nv.HoTen
+                FROM nghiphep np
+                JOIN nhanvien nv ON np.MaNV = nv.MaNV
+                WHERE np.MaNP = $maNP
+                LIMIT 1";
+        $rs = mysqli_query($this->conn, $sql);
+        return $rs ? mysqli_fetch_assoc($rs) : null;
+    }
+
     /* ===== NHÂN VIÊN ===== */
     public function getAllNhanVien() {
         return mysqli_query(
             $this->conn,
             "SELECT MaNV, HoTen FROM nhanvien ORDER BY HoTen ASC"
+        );
+    }
+
+    public function getNhanVienById($maNV) {
+        $maNV = (int)$maNV;
+        return mysqli_query(
+            $this->conn,
+            "SELECT MaNV, HoTen FROM nhanvien WHERE MaNV = $maNV LIMIT 1"
         );
     }
 
