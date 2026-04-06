@@ -48,7 +48,7 @@
 <link rel="stylesheet" href="public/css/baocao.css">
 <link rel="stylesheet" href="public/css/phanquyen.css">
 <link rel="stylesheet" href="public/css/security.css">
-<link rel="stylesheet" href="public/css/chatbot.css?v=20260405-3">
+<link rel="stylesheet" href="public/css/chatbot.css?v=20260406-1">
 
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

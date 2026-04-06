@@ -2,9 +2,36 @@
 
 <?php
 $currentController = $_GET['controller'] ?? 'home';
-$showFloatingChatbot = !empty($_SESSION['taikhoan']) && 
-                      $currentController !== 'chatbot' && 
-                      in_array('su_dung_chatbot', (array)($_SESSION['quyen'] ?? []), true);
+$showFloatingChatbot = !empty($_SESSION['taikhoan']) && $currentController !== 'chatbot';
+$chatbotRole = (string)(($_SESSION['taikhoan']['VaiTro'] ?? 'NhanVien'));
+$chatbotQuickActionsByRole = [
+	'Admin' => [
+		'Tổng số nhân viên hiện tại là bao nhiêu?' => 'Tổng nhân viên',
+		'Hợp đồng sắp hết hạn' => 'HĐ sắp hết hạn',
+		'Tóm tắt tuyển dụng' => 'Tuyển dụng',
+	],
+	'HR' => [
+		'Có bao nhiêu đơn nghỉ phép chờ duyệt?' => 'Đơn chờ duyệt',
+		'Tạo đơn nghỉ phép từ 2026-04-10 đến 2026-04-12 lý do việc riêng' => 'Tạo đơn nghỉ',
+		'Khóa đào tạo đang diễn ra' => 'Đào tạo',
+	],
+	'KeToan' => [
+		'Lương tháng này của tôi' => 'Lương của tôi',
+		'Tổng quan bảo hiểm nhân viên' => 'Bảo hiểm',
+		'Hợp đồng của tôi' => 'HĐ của tôi',
+	],
+	'QuanLy' => [
+		'Có bao nhiêu đơn nghỉ phép chờ duyệt?' => 'Đơn chờ duyệt',
+		'Phân bổ nhân sự theo phòng ban' => 'Theo phòng ban',
+		'Top tăng ca tháng này' => 'Tăng ca',
+	],
+	'NhanVien' => [
+		'Thông tin cá nhân của tôi' => 'Hồ sơ của tôi',
+		'Lương tháng này của tôi' => 'Lương của tôi',
+		'Đơn nghỉ phép của tôi' => 'Đơn nghỉ phép',
+	],
+];
+$chatbotQuickActions = $chatbotQuickActionsByRole[$chatbotRole] ?? $chatbotQuickActionsByRole['NhanVien'];
 ?>
 
 <?php if ($showFloatingChatbot) { ?>
@@ -13,6 +40,7 @@ $showFloatingChatbot = !empty($_SESSION['taikhoan']) &&
 		<span class="chatbot-launcher-art" aria-hidden="true">
 			<img class="chatbot-launcher-image" src="public/anh/anh3.gif" alt="AI Chatbot Avatar" onerror="this.style.display='none'; this.parentElement.classList.add('no-image');">
 			<span class="chatbot-launcher-bubble">Hi!</span>
+			<span class="chatbot-launcher-badge" id="chatbotBriefBadge" hidden>0</span>
 		</span>
 		<span class="chatbot-launcher-text">
 			<strong>AI Chatbot</strong>
@@ -26,10 +54,13 @@ $showFloatingChatbot = !empty($_SESSION['taikhoan']) &&
 				<strong>AI Chatbot</strong>
 				<p>Tra cứu và gợi ý nghiệp vụ ngay trên trang này.</p>
 			</div>
-			<button type="button" class="chatbot-widget-close" id="chatbotWidgetClose" aria-label="Đóng chatbot">×</button>
+			<div class="chatbot-widget-actions">
+				<button type="button" class="chatbot-widget-secondary" data-chatbot-reset>Cuộc trò chuyện mới</button>
+				<button type="button" class="chatbot-widget-close" id="chatbotWidgetClose" aria-label="Đóng chatbot">×</button>
+			</div>
 		</div>
 
-		<section class="chatbot-shell chatbot-shell-compact" data-chatbot-shell data-endpoint="index.php?controller=chatbot&action=ask" data-confirm-endpoint="index.php?controller=chatbot&action=confirmDraft">
+		<section class="chatbot-shell chatbot-shell-compact" data-chatbot-shell data-endpoint="index.php?controller=chatbot&action=ask" data-confirm-endpoint="index.php?controller=chatbot&action=confirmDraft" data-brief-endpoint="index.php?controller=chatbot&action=brief" data-reset-endpoint="index.php?controller=chatbot&action=clearHistory">
 			<div class="chatbot-messages" aria-live="polite">
 				<article class="chatbot-msg bot">
 					<div class="chatbot-bubble">
@@ -39,9 +70,9 @@ $showFloatingChatbot = !empty($_SESSION['taikhoan']) &&
 			</div>
 
 			<div class="chatbot-quick-actions">
-				<button type="button" class="chatbot-chip" data-prompt="Tổng số nhân viên hiện tại là bao nhiêu?">Tổng nhân viên</button>
-				<button type="button" class="chatbot-chip" data-prompt="Thống kê nghỉ phép">Thống kê nghỉ phép</button>
-				<button type="button" class="chatbot-chip" data-prompt="Hợp đồng sắp hết hạn">Hợp đồng sắp hết hạn</button>
+				<?php foreach ($chatbotQuickActions as $prompt => $label) { ?>
+				<button type="button" class="chatbot-chip" data-prompt="<?= htmlspecialchars($prompt, ENT_QUOTES, 'UTF-8'); ?>"><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?></button>
+				<?php } ?>
 			</div>
 
 			<form class="chatbot-form" method="post" action="index.php?controller=chatbot&action=ask">
@@ -66,7 +97,7 @@ $showFloatingChatbot = !empty($_SESSION['taikhoan']) &&
 <script src="public/js/nhanvien.js"></script>
 <script src="public/js/tuyendung.js"></script>
 <script src="public/js/form-validation.js"></script>
-<script src="public/js/chatbot.js?v=20260405-3"></script>
+<script src="public/js/chatbot.js?v=20260406-1"></script>
 <script>
 (function () {
 	var tokenMeta = document.querySelector('meta[name="csrf-token"]');

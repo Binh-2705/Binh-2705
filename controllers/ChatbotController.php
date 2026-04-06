@@ -2,21 +2,23 @@
 require_once 'core/AppLogger.php';
 require_once 'core/AuthMiddleware.php';
 require_once 'models/ChatbotAuditModel.php';
+require_once 'models/HopDongModel.php';
 require_once 'models/NghiPhepModel.php';
 
 class ChatbotController {
     private $conn;
     private $auditModel;
+    private $contractModel;
     private $leaveModel;
 
     public function __construct($conn) {
         $this->conn = $conn;
         $this->auditModel = new ChatbotAuditModel($conn);
+        $this->contractModel = new HopDongModel($conn);
         $this->leaveModel = new NghiPhepModel($conn);
     }
 
     public function index() {
-        AuthMiddleware::check($this->conn, 'su_dung_chatbot');
         $quyen = $_SESSION['quyen'] ?? [];
         include 'views/chatbot/index.php';
     }
@@ -52,8 +54,6 @@ class ChatbotController {
             $this->json(['ok' => false, 'message' => 'SESSION_EXPIRED'], 401);
             return;
         }
-
-        AuthMiddleware::check($this->conn, 'su_dung_chatbot');
 
         $message = trim((string)($_POST['message'] ?? ''));
         if ($message === '') {
@@ -187,8 +187,6 @@ class ChatbotController {
             return;
         }
 
-        AuthMiddleware::check($this->conn, 'su_dung_chatbot');
-
         $token = trim((string)($_POST['action_token'] ?? ''));
         if ($token === '') {
             $this->json(['ok' => false, 'message' => 'MISSING_ACTION_TOKEN'], 422);
@@ -251,6 +249,28 @@ class ChatbotController {
             ],
             'source' => 'action_execution',
         ], $result['ok'] ? 200 : 422);
+    }
+
+    public function clearHistory() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->json(['ok' => false, 'message' => 'METHOD_NOT_ALLOWED'], 405);
+            return;
+        }
+
+        if (empty($_SESSION['taikhoan'])) {
+            $this->json(['ok' => false, 'message' => 'SESSION_EXPIRED'], 401);
+            return;
+        }
+
+        unset($_SESSION['chatbot_history']);
+        $_SESSION['chatbot_session_key'] = bin2hex(random_bytes(16));
+
+        $this->json([
+            'ok' => true,
+            'reply' => 'Đã xóa lịch sử hội thoại hiện tại.',
+            'actions' => ['Lịch sử chat trong session đã được làm mới'],
+            'suggestions' => ['Tổng số nhân viên hiện tại là bao nhiêu?', 'Thông tin cá nhân của tôi', 'Hợp đồng sắp hết hạn'],
+        ]);
     }
 
     private function executeDraft(string $actionType, array $payload, string $confirmReason = ''): array {
@@ -316,6 +336,101 @@ class ChatbotController {
             return ['ok' => false, 'message' => 'Không thể từ chối đơn nghỉ phép từ chatbot.'];
         }
 
+        if ($actionType === 'leave_create') {
+            $currentEmployeeId = $this->getCurrentEmployeeId();
+            $maNV = (int)($payload['ma_nv'] ?? 0);
+            $tuNgay = trim((string)($payload['tu_ngay'] ?? ''));
+            $denNgay = trim((string)($payload['den_ngay'] ?? ''));
+            $lyDo = trim((string)($payload['ly_do'] ?? ''));
+            $loaiNghi = trim((string)($payload['loai_nghi'] ?? 'Nghỉ phép năm'));
+
+            if ($maNV <= 0 || $tuNgay === '' || $denNgay === '') {
+                return ['ok' => false, 'message' => 'Thiếu dữ liệu để tạo đơn nghỉ phép.'];
+            }
+
+            if ($currentEmployeeId > 0 && $currentEmployeeId !== $maNV) {
+                return ['ok' => false, 'message' => 'Bạn chỉ có thể tạo đơn nghỉ phép cho chính mình từ chatbot.'];
+            }
+
+            try {
+                $start = new DateTime($tuNgay);
+                $end = new DateTime($denNgay);
+            } catch (Exception $exception) {
+                return ['ok' => false, 'message' => 'Ngày nghỉ phép không hợp lệ.'];
+            }
+
+            if ($end < $start) {
+                return ['ok' => false, 'message' => 'Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu.'];
+            }
+
+            $soNgay = (int)$start->diff($end)->days + 1;
+            if ($this->leaveModel->insertNghiPhep($maNV, $tuNgay, $denNgay, $soNgay, $lyDo, $loaiNghi)) {
+                $newId = (int)mysqli_insert_id($this->conn);
+                return [
+                    'ok' => true,
+                    'message' => 'Đã tạo đơn nghỉ phép từ chatbot.',
+                    'state_diff' => 'Mã đơn mới: #' . $newId . ' | Trạng thái: Chờ duyệt',
+                ];
+            }
+
+            return ['ok' => false, 'message' => 'Không thể tạo đơn nghỉ phép từ chatbot.'];
+        }
+
+        if ($actionType === 'contract_extend') {
+            $maHopDong = (int)($payload['ma_hop_dong'] ?? 0);
+            $newEndDate = trim((string)($payload['new_end_date'] ?? ''));
+            if ($maHopDong <= 0 || $newEndDate === '') {
+                return ['ok' => false, 'message' => 'Thiếu dữ liệu để gia hạn hợp đồng.'];
+            }
+
+            $contract = $this->contractModel->getHopDongById($maHopDong);
+            if (!$contract) {
+                return ['ok' => false, 'message' => 'Không tìm thấy hợp đồng cần gia hạn.'];
+            }
+
+            if (trim((string)($contract['TrangThai'] ?? '')) !== 'Còn hiệu lực') {
+                return ['ok' => false, 'message' => 'Chỉ gia hạn được hợp đồng còn hiệu lực.'];
+            }
+
+            if (empty($contract['NgayKetThuc'])) {
+                return ['ok' => false, 'message' => 'Hợp đồng không xác định thời hạn không cần gia hạn theo cách này.'];
+            }
+
+            try {
+                $currentEnd = new DateTime((string)$contract['NgayKetThuc']);
+                $newEnd = new DateTime($newEndDate);
+            } catch (Exception $exception) {
+                return ['ok' => false, 'message' => 'Ngày gia hạn hợp đồng không hợp lệ.'];
+            }
+
+            if ($newEnd <= $currentEnd) {
+                return ['ok' => false, 'message' => 'Ngày kết thúc mới phải lớn hơn ngày kết thúc hiện tại.'];
+            }
+
+            $newStart = (clone $currentEnd)->modify('+1 day')->format('Y-m-d');
+            $contractNumber = $this->generateRenewalContractNumber((string)($contract['SoHopDong'] ?? ''), $newEnd->format('Ymd'));
+            $data = [
+                'MaNV' => (int)($contract['MaNV'] ?? 0),
+                'MaBac' => (int)($contract['MaBac'] ?? 0),
+                'HopDongGoc' => $maHopDong,
+                'SoHopDong' => $contractNumber,
+                'LoaiHopDong' => (string)($contract['LoaiHopDong'] ?? 'Xác định thời hạn'),
+                'NgayBatDau' => $newStart,
+                'NgayKetThuc' => $newEnd->format('Y-m-d'),
+            ];
+
+            if ($this->contractModel->insertHopDongGiaHan($data)) {
+                $newContractId = (int)mysqli_insert_id($this->conn);
+                return [
+                    'ok' => true,
+                    'message' => 'Đã tạo hợp đồng gia hạn từ chatbot.',
+                    'state_diff' => 'Hợp đồng mới: #' . $newContractId . ' | Số HĐ: ' . $contractNumber,
+                ];
+            }
+
+            return ['ok' => false, 'message' => 'Không thể tạo hợp đồng gia hạn từ chatbot.'];
+        }
+
         return ['ok' => false, 'message' => 'Loại hành động này chưa được hỗ trợ thực thi.'];
     }
 
@@ -323,8 +438,40 @@ class ChatbotController {
         $actionPermissionMap = [
             'leave_approve' => 'duyet_nghiphep',
             'leave_reject' => 'duyet_nghiphep',
+            'leave_create' => 'them_nghiphep',
+            'contract_extend' => 'giahan_hopdong',
         ];
         return (string)($actionPermissionMap[$actionType] ?? '');
+    }
+
+    private function getCurrentEmployeeId(): int {
+        $account = $_SESSION['taikhoan'] ?? [];
+        if (!empty($account['MaNVRef'])) {
+            return (int)$account['MaNVRef'];
+        }
+
+        $maNV = trim((string)($account['MaNV'] ?? ''));
+        if ($maNV !== '' && preg_match('/(\d+)/', $maNV, $matches)) {
+            return (int)$matches[1];
+        }
+
+        return 0;
+    }
+
+    private function generateRenewalContractNumber(string $baseNumber, string $suffix): string {
+        $baseNumber = trim($baseNumber);
+        if ($baseNumber === '') {
+            $baseNumber = 'HD';
+        }
+
+        $candidate = $baseNumber . '-GH-' . $suffix;
+        $counter = 1;
+        while ($this->contractModel->checkSoHopDongExists($candidate)) {
+            $candidate = $baseNumber . '-GH-' . $suffix . '-' . $counter;
+            $counter++;
+        }
+
+        return $candidate;
     }
 
     private function getChatSessionId(array $account): int {
@@ -338,6 +485,38 @@ class ChatbotController {
             (string)($account['TenDangNhap'] ?? 'unknown'),
             (string)($account['VaiTro'] ?? 'unknown')
         );
+    }
+
+    public function brief() {
+        if (empty($_SESSION['taikhoan'])) {
+            $this->json(['ok' => false, 'message' => 'SESSION_EXPIRED'], 401);
+            return;
+        }
+
+        $account = $_SESSION['taikhoan'] ?? [];
+        $payload = [
+            'user' => [
+                'ma_tk'       => (int)($_SESSION['MaTK'] ?? 0),
+                'username'    => (string)($account['TenDangNhap'] ?? ''),
+                'role'        => (string)($account['VaiTro'] ?? ''),
+                'permissions' => array_values(array_slice((array)($_SESSION['quyen'] ?? []), 0, 80)),
+            ],
+        ];
+
+        $baseUrl = getenv('BOT_SERVICE_URL') ?: 'http://127.0.0.1:8001/chat';
+        $briefUrl = rtrim(preg_replace('#/chat$#', '', $baseUrl), '/') . '/brief';
+
+        $result = $this->callBotService($briefUrl, $payload);
+        if (!$result['ok']) {
+            $this->json(['ok' => true, 'items' => [], 'source' => 'fallback']);
+            return;
+        }
+
+        $this->json([
+            'ok'     => true,
+            'items'  => array_values((array)($result['data']['items'] ?? [])),
+            'source' => (string)($result['data']['source'] ?? 'brief'),
+        ]);
     }
 
     private function callBotService(string $url, array $payload): array {
