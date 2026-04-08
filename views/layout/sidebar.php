@@ -52,6 +52,9 @@ $sidebarRole = trim((string)($loggedAccount['VaiTro'] ?? 'Nhân viên'));
 $sidebarEmployeeCode = trim((string)($loggedAccount['MaNV'] ?? ''));
 $avatarSeed = $sidebarUsername !== '' ? $sidebarUsername : 'U';
 $avatarInitial = strtoupper(substr($avatarSeed, 0, 1));
+$sidebarRoleLower = strtolower(trim((string)$sidebarRole));
+$can_quick_profile = in_array($sidebarRoleLower, ['nhanvien', 'admin', 'quanly', 'hr', 'ketoan'], true);
+$can_review_profile_request = in_array($sidebarRoleLower, ['admin', 'quanly'], true);
 ?>
 
 <nav class="sidebar">
@@ -74,6 +77,8 @@ $avatarInitial = strtoupper(substr($avatarSeed, 0, 1));
     <ul class="submenu">
         <?php if ($can_nhanvien): ?><li><a href="?controller=nhanvien" data-i18n="menu.employee">Nhân viên</a></li><?php endif; ?>
         <?php if ($can_hosocanhan): ?><li><a href="?controller=hosocanhan" data-i18n="menu.profile">Hồ sơ</a></li><?php endif; ?>
+        <?php if ($can_quick_profile): ?><li><a href="?controller=hosocanhan&action=nhapnhanh">Nhap nhanh ho so</a></li><?php endif; ?>
+        <?php if ($can_review_profile_request): ?><li><a href="?controller=hosocanhan&action=duyetyeucau">Duyet yeu cau sua</a></li><?php endif; ?>
         <?php if ($can_phancong): ?><li><a href="?controller=phancong" data-i18n="menu.assignment">Công tác</a></li><?php endif; ?>
         <?php if ($can_hopdong): ?><li><a href="?controller=hopdong" data-i18n="menu.contract">Hợp đồng</a></li><?php endif; ?>
         <?php if ($can_tuyendung): ?><li><a href="?controller=tuyendung" data-i18n="menu.recruitment">Tuyển dụng</a></li><?php endif; ?>

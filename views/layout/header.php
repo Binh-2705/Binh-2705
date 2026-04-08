@@ -49,6 +49,7 @@
 <link rel="stylesheet" href="public/css/phanquyen.css">
 <link rel="stylesheet" href="public/css/security.css">
 <link rel="stylesheet" href="public/css/chatbot.css?v=20260406-1">
+<link rel="stylesheet" href="public/css/hosocanhan_quick.css?v=20260407-1">
 
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

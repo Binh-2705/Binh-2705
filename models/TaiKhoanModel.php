@@ -106,17 +106,13 @@ class TaiKhoanModel {
     }
 
     private function columnExists(string $table, string $column): bool {
-        $sql = "SHOW COLUMNS FROM `$table` LIKE ?";
-        $stmt = $this->conn->prepare($sql);
-        if (!$stmt) {
+        if (!preg_match('/^[A-Za-z0-9_]+$/', $table) || !preg_match('/^[A-Za-z0-9_]+$/', $column)) {
             return false;
         }
 
-        $stmt->bind_param("s", $column);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $escapedColumn = $this->conn->real_escape_string($column);
+        $result = @$this->conn->query("SHOW COLUMNS FROM `{$table}` LIKE '{$escapedColumn}'");
         $exists = $result && $result->num_rows > 0;
-        $stmt->close();
 
         return $exists;
     }
@@ -319,10 +315,30 @@ class TaiKhoanModel {
         );
     }
     public function resetMatKhau($tenDangNhap, $matKhauMoi){
-    $sql = "UPDATE taikhoan SET MatKhau = ? WHERE TenDangNhap = ?";
+    $tenDangNhap = trim((string)$tenDangNhap);
+    if ($tenDangNhap === '' || (string)$matKhauMoi === '') {
+        return false;
+    }
+
+    $hash = password_hash((string)$matKhauMoi, PASSWORD_DEFAULT);
+    $setParts = ["MatKhau = ?"];
+    if ($this->columnExists('taikhoan', 'BuocDoiMatKhau')) {
+        $setParts[] = "BuocDoiMatKhau = 0";
+    }
+    if ($this->columnExists('taikhoan', 'NgayCapMatKhauTam')) {
+        $setParts[] = "NgayCapMatKhauTam = NULL";
+    }
+
+    $sql = "UPDATE taikhoan SET " . implode(", ", $setParts) . " WHERE TenDangNhap = ?";
     $stmt = $this->conn->prepare($sql);
-    $stmt->bind_param("ss", $matKhauMoi, $tenDangNhap);
-    return $stmt->execute();
+    if (!$stmt) {
+        return false;
+    }
+
+    $stmt->bind_param("ss", $hash, $tenDangNhap);
+    $ok = $stmt->execute();
+    $stmt->close();
+    return $ok;
 }
 
 public function checkTenDangNhap($tenDangNhap){
@@ -437,43 +453,12 @@ public function findAccountForResetIdentifier(string $identifier) {
         return null;
     }
 
-    $byUsername = $this->getAccountByUsername($identifier);
-    if ($byUsername) {
-        return $byUsername;
-    }
-
-    if (!filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
-        return null;
-    }
-
-    $employee = $this->findNhanVienByEmail($identifier);
-    if (!$employee) {
-        return null;
-    }
-
-    $maNV = (int)($employee['MaNV'] ?? 0);
-    if ($maNV <= 0) {
-        return null;
-    }
-
-    $sql = "SELECT * FROM taikhoan WHERE MaNVRef = ? OR MaNV = ? LIMIT 1";
-    $stmt = $this->conn->prepare($sql);
-    if (!$stmt) {
-        return null;
-    }
-
-    $maNVText = (string)$maNV;
-    $stmt->bind_param("is", $maNV, $maNVText);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $row = $result ? $result->fetch_assoc() : null;
-    $stmt->close();
-
-    return $row ?: null;
+    return $this->resolveRecoveryAccount($identifier);
 }
 
 public function findAccountForInternalRecovery(string $tenDangNhap, string $maNhanVien, string $ngaySinh, string $soDienThoai4So): ?array {
-    $account = $this->getAccountByUsername(trim($tenDangNhap));
+    $identifier = trim($tenDangNhap);
+    $account = $this->resolveRecoveryAccount($identifier, $maNhanVien);
     if (!$account) {
         return null;
     }
@@ -509,6 +494,78 @@ public function findAccountForInternalRecovery(string $tenDangNhap, string $maNh
         'account' => $account,
         'employee' => $employee,
     ];
+}
+
+private function resolveRecoveryAccount(string $identifier, string $maNhanVien = ''): ?array {
+    $identifier = trim($identifier);
+    if ($identifier === '') {
+        return null;
+    }
+
+    $account = $this->getAccountByUsername($identifier);
+    if ($account) {
+        return $account;
+    }
+
+    if (!filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
+        return null;
+    }
+
+    $employee = $this->findNhanVienByEmail($identifier);
+    if (!$employee) {
+        return null;
+    }
+
+    $maNV = (int)($employee['MaNV'] ?? 0);
+    if ($maNV <= 0) {
+        return null;
+    }
+
+    $accounts = $this->findAccountsForEmployee($maNV);
+    if (count($accounts) === 1) {
+        return $accounts[0];
+    }
+
+    if ($maNhanVien !== '') {
+        $providedCodes = $this->employeeCodeVariants($maNhanVien);
+        $filtered = array_values(array_filter($accounts, function (array $candidate) use ($providedCodes): bool {
+            $candidateCodes = array_unique(array_merge(
+                $this->employeeCodeVariants((string)($candidate['MaNV'] ?? '')),
+                $this->employeeCodeVariants((string)($candidate['MaNVRef'] ?? ''))
+            ));
+            return !empty(array_intersect($candidateCodes, $providedCodes));
+        }));
+
+        if (count($filtered) === 1) {
+            return $filtered[0];
+        }
+    }
+
+    return null;
+}
+
+private function findAccountsForEmployee(int $maNV): array {
+    if ($maNV <= 0) {
+        return [];
+    }
+
+    $sql = "SELECT *
+            FROM taikhoan
+            WHERE MaNVRef = ? OR MaNV = ? OR MaNV = ?
+            ORDER BY CASE WHEN TrangThai = 'Hoạt động' THEN 0 ELSE 1 END, MaTK ASC";
+    $stmt = $this->conn->prepare($sql);
+    if (!$stmt) {
+        return [];
+    }
+
+    $maNVText = (string)$maNV;
+    $prefixedCode = 'L' . str_pad((string)$maNV, 3, '0', STR_PAD_LEFT);
+    $stmt->bind_param("iss", $maNV, $maNVText, $prefixedCode);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $rows = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+    $stmt->close();
+    return $rows;
 }
 
 private function findNhanVienForAccount(array $account): ?array {
@@ -682,19 +739,19 @@ public function markResetTokenUsed(int $id): bool {
 }
 
 public function updatePasswordByMaTK(int $maTK, string $newHash, bool $forceChange = false): bool {
-    if ($forceChange) {
-        $sql = "UPDATE taikhoan
-                SET MatKhau = ?,
-                    BuocDoiMatKhau = 1,
-                    NgayCapMatKhauTam = NOW()
-                WHERE MaTK = ?";
-    } else {
-        $sql = "UPDATE taikhoan
-                SET MatKhau = ?,
-                    BuocDoiMatKhau = 0,
-                    NgayCapMatKhauTam = NULL
-                WHERE MaTK = ?";
+    $setParts = ["MatKhau = ?"];
+    $hasForceColumn = $this->columnExists('taikhoan', 'BuocDoiMatKhau');
+    $hasTempDateColumn = $this->columnExists('taikhoan', 'NgayCapMatKhauTam');
+
+    if ($hasForceColumn) {
+        $setParts[] = $forceChange ? "BuocDoiMatKhau = 1" : "BuocDoiMatKhau = 0";
     }
+
+    if ($hasTempDateColumn) {
+        $setParts[] = $forceChange ? "NgayCapMatKhauTam = NOW()" : "NgayCapMatKhauTam = NULL";
+    }
+
+    $sql = "UPDATE taikhoan SET " . implode(", ", $setParts) . " WHERE MaTK = ?";
 
     $stmt = $this->conn->prepare($sql);
     if (!$stmt) {

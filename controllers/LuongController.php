@@ -16,7 +16,8 @@ class LuongController {
     public function index() {
         AuthMiddleware::check($this->conn, 'xem_luong');
         $quyen = $_SESSION['quyen'] ?? [];
-        $luong = $this->model->getAll();
+        $currentMaNV = $this->isEmployeeRole() ? $this->currentEmployeeId() : null;
+        $luong = $this->model->getAll($currentMaNV);
         include './views/luong/index.php';
     }
 
@@ -71,4 +72,20 @@ public function moChot() {
     $this->model->updateTrangThai($id, 'Chưa chốt');
     WebResponder::redirectWithMessage('index.php?controller=luong&action=index', 'Mở chốt lương thành công.', 'success');
 }
+
+    private function currentEmployeeId(): ?int {
+        $account = $_SESSION['taikhoan'] ?? [];
+        $maNVRef = (int)($account['MaNVRef'] ?? 0);
+        if ($maNVRef > 0) return $maNVRef;
+        $maNVRaw = (string)($account['MaNV'] ?? '');
+        $digits = preg_replace('/\D+/', '', $maNVRaw);
+        if ($digits === '') return null;
+        $maNV = (int)$digits;
+        return $maNV > 0 ? $maNV : null;
+    }
+
+    private function isEmployeeRole(): bool {
+        $account = $_SESSION['taikhoan'] ?? [];
+        return strtolower(trim((string)($account['VaiTro'] ?? ''))) === 'nhanvien';
+    }
 }

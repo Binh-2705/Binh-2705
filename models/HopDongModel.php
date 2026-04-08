@@ -254,6 +254,10 @@ END AS SoNgayConLai
             $sql .= " AND hd.NgayBatDau <= '$denNgay'";
         }
 
+        if (!empty($filters['maNV'])) {
+            $sql .= " AND hd.MaNV = " . (int)$filters['maNV'];
+        }
+
         $rs = mysqli_query($this->conn, $sql);
         $row = $rs ? mysqli_fetch_assoc($rs) : null;
         return (int)($row['total'] ?? 0);
@@ -323,6 +327,10 @@ END AS SoNgayConLai
         if (!empty($filters['denNgay'])) {
             $denNgay = mysqli_real_escape_string($this->conn, $filters['denNgay']);
             $sql .= " AND hd.NgayBatDau <= '$denNgay'";
+        }
+
+        if (!empty($filters['maNV'])) {
+            $sql .= " AND hd.MaNV = " . (int)$filters['maNV'];
         }
 
         $sql .= " ORDER BY hd.MaHopDong DESC LIMIT $limit OFFSET $offset";

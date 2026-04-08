@@ -25,8 +25,8 @@
             <input type="hidden" name="_csrf_token" value="<?php echo htmlspecialchars($_SESSION['_csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
             <div class="auth-grid-2">
                 <div>
-                    <label for="TenDangNhap">Tên đăng nhập</label>
-                    <input id="TenDangNhap" type="text" name="TenDangNhap" required maxlength="50" value="<?php echo htmlspecialchars($formData['TenDangNhap'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" placeholder="Ví dụ: binh192k5@gmail.com">
+                    <label for="TenDangNhap">Tên đăng nhập hoặc email tài khoản</label>
+                    <input id="TenDangNhap" type="text" name="TenDangNhap" required maxlength="100" value="<?php echo htmlspecialchars($formData['TenDangNhap'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" placeholder="Ví dụ: binh192k5@gmail.com hoặc nb001">
                 </div>
                 <div>
                     <label for="MaNhanVien">Mã nhân sự</label>
@@ -52,7 +52,7 @@
         </form>
 
         <div class="auth-inline-note">
-            Nếu hồ sơ nhân sự chưa có ngày sinh hoặc số điện thoại chính xác, hãy liên hệ quản trị viên để được cấp mật khẩu tạm.
+            Nếu một nhân viên có nhiều tài khoản, hãy nhập đúng tên đăng nhập của tài khoản cần khôi phục. Nếu hồ sơ nhân sự chưa có ngày sinh hoặc số điện thoại chính xác, hãy liên hệ quản trị viên để được cấp mật khẩu tạm.
         </div>
 
         <a class="back-link" href="index.php?controller=dangnhap&action=login">← Quay lại đăng nhập</a>

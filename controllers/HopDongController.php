@@ -27,6 +27,7 @@ class HopDongController {
             'trangThai' => $_GET['trangThai'] ?? '',
             'tuNgay'    => $_GET['tuNgay']    ?? '',
             'denNgay'   => $_GET['denNgay']   ?? '',
+            'maNV'      => $this->isEmployeeRole() ? $this->currentEmployeeId() : null,
         ];
 
         $page = max(1, (int)($_GET['page'] ?? 1));
@@ -300,6 +301,21 @@ if ($luongCu != $luongMoi) {
     WebResponder::backWithMessage('Không thể chấm dứt hợp đồng.', 'error', 'index.php?controller=hopdong&action=index');
 }
 
+    private function currentEmployeeId(): ?int {
+        $account = $_SESSION['taikhoan'] ?? [];
+        $maNVRef = (int)($account['MaNVRef'] ?? 0);
+        if ($maNVRef > 0) return $maNVRef;
+        $maNVRaw = (string)($account['MaNV'] ?? '');
+        $digits = preg_replace('/\D+/', '', $maNVRaw);
+        if ($digits === '') return null;
+        $maNV = (int)$digits;
+        return $maNV > 0 ? $maNV : null;
+    }
+
+    private function isEmployeeRole(): bool {
+        $account = $_SESSION['taikhoan'] ?? [];
+        return strtolower(trim((string)($account['VaiTro'] ?? ''))) === 'nhanvien';
+    }
 
 
 }

@@ -19,7 +19,8 @@ class PhanCongController {
         AuthMiddleware::check($this->conn, 'xem_phancong');
         $quyen = $_SESSION['quyen'] ?? [];
         $keyword = trim((string)($_GET['keyword'] ?? ''));
-        $phancongs = $this->model->getAll($keyword);
+        $currentMaNV = $this->isEmployeeRole() ? $this->currentEmployeeId() : null;
+        $phancongs = $this->model->getAll($keyword, $currentMaNV);
 
         require 'views/phancong/index.php';
     }
@@ -133,4 +134,20 @@ class PhanCongController {
 
     require 'views/phancong/history.php';
 }
+
+    private function currentEmployeeId(): ?int {
+        $account = $_SESSION['taikhoan'] ?? [];
+        $maNVRef = (int)($account['MaNVRef'] ?? 0);
+        if ($maNVRef > 0) return $maNVRef;
+        $maNVRaw = (string)($account['MaNV'] ?? '');
+        $digits = preg_replace('/\D+/', '', $maNVRaw);
+        if ($digits === '') return null;
+        $maNV = (int)$digits;
+        return $maNV > 0 ? $maNV : null;
+    }
+
+    private function isEmployeeRole(): bool {
+        $account = $_SESSION['taikhoan'] ?? [];
+        return strtolower(trim((string)($account['VaiTro'] ?? ''))) === 'nhanvien';
+    }
 }

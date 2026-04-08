@@ -97,8 +97,8 @@ class DangNhapController {
                 return;
             }
 
-            if (strlen($matKhauMoi) < 8) {
-                $loi = 'Mật khẩu mới phải có ít nhất 8 ký tự.';
+            if (strlen($matKhauMoi) < 7) {
+                $loi = 'Mật khẩu mới phải có ít nhất 6 ký tự.';
                 include 'views/dangnhap/quenmatkhau.php';
                 return;
             }
@@ -122,12 +122,18 @@ class DangNhapController {
                     'employee_code' => $formData['MaNhanVien'],
                     'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
                 ]);
-                $loi = 'Thông tin xác thực không khớp với hồ sơ nhân viên. Vui lòng kiểm tra lại hoặc liên hệ quản trị viên.';
+                $loi = 'Thông tin xác thực không khớp. Nếu một nhân viên có nhiều tài khoản, hãy nhập đúng tên đăng nhập của tài khoản cần khôi phục.';
                 include 'views/dangnhap/quenmatkhau.php';
                 return;
             }
 
             $account = $match['account'];
+            if (password_verify($matKhauMoi, (string)($account['MatKhau'] ?? ''))) {
+                $loi = 'Mật khẩu mới không được trùng với mật khẩu hiện tại.';
+                include 'views/dangnhap/quenmatkhau.php';
+                return;
+            }
+
             $hash = password_hash($matKhauMoi, PASSWORD_DEFAULT);
             $ok = $this->model->updatePasswordByMaTK((int)$account['MaTK'], $hash, false);
 

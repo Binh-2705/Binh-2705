@@ -1,6 +1,15 @@
 <?php include 'views/layout/header.php'; ?>
 
 <?php include 'views/layout/sidebar.php'; ?>
+<?php
+$homeAccount = $_SESSION['taikhoan'] ?? [];
+$homeRoleRaw = trim((string)($homeAccount['VaiTro'] ?? ($_SESSION['VaiTro'] ?? '')));
+$homeRoleLower = strtolower($homeRoleRaw);
+$homeRoleCompact = str_replace(' ', '', $homeRoleLower);
+$hasEmployeeCode = trim((string)($homeAccount['MaNV'] ?? '')) !== '';
+$isManagementRole = in_array($homeRoleCompact, ['admin', 'quanly', 'hr', 'ketoan'], true);
+$showQuickProfileFab = $hasEmployeeCode && !$isManagementRole;
+?>
 
 <main class="main-content">
 
@@ -54,30 +63,7 @@
       </div>
     </div>
 
-    <div class="home-user-menu">
-      <div class="home-user-info" onclick="toggleMenu()">
-        <img src="https://i.pravatar.cc/40" class="home-avatar" alt="Avatar">
-        <div class="username-wrap">
-          <span class="home-username">Nguyễn Thanh Bình</span>
-          <span class="user-status">Online</span>
-        </div>
-        <span class="home-arrow" id="arrow">▾</span>
-      </div>
-
-      <div class="home-user-panel" id="userDropdown" aria-hidden="true">
-        <div class="panel-profile">
-          <img src="https://i.pravatar.cc/64" class="home-avatar-large" alt="Avatar">
-          <div>
-            <strong>Nguyễn Thanh Bình</strong>
-            <small>Admin hệ thống</small>
-          </div>
-        </div>
-        <div class="panel-actions">
-          <a href="#" class="panel-action">🔑 Thay đổi mật khẩu</a>
-          <a href="index.php?controller=dangnhap&action=dangxuat" class="panel-action logout">↪ Đăng xuất</a>
-        </div>
-      </div>
-    </div>
+    
   </div>
 </div>
 </div>
@@ -217,6 +203,22 @@
 </div>
 
 </section>
+
+<?php if ($showQuickProfileFab) { ?>
+<a
+  href="index.php?controller=hosocanhan&action=nhapnhanh"
+  class="quick-profile-fab"
+  data-tooltip="Them ho so cua toi"
+  aria-label="Them nhanh thong tin ho so"
+  title="Them nhanh thong tin ho so"
+>
+  <span class="quick-profile-fab-core" aria-hidden="true">
+    <img class="quick-profile-fab-avatar" src="public/anh/anh4.png" alt="Them ho so">
+    <span class="quick-profile-fab-icon">+</span>
+  </span>
+  <span class="quick-profile-fab-text">Them nhanh ho so</span>
+</a>
+<?php } ?>
 
 </main>
 

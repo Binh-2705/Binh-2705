@@ -16,13 +16,16 @@ public function getDanhSachNhanVien(){
 }
 
     /* ================= LẤY BẢNG LƯƠNG ================= */
-public function getAll() {
+public function getAll(?int $maNV = null) {
     $sql = "SELECT bl.*, nv.HoTen
             FROM bangluong bl
-            LEFT JOIN nhanvien nv ON bl.MaNV = nv.MaNV
-            ORDER BY bl.Nam DESC, bl.Thang DESC, bl.MaNV ASC";
-    // ... giữ nguyên phần còn lại
+            LEFT JOIN nhanvien nv ON bl.MaNV = nv.MaNV";
 
+    if ($maNV !== null) {
+        $sql .= " WHERE bl.MaNV = " . (int)$maNV;
+    }
+
+    $sql .= " ORDER BY bl.Nam DESC, bl.Thang DESC, bl.MaNV ASC";
 
     $rs = $this->conn->query($sql);
 

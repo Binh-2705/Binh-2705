@@ -7,7 +7,7 @@ class PhanCongModel {
     }
 
     /* ================== READ ================== */
-    public function getAll($keyword = '') {
+    public function getAll($keyword = '', ?int $maNV = null) {
         $keyword = trim((string)$keyword);
 
         $sql = "SELECT 
@@ -24,16 +24,23 @@ class PhanCongModel {
                 INNER JOIN phongban pb ON pc.MaPB = pb.MaPB
                 INNER JOIN chucvu cv ON pc.MaCV = cv.MaCV";
 
+        $conditions = [];
+        if ($maNV !== null) {
+            $conditions[] = "pc.MaNV = " . (int)$maNV;
+        }
+
         if ($keyword === '') {
-            $sql .= " ORDER BY pc.NgayBatDau DESC";
+            $where = $conditions ? ' WHERE ' . implode(' AND ', $conditions) : '';
+            $sql .= $where . " ORDER BY pc.NgayBatDau DESC";
             return mysqli_query($this->conn, $sql);
         }
 
-        $sql .= " WHERE CAST(nv.MaNV AS CHAR) LIKE ?
+        $baseWhere = $conditions ? ' WHERE ' . implode(' AND ', $conditions) . ' AND ' : ' WHERE ';
+        $sql .= $baseWhere . "(CAST(nv.MaNV AS CHAR) LIKE ?
                   OR nv.HoTen LIKE ?
                   OR pb.TenPB LIKE ?
                   OR cv.TenCV LIKE ?
-                  OR pc.LoaiDieuChuyen LIKE ?
+                  OR pc.LoaiDieuChuyen LIKE ?)
                   ORDER BY pc.NgayBatDau DESC";
 
         $search = '%' . $keyword . '%';
