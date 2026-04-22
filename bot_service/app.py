@@ -381,6 +381,66 @@ class DataTools:
         finally:
             conn.close()
 
+    def new_employees_this_month(self, limit: int = 10) -> List[Dict[str, Any]]:
+        conn = self._connect()
+        try:
+            cur = conn.cursor(dictionary=True)
+            cur.execute(
+                """
+                SELECT MaNV, HoTen, Email, NgayVaoLam, TrangThai
+                FROM nhanvien
+                WHERE MONTH(NgayVaoLam) = MONTH(CURDATE())
+                  AND YEAR(NgayVaoLam) = YEAR(CURDATE())
+                ORDER BY NgayVaoLam DESC
+                LIMIT %s
+                """,
+                (limit,),
+            )
+            return cur.fetchall() or []
+        finally:
+            conn.close()
+
+    def department_list(self) -> List[Dict[str, Any]]:
+        conn = self._connect()
+        try:
+            cur = conn.cursor(dictionary=True)
+            cur.execute(
+                """
+                SELECT pb.MaPB, pb.TenPB, pb.MoTa,
+                       COUNT(DISTINCT pc.MaNV) AS SoNhanVien
+                FROM phongban pb
+                LEFT JOIN phancong pc ON pc.MaPB = pb.MaPB
+                    AND (pc.NgayKetThuc IS NULL OR pc.NgayKetThuc >= CURDATE())
+                GROUP BY pb.MaPB, pb.TenPB, pb.MoTa
+                ORDER BY SoNhanVien DESC
+                """
+            )
+            return cur.fetchall() or []
+        finally:
+            conn.close()
+
+    def payroll_summary_this_month(self) -> Optional[Dict[str, Any]]:
+        conn = self._connect()
+        try:
+            cur = conn.cursor(dictionary=True)
+            cur.execute(
+                """
+                SELECT
+                    COUNT(DISTINCT MaNV) AS SoNhanVienCoLuong,
+                    ROUND(AVG(TongLuong), 0) AS LuongTrungBinh,
+                    ROUND(MAX(TongLuong), 0) AS LuongCaoNhat,
+                    ROUND(MIN(TongLuong), 0) AS LuongThapNhat,
+                    ROUND(SUM(TongLuong), 0) AS TongQuyLuong,
+                    SUM(CASE WHEN TrangThai='Đã duyệt' THEN 1 ELSE 0 END) AS DaDuyet,
+                    SUM(CASE WHEN TrangThai='Chờ duyệt' THEN 1 ELSE 0 END) AS ChoDuyet
+                FROM bangluong
+                WHERE Thang = MONTH(CURDATE()) AND Nam = YEAR(CURDATE())
+                """
+            )
+            return cur.fetchone()
+        finally:
+            conn.close()
+
     def resolve_employee_id(self, ma_tk: int) -> int:
         conn = self._connect()
         try:
@@ -584,6 +644,7 @@ class ChatEngine:
 
     def answer(self, request: ChatRequest) -> ChatResponse:
         message = request.message.strip()
+        self._current_user_role = request.user.role
 
         plan_reply = self._try_action_plan(message, request.user)
         if plan_reply is not None:
@@ -621,11 +682,39 @@ class ChatEngine:
         )
 
     def _default_suggestions(self) -> List[str]:
-        return [
+        role = getattr(self, "_current_user_role", "")
+        role_suggestions: Dict[str, List[str]] = {
+            "Admin": [
+                "Tổng số nhân viên hiện tại là bao nhiêu?",
+                "Thống kê nghỉ phép",
+                "Hợp đồng sắp hết hạn",
+            ],
+            "HR": [
+                "Nhân viên mới tháng này",
+                "Có bao nhiêu đơn nghỉ phép chờ duyệt?",
+                "Tóm tắt tuyển dụng",
+            ],
+            "KeToan": [
+                "Thống kê lương tháng này",
+                "Tổng số nhân viên hiện tại là bao nhiêu?",
+                "Tổng quan bảo hiểm",
+            ],
+            "QuanLy": [
+                "Phân bổ nhân sự theo phòng ban",
+                "Hợp đồng sắp hết hạn",
+                "Thống kê nghỉ phép",
+            ],
+            "NhanVien": [
+                "Thông tin cá nhân của tôi",
+                "Đơn nghỉ phép của tôi",
+                "Lương tháng này của tôi",
+            ],
+        }
+        return role_suggestions.get(role, [
             "Tổng số nhân viên hiện tại là bao nhiêu?",
             "Thống kê nghỉ phép",
             "Hợp đồng sắp hết hạn",
-        ]
+        ])
 
     def _try_action_plan(self, message: str, user: UserContext) -> Optional[Tuple[str, List[str], List[str], Optional[Dict[str, Any]]]]:
         q = normalize_text(message)
@@ -1341,6 +1430,77 @@ class ChatEngine:
                 ["Tổng số nhân viên hiện tại là bao nhiêu?", "Phân bổ nhân sự theo phòng ban"],
             )
 
+        # --- Nhân viên mới tháng này ---
+        if ("nhan vien moi" in q or "tuyen moi" in q or ("moi" in q and "nhan vien" in q and "thang" in q)):
+            if not self._has_permission(user_permissions, "xem_nhanvien"):
+                return self._permission_denied("xem_nhanvien")
+
+            now = datetime.now()
+            rows = self.tools.new_employees_this_month(limit=10)
+            if not rows:
+                return (
+                    f"Không có nhân viên nào vào làm trong tháng {now.month}/{now.year}.",
+                    ["Nguồn: nhanvien.NgayVaoLam"],
+                    self._default_suggestions(),
+                )
+
+            lines = [f"Nhân viên mới tháng {now.month}/{now.year}:"]
+            for row in rows:
+                lines.append(f"- MaNV {row.get('MaNV')} | {row.get('HoTen')} | Vào làm: {row.get('NgayVaoLam')}")
+            return (
+                "\n".join(lines),
+                [f"Nguồn: nhanvien.NgayVaoLam | Tháng {now.month}/{now.year}"],
+                ["Tổng số nhân viên hiện tại là bao nhiêu?", "Phân bổ nhân sự theo phòng ban"],
+            )
+
+        # --- Danh sách phòng ban ---
+        if ("danh sach phong ban" in q or "cac phong ban" in q or ("phong ban" in q and "co nhung" in q)):
+            if not self._has_permission(user_permissions, "xem_nhanvien"):
+                return self._permission_denied("xem_nhanvien")
+
+            rows = self.tools.department_list()
+            if not rows:
+                return ("Chưa có dữ liệu phòng ban.", ["Nguồn: bảng phongban"], self._default_suggestions())
+
+            lines = ["Danh sách phòng ban:"]
+            for row in rows:
+                nv = row.get("SoNhanVien") or 0
+                lines.append(f"- {row.get('TenPB')} ({nv} nhân viên)")
+            return (
+                "\n".join(lines),
+                ["Nguồn: phongban + phancong hiện tại"],
+                ["Phân bổ nhân sự theo phòng ban", "Tổng số nhân viên hiện tại là bao nhiêu?"],
+            )
+
+        # --- Thống kê lương tháng này ---
+        if ("thong ke luong" in q or "thong ke bang luong" in q or ("luong" in q and "thang nay" in q and "tong" in q)):
+            if not self._has_permission(user_permissions, "xem_bangluong"):
+                return self._permission_denied("xem_bangluong")
+
+            now = datetime.now()
+            row = self.tools.payroll_summary_this_month()
+            if not row or not row.get("SoNhanVienCoLuong"):
+                return (
+                    f"Chưa có dữ liệu bảng lương tháng {now.month}/{now.year}.",
+                    ["Nguồn: bảng bangluong"],
+                    self._default_suggestions(),
+                )
+
+            reply = (
+                f"Thống kê lương tháng {now.month}/{now.year}:\n"
+                f"- Số nhân viên có bảng lương: {row.get('SoNhanVienCoLuong', 0)}\n"
+                f"- Lương trung bình: {int(row.get('LuongTrungBinh') or 0):,}đ\n"
+                f"- Lương cao nhất: {int(row.get('LuongCaoNhat') or 0):,}đ\n"
+                f"- Lương thấp nhất: {int(row.get('LuongThapNhat') or 0):,}đ\n"
+                f"- Tổng quỹ lương: {int(row.get('TongQuyLuong') or 0):,}đ\n"
+                f"- Đã duyệt: {row.get('DaDuyet', 0)} | Chờ duyệt: {row.get('ChoDuyet', 0)}"
+            )
+            return (
+                reply,
+                ["Nguồn: bảng bangluong", f"Tháng {now.month}/{now.year}"],
+                ["Tổng quan bảo hiểm", "Hợp đồng sắp hết hạn", "Tổng số nhân viên hiện tại là bao nhiêu?"],
+            )
+
         return None
 
     def _llm_answer(self, request: ChatRequest) -> str:
@@ -1488,3 +1648,68 @@ def brief(request: BriefRequest, x_app_secret: Optional[str] = Header(default=No
         items.append("Mọi thứ đang ổn. Không có thông báo quan trọng nào.")
 
     return BriefResponse(items=items)
+
+
+class StatsResponse(BaseModel):
+    ok: bool = True
+    stats: Dict[str, Any] = Field(default_factory=dict)
+
+
+@app.post("/stats", response_model=StatsResponse)
+def stats(request: BriefRequest, x_app_secret: Optional[str] = Header(default=None)) -> StatsResponse:
+    """Trả về thống kê tổng hợp toàn hệ thống dựa trên quyền người dùng."""
+    if shared_secret:
+        if not x_app_secret or x_app_secret != shared_secret:
+            raise HTTPException(status_code=401, detail="INVALID_SHARED_SECRET")
+
+    perms = set(request.user.permissions)
+    result: Dict[str, Any] = {}
+
+    try:
+        if "xem_nhanvien" in perms:
+            result["tong_nhan_vien"] = engine.tools.employee_count()
+            result["nhan_vien_moi_thang_nay"] = len(engine.tools.new_employees_this_month())
+
+        if "xem_nghiphep" in perms:
+            result["don_nghi_phep_cho_duyet"] = engine.tools.pending_leave_count()
+
+        if "xem_hopdong" in perms:
+            result["hop_dong_sap_het_han_30_ngay"] = len(engine.tools.contracts_expiring(days=30))
+
+        if "xem_chamcong" in perms:
+            cc = engine.tools.attendance_summary_this_month()
+            if cc:
+                result["cham_cong_thang_nay"] = {
+                    "so_nhan_vien": cc.get("SoNhanVien", 0),
+                    "tong_di_lam": cc.get("TongDiLam", 0),
+                    "tong_nghi_phep": cc.get("TongNghiPhep", 0),
+                    "tb_gio_lam": cc.get("TBGioLam"),
+                }
+
+        if "xem_bangluong" in perms:
+            bl = engine.tools.payroll_summary_this_month()
+            if bl:
+                result["luong_thang_nay"] = {
+                    "so_nhan_vien": bl.get("SoNhanVienCoLuong", 0),
+                    "luong_trung_binh": bl.get("LuongTrungBinh"),
+                    "tong_quy_luong": bl.get("TongQuyLuong"),
+                    "cho_duyet": bl.get("ChoDuyet", 0),
+                }
+
+        if "xem_dot_tuyen" in perms:
+            rec = engine.tools.recruitment_status_summary()
+            if rec:
+                result["tuyen_dung"] = {
+                    "tong_ho_so": rec.get("Tong", 0),
+                    "phong_van": rec.get("PhongVan", 0),
+                    "offer": rec.get("Offer", 0),
+                    "nhan_viec": rec.get("NhanViec", 0),
+                }
+
+        if "xem_daotao" in perms:
+            result["khoa_dao_tao_dang_dien_ra"] = len(engine.tools.training_ongoing())
+
+    except Exception as exc:
+        return StatsResponse(ok=False, stats={"error": str(exc)})
+
+    return StatsResponse(ok=True, stats=result)

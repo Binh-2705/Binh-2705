@@ -3,93 +3,62 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Dang nhap - HRM Laravel</title>
-    <style>
-        :root {
-            --bg: #f3f0e8;
-            --card: #fffdf7;
-            --ink: #1d252a;
-            --accent: #0f6d5a;
-            --accent-2: #d8a52f;
-            --danger: #a91d3a;
-            --line: #d7d0c1;
-        }
-        * { box-sizing: border-box; }
-        body {
-            margin: 0;
-            min-height: 100vh;
-            font-family: "Segoe UI", Tahoma, sans-serif;
-            color: var(--ink);
-            background:
-                radial-gradient(circle at 10% 20%, #f6dbc6 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, #d3e9dc 0%, transparent 35%),
-                var(--bg);
-            display: grid;
-            place-items: center;
-            padding: 16px;
-        }
-        .card {
-            width: min(420px, 100%);
-            background: var(--card);
-            border: 1px solid var(--line);
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 12px 34px rgba(0, 0, 0, 0.08);
-        }
-        h1 {
-            margin: 0 0 12px;
-            font-size: 24px;
-        }
-        p { margin: 0 0 18px; color: #4d5559; }
-        .err {
-            margin: 0 0 14px;
-            padding: 10px;
-            border-radius: 10px;
-            border: 1px solid #f0bec9;
-            background: #fff2f5;
-            color: var(--danger);
-        }
-        label { display: block; font-size: 14px; margin: 10px 0 6px; }
-        input {
-            width: 100%;
-            height: 42px;
-            border: 1px solid var(--line);
-            border-radius: 10px;
-            padding: 0 12px;
-            background: #fff;
-        }
-        button {
-            width: 100%;
-            margin-top: 14px;
-            height: 44px;
-            border: 0;
-            border-radius: 10px;
-            color: #fff;
-            background: linear-gradient(120deg, var(--accent), #167f68);
-            font-weight: 600;
-            cursor: pointer;
-        }
-    </style>
+    <title>Đăng nhập - Hệ thống nhân sự</title>
+    <link rel="stylesheet" href="{{ asset('public/style1.css') }}?v=20260420-2">
+    <link rel="stylesheet" href="{{ asset('public/css/legacy-bridge.css') }}?v=20260410-1">
 </head>
 <body>
-    <main class="card">
-        <h1>Dang nhap he thong</h1>
-        <p>Ban Laravel migration cho du an quan ly nhan su.</p>
+    <main class="login-shell">
+    <section class="login-container">
+        <div class="login-left login-left-art">
+            <div class="login-left-overlay"></div>
+            <div class="login-left-content">
+                <span class="brand-pill">HR Workspace</span>
+                <h2>Đăng nhập vào trung tâm vận hành nhân sự</h2>
+                <p>Toàn bộ hồ sơ, chấm công, lương và quy trình nội bộ giờ chạy trên cùng một giao diện thống nhất.</p>
+                <ul class="login-feature-list">
+                    <li><strong>24h</strong><span>Theo dõi trạng thái hệ thống và tác vụ gần đây theo thời gian thực</span></li>
+                    <li><strong>HR</strong><span>Truy cập nhanh nhân sự, hợp đồng, tuyển dụng và cấu hình tài khoản</span></li>
+                    <li><strong>AI</strong><span>Sẵn sàng dùng chatbot nội bộ và quy trình phê duyệt ngay sau khi đăng nhập</span></li>
+                </ul>
+            </div>
+        </div>
 
-        @if ($errors->any())
-            <div class="err">{{ $errors->first() }}</div>
-        @endif
+        <div class="login-right">
+            <span class="auth-title-badge">Đăng nhập bảo mật</span>
+            <h2>Xin chào trở lại</h2>
+            <p>Sử dụng tài khoản nội bộ để tiếp tục làm việc trên hệ thống nhân sự mới.</p>
 
-        <form method="post" action="{{ route('login.submit') }}">
-            @csrf
-            <label for="TenDangNhap">Ten dang nhap</label>
-            <input id="TenDangNhap" name="TenDangNhap" value="{{ old('TenDangNhap') }}" required>
+            @if ($errors->any())
+                <div class="auth-alert auth-alert-error">{{ $errors->first() }}</div>
+            @endif
 
-            <label for="MatKhau">Mat khau</label>
-            <input id="MatKhau" name="MatKhau" type="password" required>
+            @if (session('success'))
+                <div class="auth-alert auth-alert-success">{{ session('success') }}</div>
+            @endif
 
-            <button type="submit">Dang nhap</button>
-        </form>
+            <form method="post" action="{{ route('login.submit') }}" class="auth-form">
+                @csrf
+                <div>
+                    <label for="TenDangNhap">Tên đăng nhập</label>
+                    <input id="TenDangNhap" name="TenDangNhap" type="text" value="{{ old('TenDangNhap') }}" required>
+                </div>
+
+                <div>
+                    <label for="MatKhau">Mật khẩu</label>
+                    <input id="MatKhau" name="MatKhau" type="password" required>
+                </div>
+
+                <div class="options">
+                    <label><input type="checkbox" checked disabled><span>Phiên đăng nhập được bảo vệ</span></label>
+                    <a href="{{ route('password.forgot') }}">Quên mật khẩu?</a>
+                </div>
+
+                <button type="submit">Đăng nhập</button>
+                <span class="auth-meta-note">Nếu đây là lần đầu đăng nhập sau khi được cấp tài khoản, hệ thống có thể yêu cầu đổi mật khẩu để tiếp tục.</span>
+            </form>
+        </div>
+    </section>
     </main>
 </body>
 </html>

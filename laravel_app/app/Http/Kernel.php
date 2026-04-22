@@ -30,6 +30,8 @@ class Kernel extends HttpKernel
      */
     protected $middlewareGroups = [
         'web' => [
+            \App\Http\Middleware\LegacyRedirectMiddleware::class,
+            \App\Http\Middleware\ApplySubdirectoryRootUrl::class,
             \App\Http\Middleware\EncryptCookies::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
             \Illuminate\Session\Middleware\StartSession::class,
@@ -59,6 +61,7 @@ class Kernel extends HttpKernel
         'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
         'can' => \Illuminate\Auth\Middleware\Authorize::class,
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
+        'api.token' => \App\Http\Middleware\ApiTokenMiddleware::class,
         'permission' => \App\Http\Middleware\PermissionMiddleware::class,
         'password.confirm' => \Illuminate\Auth\Middleware\RequirePassword::class,
         'session.auth' => \App\Http\Middleware\SessionAuthMiddleware::class,

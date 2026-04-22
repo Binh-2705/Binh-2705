@@ -4,12 +4,6 @@
         "phpmailer/phpmailer": "^7.0"
     },
     "scripts": {
-        "db:migrate": "php scripts/migrate.php",
-        "test:auth-smoke": "php tests/auth_smoke.php",
-        "test:auth-recovery-smoke": "php tests/auth_recovery_smoke.php",
-        "test:all": [
-            "@test:auth-smoke",
-            "@test:auth-recovery-smoke"
-        ]
+        "db:migrate": "php scripts/migrate.php"
     }
 }

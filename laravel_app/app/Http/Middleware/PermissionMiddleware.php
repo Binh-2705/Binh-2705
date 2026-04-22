@@ -21,7 +21,14 @@ class PermissionMiddleware
                 ->withErrors(['auth' => 'Ban can dang nhap truoc.']);
         }
 
-        if (!$this->permissionService->hasPermission($maTK, $permission)) {
+        // Dùng quyền đã load trong session — không query DB
+        $sessionPermissions = (array) $request->session()->get('quyen', []);
+        if (in_array($permission, $sessionPermissions, true)) {
+            return $next($request);
+        }
+
+        // Fallback: query DB (cache 5 phút) nếu session chưa có quyền
+        if (!$this->permissionService->hasPermissionFromCache($maTK, $permission)) {
             abort(403, 'Ban khong co quyen truy cap chuc nang nay.');
         }
 
