@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>404 - Không tìm thấy trang</title>
-    <link rel="stylesheet" href="<?php echo e(asset('public/style1.css')); ?>?v=20260410-1">
-    <link rel="stylesheet" href="<?php echo e(asset('public/css/legacy-bridge.css')); ?>?v=20260410-1">
+    <link rel="stylesheet" href="<?php echo e(asset('assets/css/style1.css')); ?>?v=20260410-1">
+    <link rel="stylesheet" href="<?php echo e(asset('assets/css/legacy-bridge.css')); ?>?v=20260410-1">
 </head>
 <body>
     <main class="legacy-auth-shell">

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Services\DashboardOverviewService;
+use App\Services\InternalApiClient;
 use Tests\TestCase;
 
 class DashboardTest extends TestCase
@@ -49,6 +50,10 @@ class DashboardTest extends TestCase
                     'href' => '/chatbot/1',
                 ],
             ]);
+        });
+
+        $this->mock(InternalApiClient::class, function ($mock) {
+            $mock->shouldReceive('post')->with('biz/dashboard/charts', \Mockery::any())->andReturn(['charts' => []]);
         });
 
         $response = $this->withSession([

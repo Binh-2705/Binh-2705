@@ -13,7 +13,7 @@ class AttendancePayrollModulesTest extends TestCase
     public function test_attendance_index_renders_for_authorized_session(): void
     {
         $this->mock(PermissionService::class, function ($mock) {
-            $mock->shouldReceive('hasPermission')->andReturnTrue();
+            $mock->shouldReceive('hasPermission', 'hasPermissionFromCache')->andReturnTrue();
         });
 
         $this->mock(AttendanceService::class, function ($mock) {
@@ -39,7 +39,7 @@ class AttendancePayrollModulesTest extends TestCase
     public function test_payroll_index_renders_for_authorized_session(): void
     {
         $this->mock(PermissionService::class, function ($mock) {
-            $mock->shouldReceive('hasPermission')->andReturnTrue();
+            $mock->shouldReceive('hasPermission', 'hasPermissionFromCache')->andReturnTrue();
         });
 
         $this->mock(PayrollService::class, function ($mock) {

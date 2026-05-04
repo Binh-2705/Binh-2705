@@ -68,10 +68,17 @@ class ServiceResourceGateway
         ];
     }
 
-    public function listRecords(string $service, string $resource, int $page, int $limit): array
+    public function listRecords(string $service, string $resource, int $page, int $limit, string $keyword = '', array $extraFilters = []): array
     {
         $definition = $this->serviceRegistry->getResource($service, $resource);
+        $columns = $this->columnsForDefinition($definition);
         $query = DB::connection($definition['connection'])->table($definition['table']);
+        $this->applyKeywordFilter($query, $columns, $keyword);
+        // Apply extra exact-match filters (e.g. ma_nv → MaNV)
+        if (!empty($extraFilters['ma_nv'])) {
+            $query->where('MaNV', (int) $extraFilters['ma_nv']);
+        }
+        $this->applyDefaultOrdering($query, $definition);
         $items = $query->forPage($page, $limit)->get()->map(function ($item) use ($definition) {
             return $this->withRecordIdentifier((array) $item, $definition);
         })->all();
@@ -86,6 +93,25 @@ class ServiceResourceGateway
                 'total' => (clone $query)->count(),
             ],
             'data' => $items,
+        ];
+    }
+
+    public function exportRecords(string $service, string $resource, string $keyword = ''): array
+    {
+        $definition = $this->serviceRegistry->getResource($service, $resource);
+        $columns = $this->columnsForDefinition($definition);
+        $query = DB::connection($definition['connection'])->table($definition['table']);
+        $this->applyKeywordFilter($query, $columns, $keyword);
+        $this->applyDefaultOrdering($query, $definition);
+
+        return [
+            'service' => $service,
+            'resource' => $resource,
+            'connection' => $definition['connection'],
+            'columns' => array_map(static fn (array $column) => $column['field'], $columns),
+            'rows' => $query->get()->map(function ($row) {
+                return (array) $row;
+            })->all(),
         ];
     }
 
@@ -224,6 +250,55 @@ class ServiceResourceGateway
     private function isReadOnly(array $definition): bool
     {
         return (bool) ($definition['read_only'] ?? false);
+    }
+
+    private function columnsForDefinition(array $definition): array
+    {
+        $columns = DB::connection($definition['connection'])
+            ->select('SHOW COLUMNS FROM `' . $definition['table'] . '`');
+
+        return array_map(static function ($column) {
+            $column = (array) $column;
+
+            return [
+                'field' => (string) ($column['Field'] ?? ''),
+                'type' => (string) ($column['Type'] ?? 'text'),
+                'nullable' => (($column['Null'] ?? 'NO') === 'YES'),
+                'key' => (string) ($column['Key'] ?? ''),
+                'default' => $column['Default'] ?? null,
+                'extra' => (string) ($column['Extra'] ?? ''),
+            ];
+        }, $columns);
+    }
+
+    private function applyKeywordFilter(object $query, array $columns, string $keyword): void
+    {
+        if ($keyword === '') {
+            return;
+        }
+
+        $searchableColumns = array_values(array_map(
+            static fn (array $column) => (string) $column['field'],
+            array_filter($columns, static fn (array $column) => !str_contains((string) $column['type'], 'blob'))
+        ));
+
+        if ($searchableColumns === []) {
+            return;
+        }
+
+        $query->where(function ($inner) use ($searchableColumns, $keyword) {
+            foreach ($searchableColumns as $index => $field) {
+                $method = $index === 0 ? 'where' : 'orWhere';
+                $inner->{$method}($field, 'like', "%{$keyword}%");
+            }
+        });
+    }
+
+    private function applyDefaultOrdering(object $query, array $definition): void
+    {
+        foreach ($this->primaryKeys($definition) as $primaryKey) {
+            $query->orderBy($primaryKey);
+        }
     }
 
     private function guardWritable(array $definition): void

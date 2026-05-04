@@ -40,6 +40,16 @@ class ServiceGatewayController extends Controller
         return $this->index($request, (string) $request->route('service'), $resource);
     }
 
+    public function aliasMeta(Request $request, string $resource): JsonResponse
+    {
+        return $this->meta((string) $request->route('service'), $resource);
+    }
+
+    public function aliasExport(Request $request, string $resource): JsonResponse
+    {
+        return $this->export($request, (string) $request->route('service'), $resource);
+    }
+
     public function aliasShow(Request $request, string $resource, string $id): JsonResponse
     {
         return $this->show((string) $request->route('service'), $resource, $id);
@@ -64,11 +74,44 @@ class ServiceGatewayController extends Controller
     {
         $limit = max(1, min((int) $request->query('limit', 20), 100));
         $page = max(1, (int) $request->query('page', 1));
+        $keyword = trim((string) $request->query('q', ''));
+        $extraFilters = array_filter([
+            'ma_nv' => $request->query('ma_nv') !== null ? (int) $request->query('ma_nv') : null,
+        ], fn ($v) => $v !== null);
 
         try {
             return response()->json(array_merge([
                 'ok' => true,
-            ], $this->gateway->listRecords($service, $resource, $page, $limit)));
+            ], $this->gateway->listRecords($service, $resource, $page, $limit, $keyword, $extraFilters)));
+        } catch (InvalidArgumentException $exception) {
+            return $this->notFoundResponse($exception->getMessage());
+        } catch (QueryException $exception) {
+            return $this->databaseErrorResponse($exception);
+        }
+    }
+
+    public function meta(string $service, string $resource): JsonResponse
+    {
+        try {
+            return response()->json([
+                'ok' => true,
+                'data' => $this->gateway->describeResource($service, $resource),
+            ]);
+        } catch (InvalidArgumentException $exception) {
+            return $this->notFoundResponse($exception->getMessage());
+        } catch (QueryException $exception) {
+            return $this->databaseErrorResponse($exception);
+        }
+    }
+
+    public function export(Request $request, string $service, string $resource): JsonResponse
+    {
+        $keyword = trim((string) $request->query('q', ''));
+
+        try {
+            return response()->json(array_merge([
+                'ok' => true,
+            ], $this->gateway->exportRecords($service, $resource, $keyword)));
         } catch (InvalidArgumentException $exception) {
             return $this->notFoundResponse($exception->getMessage());
         } catch (QueryException $exception) {

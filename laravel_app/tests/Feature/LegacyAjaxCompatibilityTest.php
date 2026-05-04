@@ -13,11 +13,11 @@ class LegacyAjaxCompatibilityTest extends TestCase
 {
     public function test_salary_grades_by_band_returns_legacy_option_markup(): void
     {
-        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission')->andReturnTrue());
+        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission', 'hasPermissionFromCache')->andReturnTrue());
         $this->mock(HrEmployeeService::class, function ($mock) {
-            $mock->shouldReceive('salaryGradesByBand')->once()->with('2')->andReturn(collect([
-                (object) ['MaBac' => 5, 'TenBac' => 'Bac 5', 'HeSoLuong' => '3.66'],
-            ]));
+            $mock->shouldReceive('salaryGradesByBand')->once()->with('2')->andReturn([
+                ['MaBac' => 5, 'TenBac' => 'Bac 5', 'HeSoLuong' => '3.66'],
+            ]);
         });
 
         $this->withSession(['MaTK' => 3])
@@ -28,7 +28,7 @@ class LegacyAjaxCompatibilityTest extends TestCase
 
     public function test_worked_days_endpoint_returns_legacy_json_shape(): void
     {
-        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission')->andReturnTrue());
+        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission', 'hasPermissionFromCache')->andReturnTrue());
         $this->mock(AttendanceService::class, function ($mock) {
             $mock->shouldReceive('workedDaysByMonth')->once()->with(7, 4, null)->andReturn([
                 'SoNgayLam' => 21,
@@ -46,7 +46,7 @@ class LegacyAjaxCompatibilityTest extends TestCase
 
     public function test_run_monthly_payroll_returns_success_json(): void
     {
-        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission')->andReturnTrue());
+        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission', 'hasPermissionFromCache')->andReturnTrue());
         $this->mock(PayrollService::class, function ($mock) {
             $mock->shouldReceive('processMonthlyPayroll')->once()->with(4, 2026)->andReturn(12);
         });
@@ -59,9 +59,9 @@ class LegacyAjaxCompatibilityTest extends TestCase
 
     public function test_recruitment_kanban_update_returns_legacy_ok_text(): void
     {
-        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission')->andReturnTrue());
+        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission', 'hasPermissionFromCache')->andReturnTrue());
         $this->mock(RecruitmentService::class, function ($mock) {
-            $mock->shouldReceive('updateApplicationStatus')->once()->with(18, [
+            $mock->shouldReceive('updateKanban')->once()->with(18, [
                 'TrangThai' => 'Phỏng vấn',
                 'GhiChu' => null,
             ])->andReturnNull();

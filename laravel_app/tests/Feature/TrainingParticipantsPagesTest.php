@@ -10,7 +10,7 @@ class TrainingParticipantsPagesTest extends TestCase
 {
     public function test_training_participants_page_renders_for_authorized_session(): void
     {
-        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission')->andReturnTrue());
+        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission', 'hasPermissionFromCache')->andReturnTrue());
         $this->mock(TrainingService::class, function ($mock) {
             $mock->shouldReceive('participantsPageData')->once()->with(5)->andReturn([
                 'course' => [
@@ -39,7 +39,7 @@ class TrainingParticipantsPagesTest extends TestCase
 
     public function test_add_training_participant_redirects_back_to_participants_page(): void
     {
-        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission')->andReturnTrue());
+        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission', 'hasPermissionFromCache')->andReturnTrue());
         $this->mock(TrainingService::class, function ($mock) {
             $mock->shouldReceive('addParticipant')->once()->with(6, 12)->andReturnTrue();
         });
@@ -51,7 +51,7 @@ class TrainingParticipantsPagesTest extends TestCase
 
     public function test_update_training_result_redirects_back_to_participants_page(): void
     {
-        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission')->andReturnTrue());
+        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission', 'hasPermissionFromCache')->andReturnTrue());
         $this->mock(TrainingService::class, function ($mock) {
             $mock->shouldReceive('updateParticipantResult')->once()->with(21, [
                 'KetQua' => 'Đạt',

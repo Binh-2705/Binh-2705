@@ -9,6 +9,11 @@ return [
         'legacy_prefix' => 'chucvu',
         'legacy_name' => 'chucvu',
         'permission' => ['view' => 'xem_chucvu', 'create' => 'them_chucvu', 'update' => 'sua_chucvu', 'delete' => 'xoa_chucvu'],
+        'read_only' => true,
+        'disable_filter' => true,
+        'disable_export' => true,
+        'hidden_columns' => ['TrangThai'],
+        'hide_actions' => true,
     ],
     'assignments' => [
         'title' => 'Phan cong',
@@ -36,6 +41,7 @@ return [
         'legacy_prefix' => 'nghiphep',
         'legacy_name' => 'nghiphep',
         'permission' => ['view' => 'xem_nghiphep', 'create' => 'them_nghiphep', 'update' => 'sua_nghiphep', 'delete' => 'xoa_nghiphep'],
+        'auto_fill_ma_nv' => true,
     ],
     'reward-records' => [
         'title' => 'Khen thuong ky luat',
@@ -62,7 +68,8 @@ return [
         'resource' => 'employee-profiles',
         'legacy_prefix' => 'hosocanhan',
         'legacy_name' => 'hosocanhan',
-        'permission' => ['view' => 'xem_nhanvien', 'create' => 'sua_nhanvien', 'update' => 'sua_nhanvien', 'delete' => 'xoa_nhanvien'],
+        'permission' => ['view' => 'xem_nhanvien', 'create' => 'them_hoso', 'update' => 'sua_nhanvien', 'delete' => 'xoa_nhanvien'],
+        'file_fields' => ['Anh'],
     ],
     'contracts' => [
         'title' => 'Hop dong',
@@ -81,6 +88,11 @@ return [
         'legacy_prefix' => 'ngachluong',
         'legacy_name' => 'ngachluong',
         'permission' => ['view' => 'xem_ngachluong', 'create' => 'xem_ngachluong', 'update' => 'xem_ngachluong', 'delete' => 'xem_ngachluong'],
+        'read_only' => true,
+        'disable_filter' => true,
+        'disable_export' => true,
+        'hidden_columns' => ['TrangThai'],
+        'hide_actions' => true,
     ],
     'salary-grades' => [
         'title' => 'Bac luong',
@@ -90,6 +102,11 @@ return [
         'legacy_prefix' => 'bacluong',
         'legacy_name' => 'bacluong',
         'permission' => ['view' => 'xem_bacluong', 'create' => 'xem_bacluong', 'update' => 'xem_bacluong', 'delete' => 'xem_bacluong'],
+        'read_only' => true,
+        'disable_filter' => true,
+        'disable_export' => true,
+        'hidden_columns' => ['TrangThai'],
+        'hide_actions' => true,
     ],
     'accounts' => [
         'title' => 'Tai khoan',

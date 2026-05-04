@@ -3,6 +3,7 @@
 <?php $canCreate = in_array('them_nhanvien', session('quyen', []), true) ?>
 <?php $canEdit = in_array('sua_nhanvien', session('quyen', []), true) ?>
 <?php $canDelete = in_array('xoa_nhanvien', session('quyen', []), true) ?>
+<?php $isSelfView = $isSelfView ?? false ?>
 
 
 <?php $__env->startSection('content'); ?>
@@ -13,6 +14,7 @@
         </div>
     <?php endif; ?>
 
+    <?php if(!$isSelfView): ?>
     <section class="panel">
         <form method="get" action="<?php echo e(route('nhanvien.index')); ?>">
             <div class="field-grid">
@@ -46,6 +48,7 @@
             </div>
         </form>
     </section>
+    <?php endif; ?>
 
     <section class="panel">
         <div class="table-shell">

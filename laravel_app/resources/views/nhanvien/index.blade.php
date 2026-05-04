@@ -3,6 +3,7 @@
 @php $canCreate = in_array('them_nhanvien', session('quyen', []), true) @endphp
 @php $canEdit = in_array('sua_nhanvien', session('quyen', []), true) @endphp
 @php $canDelete = in_array('xoa_nhanvien', session('quyen', []), true) @endphp
+@php $isSelfView = $isSelfView ?? false @endphp
 @extends('layouts.app')
 
 @section('content')
@@ -12,6 +13,7 @@
         </div>
     @endif
 
+    @if (!$isSelfView)
     <section class="panel">
         <form method="get" action="{{ route('nhanvien.index') }}">
             <div class="field-grid">
@@ -45,6 +47,7 @@
             </div>
         </form>
     </section>
+    @endif
 
     <section class="panel">
         <div class="table-shell">

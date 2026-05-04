@@ -44,17 +44,32 @@
 
     <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
 
-    <link rel="stylesheet" href="<?php echo e(asset('public/css/style.css')); ?>?v=20260420-5">
-    <link rel="stylesheet" href="<?php echo e(asset('public/css/legacy-bridge.css')); ?>?v=20260410-1">
-    <link rel="stylesheet" href="<?php echo e(asset('public/css/sidebar.css')); ?>?v=20260410-1">
-    <link rel="stylesheet" href="<?php echo e(asset('public/css/dashboard.css')); ?>?v=20260410-1">
-    <link rel="stylesheet" href="<?php echo e(asset('public/css/modules.css')); ?>?v=20260413-1">
-    <link rel="stylesheet" href="<?php echo e(asset('public/css/chatbot-widget.css')); ?>?v=20260420-1">
+    <link rel="stylesheet" href="<?php echo e(asset('assets/css/style.css')); ?>?v=20260420-5">
+    <link rel="stylesheet" href="<?php echo e(asset('assets/css/legacy-bridge.css')); ?>?v=20260410-1">
+    <link rel="stylesheet" href="<?php echo e(asset('assets/css/sidebar.css')); ?>?v=20260410-1">
+    <link rel="stylesheet" href="<?php echo e(asset('assets/css/dashboard.css')); ?>?v=20260410-1">
+    <link rel="stylesheet" href="<?php echo e(asset('assets/css/modules.css')); ?>?v=20260413-1">
+    <link rel="stylesheet" href="<?php echo e(asset('assets/css/chatbot-widget.css')); ?>?v=20260420-1">
 </head>
 <body class="app-body">
     <?php
-        $permissions = (array) session('quyen', []);
         $account = (array) session('taikhoan', []);
+        $sessionPerms = (array) session('quyen', []);
+        // Refresh permissions live from DB/cache so newly granted rights show immediately
+        $maTKLayout = (int) ($account['MaTK'] ?? 0);
+        if ($maTKLayout > 0) {
+            try {
+                $permissions = app(\App\Services\PermissionService::class)->getPermissionsByAccountId($maTKLayout);
+                // Sync back to session so middleware checks stay consistent
+                if ($permissions !== $sessionPerms) {
+                    request()->session()->put('quyen', $permissions);
+                }
+            } catch (\Throwable $e) {
+                $permissions = $sessionPerms;
+            }
+        } else {
+            $permissions = $sessionPerms;
+        }
         $resourceModules = config('laravel_resource_modules', []);
         $sidebarUsername = trim((string) ($account['TenDangNhap'] ?? 'Người dùng'));
         $sidebarRole = trim((string) ($account['VaiTro'] ?? 'Nhân viên'));
@@ -81,7 +96,6 @@
         $canBacLuong = in_array('xem_bacluong', $permissions, true);
         $canTaiKhoan = in_array('xem_taikhoan', $permissions, true);
         $canPhanQuyen = in_array('xem_phanquyen', $permissions, true);
-        $canAdminOnly = in_array($sidebarRoleLower, ['admin'], true);
         $showHeThong = $canPhongBan || $canChucVu || $canNgachLuong || $canBacLuong || $canTaiKhoan || $canPhanQuyen;
         $canBaoCao = in_array('xem_baocao', $permissions, true);
         $flashMessages = [];
@@ -173,7 +187,7 @@
                             <?php if($canPhanQuyen): ?><li><a href="<?php echo e(route('phanquyen.index')); ?>">Phân quyền</a></li><?php endif; ?>
                             <?php if(Route::has('auditlog.index') && $canTaiKhoan): ?><li><a href="<?php echo e(route('auditlog.index')); ?>">Nhật ký hệ thống</a></li><?php endif; ?>
                             <?php if(in_array('su_dung_chatbot', $permissions, true)): ?><li><a href="<?php echo e(route('chatbot.index')); ?>" class="<?php echo e(request()->routeIs('chatbot.*') ? 'active' : ''); ?>">Nhật ký Chatbot</a></li><?php endif; ?>
-                            <?php if($canAdminOnly && $canTaiKhoan): ?><li><a href="<?php echo e(route('systemhealth.index')); ?>">Sức khỏe hệ thống</a></li><?php endif; ?>
+                            <?php if($canTaiKhoan): ?><li><a href="<?php echo e(route('systemhealth.index')); ?>">Sức khỏe hệ thống</a></li><?php endif; ?>
                             <?php if($canPhanQuyen): ?><li><a href="<?php echo e(route('services.index')); ?>">Bảng dịch vụ</a></li><?php endif; ?>
                         </ul>
                     </li>
@@ -287,7 +301,7 @@
         </main>
     </div>
 
-    <script src="<?php echo e(asset('public/js/sidebar.js')); ?>?v=20260420-5"></script>
+    <script src="<?php echo e(asset('assets/js/sidebar.js')); ?>?v=20260420-5"></script>
 
     
     <?php $hasChat = in_array('su_dung_chatbot', (array)session('quyen', []), true); ?>

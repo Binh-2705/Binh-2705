@@ -12,6 +12,7 @@ return [
                 'departments' => [
                     'table' => 'phongban',
                     'primary_key' => 'MaPB',
+                    'read_only' => true,
                 ],
                 'accounts' => [
                     'table' => 'taikhoan',
@@ -24,6 +25,7 @@ return [
                 'positions' => [
                     'table' => 'chucvu',
                     'primary_key' => 'MaCV',
+                    'read_only' => true,
                 ],
                 'assignments' => [
                     'table' => 'phancong',
@@ -85,10 +87,12 @@ return [
                 'salary-grades' => [
                     'table' => 'bacluong',
                     'primary_key' => 'MaBac',
+                    'read_only' => true,
                 ],
                 'salary-bands' => [
                     'table' => 'ngachluong',
                     'primary_key' => 'MaNgach',
+                    'read_only' => true,
                 ],
                 'contracts' => [
                     'table' => 'hopdong',

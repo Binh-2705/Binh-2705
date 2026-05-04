@@ -20,7 +20,7 @@ class HrModulesTest extends TestCase
     public function test_employee_index_renders_for_authorized_session(): void
     {
         $this->mock(PermissionService::class, function ($mock) {
-            $mock->shouldReceive('hasPermission')->andReturnTrue();
+            $mock->shouldReceive('hasPermission', 'hasPermissionFromCache')->andReturnTrue();
         });
 
         $this->mock(HrEmployeeService::class, function ($mock) {
@@ -50,7 +50,7 @@ class HrModulesTest extends TestCase
     public function test_department_index_renders_for_authorized_session(): void
     {
         $this->mock(PermissionService::class, function ($mock) {
-            $mock->shouldReceive('hasPermission')->andReturnTrue();
+            $mock->shouldReceive('hasPermission', 'hasPermissionFromCache')->andReturnTrue();
         });
 
         $this->mock(DepartmentDirectoryService::class, function ($mock) {

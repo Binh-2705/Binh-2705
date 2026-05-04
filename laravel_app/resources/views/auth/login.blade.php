@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Đăng nhập - Hệ thống nhân sự</title>
-    <link rel="stylesheet" href="{{ asset('public/style1.css') }}?v=20260420-2">
-    <link rel="stylesheet" href="{{ asset('public/css/legacy-bridge.css') }}?v=20260410-1">
+    <link rel="stylesheet" href="{{ asset('assets/css/style1.css') }}?v=20260420-2">
+    <link rel="stylesheet" href="{{ asset('assets/css/legacy-bridge.css') }}?v=20260410-1">
 </head>
 <body>
     <main class="login-shell">

@@ -10,7 +10,7 @@ class ContractAdminActionsTest extends TestCase
 {
     public function test_contract_salary_history_page_renders(): void
     {
-        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission')->andReturnTrue());
+        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission', 'hasPermissionFromCache')->andReturnTrue());
         $this->mock(ContractAdminService::class, function ($mock) {
             $mock->shouldReceive('contractDetail')->once()->with(12)->andReturn([
                 'MaHopDong' => 12,
@@ -33,7 +33,7 @@ class ContractAdminActionsTest extends TestCase
 
     public function test_contract_renew_redirects_to_contracts_index(): void
     {
-        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission')->andReturnTrue());
+        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission', 'hasPermissionFromCache')->andReturnTrue());
         $this->mock(ContractAdminService::class, function ($mock) {
             $mock->shouldReceive('renewContract')->once()->with(12, [
                 'SoHopDong' => 'HD-NEW-12',
@@ -57,7 +57,7 @@ class ContractAdminActionsTest extends TestCase
 
     public function test_contract_terminate_redirects_to_contracts_index(): void
     {
-        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission')->andReturnTrue());
+        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission', 'hasPermissionFromCache')->andReturnTrue());
         $this->mock(ContractAdminService::class, function ($mock) {
             $mock->shouldReceive('terminateContract')->once()->with(12);
         });

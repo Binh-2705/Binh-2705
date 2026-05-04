@@ -3,6 +3,7 @@ logs/
 uploads/cv/
 vendor/
 .vscode/
+.venv/
 
 *.log
 *.tmp

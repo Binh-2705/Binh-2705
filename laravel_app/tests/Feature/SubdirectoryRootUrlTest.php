@@ -17,8 +17,8 @@ class SubdirectoryRootUrlTest extends TestCase
             ->get('/login');
 
         $response->assertOk();
-        $response->assertSee('http://localhost/du_an2/public/style1.css?v=20260410-1', false);
-        $response->assertSee('http://localhost/du_an2/public/css/legacy-bridge.css?v=20260410-1', false);
+        $response->assertSee('http://localhost/du_an2/assets/css/style1.css?v=20260420-2', false);
+        $response->assertSee('http://localhost/du_an2/assets/css/legacy-bridge.css?v=20260410-1', false);
         $response->assertSee('action="http://localhost/du_an2/login"', false);
         $response->assertSee('href="http://localhost/du_an2/forgot-password"', false);
     }

@@ -1,5 +1,6 @@
+@php $fileFields = $moduleConfig['file_fields'] ?? []; @endphp
 <section class="panel">
-    <form method="post" action="{{ $mode === 'create' ? route(($routeKey ?? $moduleKey) . '.store') : route(($routeKey ?? $moduleKey) . '.update', ['record' => $recordId]) }}">
+    <form method="post" action="{{ $mode === 'create' ? route(($routeKey ?? $moduleKey) . '.store') : route(($routeKey ?? $moduleKey) . '.update', ['record' => $recordId]) }}" {{ count($fileFields) ? 'enctype="multipart/form-data"' : '' }}>
         @csrf
         @if ($mode === 'edit')
             @method('PUT')
@@ -24,9 +25,16 @@
                         $inputType = 'number';
                     }
                 @endphp
-                <div class="{{ $isTextarea ? 'full-span' : '' }}">
+<div class="{{ $isTextarea ? 'full-span' : '' }}">
                     <label for="{{ $field }}">{{ $field }}</label>
-                    @if ($isTextarea)
+                    @if (in_array($field, $fileFields, true))
+                        @if ($value)
+                            <div class="top-gap-sm" style="margin-bottom:6px">
+                                <img src="{{ route('legacy.upload', ['path' => 'photos/' . $value]) }}" alt="Ảnh hiện tại" style="max-height:80px;border-radius:4px;border:1px solid #e5e7eb;">
+                            </div>
+                        @endif
+                        <input id="{{ $field }}" name="{{ $field }}" type="file" accept="image/*" {{ $shouldDisable ? 'disabled' : '' }}>
+                    @elseif ($isTextarea)
                         <textarea id="{{ $field }}" name="{{ $field }}" {{ $shouldDisable ? 'disabled' : '' }}>{{ $value }}</textarea>
                     @else
                         <input id="{{ $field }}" name="{{ $field }}" type="{{ $inputType }}" value="{{ $value }}" {{ $shouldDisable ? 'disabled' : '' }} {{ !$column['nullable'] && !$shouldDisable ? 'required' : '' }}>

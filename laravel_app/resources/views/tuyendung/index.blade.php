@@ -6,6 +6,14 @@
 
 @section('content')
     <section class="panel">
+        <div class="toolbar toolbar-start" style="margin-bottom:12px;">
+            @if (in_array('them_dot_tuyen', session('quyen', []), true))
+                <a class="btn" href="{{ route('tuyendung.create') }}">+ Thêm đợt tuyển</a>
+            @endif
+            @if (in_array('xem_ung_vien', session('quyen', []), true))
+                <a class="btn btn-secondary" href="{{ route('tuyendung.ungvien.index') }}">👤 Quản lý ứng viên</a>
+            @endif
+        </div>
         <form method="get" class="filter-grid">
             <div>
                 <label for="q" class="wide-search-label">Tìm kiếm</label>
@@ -23,9 +31,6 @@
                 <button class="btn" type="submit">Lọc</button>
                 @if (in_array('them_dot_tuyen', session('quyen', []), true))
                     <a class="btn btn-secondary" href="{{ route('tuyendung.create') }}">Thêm mới</a>
-                @endif
-                @if (in_array('xem_ung_vien', session('quyen', []), true))
-                    <a class="btn btn-secondary" href="{{ route('tuyendung.ungvien.index') }}">Ứng viên</a>
                 @endif
             </div>
         </form>

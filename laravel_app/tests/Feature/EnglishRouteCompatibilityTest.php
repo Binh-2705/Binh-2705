@@ -14,7 +14,7 @@ class EnglishRouteCompatibilityTest extends TestCase
 {
     public function test_employees_route_still_renders_for_authorized_session(): void
     {
-        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission')->andReturnTrue());
+        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission', 'hasPermissionFromCache')->andReturnTrue());
         $this->mock(HrEmployeeService::class, function ($mock) {
             $mock->shouldReceive('paginate')->andReturn(new LengthAwarePaginator([
                 (object) [
@@ -39,7 +39,7 @@ class EnglishRouteCompatibilityTest extends TestCase
 
     public function test_recruitment_route_still_renders_for_authorized_session(): void
     {
-        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission')->andReturnTrue());
+        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission', 'hasPermissionFromCache')->andReturnTrue());
         $this->mock(RecruitmentService::class, fn ($mock) => $mock->shouldReceive('paginate')->andReturn(new LengthAwarePaginator([
             (object) ['MaDTD' => 1, 'TenDotTuyenDung' => 'Tuyen dung IT', 'ViTriTuyenDung' => 'Nhan vien', 'SoLuong' => 2, 'SoHoSo' => 5, 'TrangThai' => 'Đang tuyển'],
         ], 1, 12)));
@@ -49,7 +49,7 @@ class EnglishRouteCompatibilityTest extends TestCase
 
     public function test_permission_matrix_route_still_renders_for_authorized_session(): void
     {
-        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission')->andReturnTrue());
+        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission', 'hasPermissionFromCache')->andReturnTrue());
         $this->mock(RolePermissionService::class, function ($mock) {
             $mock->shouldReceive('indexData')->once()->andReturn([
                 'roles' => [
@@ -76,7 +76,7 @@ class EnglishRouteCompatibilityTest extends TestCase
 
     public function test_employee_profiles_review_requests_route_still_renders_for_manager(): void
     {
-        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission')->andReturnTrue());
+        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission', 'hasPermissionFromCache')->andReturnTrue());
         $this->mock(EmployeeProfileAdminService::class, function ($mock) {
             $mock->shouldReceive('pendingRequests')->once()->andReturn([
                 ['id' => 4, 'MaNV' => 8, 'HoTen' => 'Pham Thi D', 'DienThoai' => '0909', 'note' => 'Xin cap nhat', 'payload' => ['CCCD' => '123456789012']],

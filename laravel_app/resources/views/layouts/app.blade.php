@@ -44,17 +44,32 @@
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <link rel="stylesheet" href="{{ asset('public/css/style.css') }}?v=20260420-5">
-    <link rel="stylesheet" href="{{ asset('public/css/legacy-bridge.css') }}?v=20260410-1">
-    <link rel="stylesheet" href="{{ asset('public/css/sidebar.css') }}?v=20260410-1">
-    <link rel="stylesheet" href="{{ asset('public/css/dashboard.css') }}?v=20260410-1">
-    <link rel="stylesheet" href="{{ asset('public/css/modules.css') }}?v=20260413-1">
-    <link rel="stylesheet" href="{{ asset('public/css/chatbot-widget.css') }}?v=20260420-1">
+    <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}?v=20260420-5">
+    <link rel="stylesheet" href="{{ asset('assets/css/legacy-bridge.css') }}?v=20260410-1">
+    <link rel="stylesheet" href="{{ asset('assets/css/sidebar.css') }}?v=20260410-1">
+    <link rel="stylesheet" href="{{ asset('assets/css/dashboard.css') }}?v=20260410-1">
+    <link rel="stylesheet" href="{{ asset('assets/css/modules.css') }}?v=20260413-1">
+    <link rel="stylesheet" href="{{ asset('assets/css/chatbot-widget.css') }}?v=20260420-1">
 </head>
 <body class="app-body">
     @php
-        $permissions = (array) session('quyen', []);
         $account = (array) session('taikhoan', []);
+        $sessionPerms = (array) session('quyen', []);
+        // Refresh permissions live from DB/cache so newly granted rights show immediately
+        $maTKLayout = (int) ($account['MaTK'] ?? 0);
+        if ($maTKLayout > 0) {
+            try {
+                $permissions = app(\App\Services\PermissionService::class)->getPermissionsByAccountId($maTKLayout);
+                // Sync back to session so middleware checks stay consistent
+                if ($permissions !== $sessionPerms) {
+                    request()->session()->put('quyen', $permissions);
+                }
+            } catch (\Throwable $e) {
+                $permissions = $sessionPerms;
+            }
+        } else {
+            $permissions = $sessionPerms;
+        }
         $resourceModules = config('laravel_resource_modules', []);
         $sidebarUsername = trim((string) ($account['TenDangNhap'] ?? 'Người dùng'));
         $sidebarRole = trim((string) ($account['VaiTro'] ?? 'Nhân viên'));
@@ -81,7 +96,6 @@
         $canBacLuong = in_array('xem_bacluong', $permissions, true);
         $canTaiKhoan = in_array('xem_taikhoan', $permissions, true);
         $canPhanQuyen = in_array('xem_phanquyen', $permissions, true);
-        $canAdminOnly = in_array($sidebarRoleLower, ['admin'], true);
         $showHeThong = $canPhongBan || $canChucVu || $canNgachLuong || $canBacLuong || $canTaiKhoan || $canPhanQuyen;
         $canBaoCao = in_array('xem_baocao', $permissions, true);
         $flashMessages = [];
@@ -172,7 +186,7 @@
                             @if ($canPhanQuyen)<li><a href="{{ route('phanquyen.index') }}">Phân quyền</a></li>@endif
                             @if (Route::has('auditlog.index') && $canTaiKhoan)<li><a href="{{ route('auditlog.index') }}">Nhật ký hệ thống</a></li>@endif
                             @if (in_array('su_dung_chatbot', $permissions, true))<li><a href="{{ route('chatbot.index') }}" class="{{ request()->routeIs('chatbot.*') ? 'active' : '' }}">Nhật ký Chatbot</a></li>@endif
-                            @if ($canAdminOnly && $canTaiKhoan)<li><a href="{{ route('systemhealth.index') }}">Sức khỏe hệ thống</a></li>@endif
+                            @if ($canTaiKhoan)<li><a href="{{ route('systemhealth.index') }}">Sức khỏe hệ thống</a></li>@endif
                             @if ($canPhanQuyen)<li><a href="{{ route('services.index') }}">Bảng dịch vụ</a></li>@endif
                         </ul>
                     </li>
@@ -286,7 +300,7 @@
         </main>
     </div>
 
-    <script src="{{ asset('public/js/sidebar.js') }}?v=20260420-5"></script>
+    <script src="{{ asset('assets/js/sidebar.js') }}?v=20260420-5"></script>
 
     {{-- ===== Floating AI Chat Widget ===== --}}
     @php $hasChat = in_array('su_dung_chatbot', (array)session('quyen', []), true); @endphp

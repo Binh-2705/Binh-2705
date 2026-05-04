@@ -1,11 +1,15 @@
 @php $title = 'Lương' @endphp
 @php $subtitle = 'Quản trị bảng lương' @endphp
 @php $canRun = in_array('tinh_luong_thang', session('quyen', []), true) @endphp
+@php $canView = in_array('xem_luong', session('quyen', []), true) @endphp
+@php $canLock = in_array('chot_luong', session('quyen', []), true) @endphp
+@php $canUnlock = in_array('mo_chot_luong', session('quyen', []), true) @endphp
 @php $canEdit = in_array('mo_chot_luong', session('quyen', []), true) || in_array('chot_luong', session('quyen', []), true) @endphp
+@php $isSelfView = $isSelfView ?? false @endphp
 @extends('layouts.app')
 
 @section('content')
-    @if ($canRun)
+    @if ($canRun && !$isSelfView)
         <section class="panel">
             <form method="post" action="{{ route('luong.run-monthly') }}">
                 @csrf
@@ -27,6 +31,7 @@
         </section>
     @endif
 
+    @if (!$isSelfView)
     <section class="panel">
         <form method="get" action="{{ route('luong.index') }}">
             <div class="field-grid">
@@ -52,6 +57,7 @@
             </div>
         </form>
     </section>
+    @endif
 
     <section class="panel">
         <div class="table-shell">
@@ -88,9 +94,20 @@
                                 @endif
                             </td>
                             <td>
-                                @if ($canEdit)
+                                @if ($canView || $canEdit || $canLock || $canUnlock)
                                     <div class="button-row">
-                                        <a href="{{ route('luong.edit', ['payroll' => $record->MaBL]) }}" class="btn btn-secondary">Sửa</a>
+                                        @if ($canView)
+                                            <a href="{{ route('luong.show', ['payroll' => $record->MaBL]) }}" class="btn btn-secondary">Xem</a>
+                                        @endif
+                                        @if ($canEdit)
+                                            <a href="{{ route('luong.edit', ['payroll' => $record->MaBL]) }}" class="btn btn-secondary">Sửa</a>
+                                        @endif
+                                        @if ($record->TrangThai !== 'Đã chốt' && $canLock)
+                                            <a href="{{ route('luong.lock.legacy', ['payroll' => $record->MaBL]) }}" class="btn">Chốt lương</a>
+                                        @endif
+                                        @if ($record->TrangThai === 'Đã chốt' && $canUnlock)
+                                            <a href="{{ route('luong.unlock.legacy', ['payroll' => $record->MaBL]) }}" class="btn btn-secondary">Mở chốt</a>
+                                        @endif
                                     </div>
                                 @else
                                     <span class="muted-inline-note">Chỉ xem</span>

@@ -14,11 +14,11 @@ class ExportImportCompatibilityTest extends TestCase
 {
     public function test_department_export_excel_streams_laravel_response(): void
     {
-        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission')->andReturnTrue());
+        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission', 'hasPermissionFromCache')->andReturnTrue());
         $this->mock(DepartmentDirectoryService::class, function ($mock) {
-            $mock->shouldReceive('exportRows')->once()->with([])->andReturn(new Collection([
-                (object) ['MaPB' => 1, 'TenPB' => 'IT', 'MoTa' => 'Phong cong nghe'],
-            ]));
+            $mock->shouldReceive('exportRows')->once()->with([])->andReturn([
+                ['MaPB' => 1, 'TenPB' => 'IT', 'MoTa' => 'Phong cong nghe'],
+            ]);
         });
 
         $response = $this->withSession(['MaTK' => 3])->get('/phongban/export-excel');
@@ -28,7 +28,7 @@ class ExportImportCompatibilityTest extends TestCase
 
     public function test_department_import_csv_redirects_with_success(): void
     {
-        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission')->andReturnTrue());
+        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission', 'hasPermissionFromCache')->andReturnTrue());
         $this->mock(DepartmentDirectoryService::class, function ($mock) {
             $mock->shouldReceive('importRows')->once()->andReturn(2);
         });
@@ -42,11 +42,11 @@ class ExportImportCompatibilityTest extends TestCase
 
     public function test_report_export_json_returns_payload(): void
     {
-        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission')->andReturnTrue());
+        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission', 'hasPermissionFromCache')->andReturnTrue());
         $this->mock(ReportService::class, function ($mock) {
-            $mock->shouldReceive('exportRows')->once()->with([])->andReturn(new Collection([
-                (object) ['MaBC' => 5, 'TenBaoCao' => 'Tong hop', 'LoaiBaoCao' => 'Nhân sự', 'NguoiTao' => 'admin'],
-            ]));
+            $mock->shouldReceive('exportRows')->once()->with([])->andReturn([
+                ['MaBC' => 5, 'TenBaoCao' => 'Tong hop', 'LoaiBaoCao' => 'Nhân sự', 'NguoiTao' => 'admin'],
+            ]);
         });
 
         $this->withSession(['MaTK' => 3])
@@ -57,7 +57,7 @@ class ExportImportCompatibilityTest extends TestCase
 
     public function test_audit_log_export_json_returns_filtered_logs(): void
     {
-        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission')->andReturnTrue());
+        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission', 'hasPermissionFromCache')->andReturnTrue());
         $this->mock(AppAuditLogService::class, function ($mock) {
             $mock->shouldReceive('readFilteredRows')->once()->with('ERROR', 'csrf')->andReturn([
                 ['time' => '2026-04-09 10:00:00', 'level' => 'ERROR', 'message' => 'CSRF mismatch', 'context' => '{}'],

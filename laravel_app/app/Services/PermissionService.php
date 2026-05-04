@@ -3,27 +3,16 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 
 class PermissionService
 {
-    private function hrConnection(): string
-    {
-        return (string) config('service_registry.services.hr.connection', config('database.default'));
-    }
+    public function __construct(private InternalApiClient $client) {}
 
     public function getPermissionsByAccountId(int $maTK): array
     {
-        return Cache::remember("permissions_tk_{$maTK}", 300, function () use ($maTK) {
-            return DB::connection($this->hrConnection())
-                ->table('taikhoanvaitro as tkvt')
-                ->join('vaitro as vt', 'tkvt.MaVaiTro', '=', 'vt.MaVaiTro')
-                ->join('phanquyen as pq', 'vt.MaVaiTro', '=', 'pq.MaVaiTro')
-                ->join('chucnang as cn', 'pq.MaCN', '=', 'cn.MaCN')
-                ->where('tkvt.MaTK', $maTK)
-                ->pluck('cn.TenChucNang')
-                ->toArray();
-        });
+        return Cache::remember("permissions_tk_{$maTK}", 300, fn () =>
+            $this->client->get('biz/permissions', ['ma_tk' => $maTK])['permissions'] ?? []
+        );
     }
 
     public function clearPermissionsCache(int $maTK): void
@@ -33,12 +22,11 @@ class PermissionService
 
     public function hasPermission(int $maTK, string $tenChucNang): bool
     {
-        return $this->hasPermissionFromCache($maTK, $tenChucNang);
+        return in_array($tenChucNang, $this->getPermissionsByAccountId($maTK), true);
     }
 
     public function hasPermissionFromCache(int $maTK, string $tenChucNang): bool
     {
-        $permissions = $this->getPermissionsByAccountId($maTK);
-        return in_array($tenChucNang, $permissions, true);
+        return $this->hasPermission($maTK, $tenChucNang);
     }
 }

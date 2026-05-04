@@ -1,7 +1,13 @@
 @php
-    $columns = collect($resourceConfig['columns'])->pluck('field')->filter(fn ($field) => $field !== '__resource_id')->take(8)->values();
+    $hiddenColumns = array_map('strtolower', $moduleConfig['hidden_columns'] ?? []);
+    $columns = collect($resourceConfig['columns'])->pluck('field')->filter(fn ($field) => $field !== '__resource_id' && !in_array(strtolower($field), $hiddenColumns, true))->take(8)->values();
+    $disableFilter = (bool) ($moduleConfig['disable_filter'] ?? false);
+    $disableExport = (bool) ($moduleConfig['disable_export'] ?? false);
+    $hideActions = (bool) ($moduleConfig['hide_actions'] ?? false);
+    $isSelfView = (bool) ($isSelfView ?? false);
 @endphp
 <section class="panel">
+    @if (!$disableFilter && !$isSelfView)
     <form method="get" class="filter-grid single-wide">
         <div>
             <label for="q" class="wide-search-label">Tìm kiếm</label>
@@ -9,7 +15,7 @@
         </div>
         <div class="button-row">
             <button class="btn" type="submit">Lọc</button>
-            @if (in_array($moduleConfig['permission']['view'], session('quyen', []), true))
+            @if (!$disableExport && in_array($moduleConfig['permission']['view'], session('quyen', []), true))
                 <a class="btn btn-secondary" href="{{ route(($routeKey ?? $moduleKey) . '.export-excel', request()->only(['q'])) }}">Xuất Excel</a>
             @endif
             @if ($moduleKey === 'employee-profiles')
@@ -25,6 +31,7 @@
             @endif
         </div>
     </form>
+    @endif
 </section>
 
 <section class="panel">
@@ -35,7 +42,9 @@
                     @foreach ($columns as $column)
                         <th>{{ $column }}</th>
                     @endforeach
+                    @if (!$hideActions)
                     <th>Thao tác</th>
+                    @endif
                 </tr>
             </thead>
             <tbody>
@@ -44,6 +53,7 @@
                         @foreach ($columns as $column)
                             <td>{{ data_get($item, $column) }}</td>
                         @endforeach
+                        @if (!$hideActions)
                         <td>
                             @if ($resourceConfig['read_only'] ?? false)
                                 <span class="muted">Chỉ xem</span>
@@ -85,10 +95,11 @@
                                 </div>
                             @endif
                         </td>
+                        @endif
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="{{ $columns->count() + 1 }}" class="muted">Không có dữ liệu.</td>
+                        <td colspan="{{ $columns->count() + ($hideActions ? 0 : 1) }}" class="muted">Không có dữ liệu.</td>
                     </tr>
                 @endforelse
             </tbody>

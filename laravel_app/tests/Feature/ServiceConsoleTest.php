@@ -17,7 +17,7 @@ class ServiceConsoleTest extends TestCase
     public function test_service_console_index_requires_permission(): void
     {
         $this->mock(PermissionService::class, function ($mock) {
-            $mock->shouldReceive('hasPermission')->andReturnFalse();
+            $mock->shouldReceive('hasPermission', 'hasPermissionFromCache')->andReturnFalse();
         });
 
         $response = $this->withSession(['MaTK' => 3])->get('/services');
@@ -28,7 +28,7 @@ class ServiceConsoleTest extends TestCase
     public function test_service_console_index_renders_for_authorized_session(): void
     {
         $this->mock(PermissionService::class, function ($mock) {
-            $mock->shouldReceive('hasPermission')->andReturnTrue();
+            $mock->shouldReceive('hasPermission', 'hasPermissionFromCache')->andReturnTrue();
         });
 
         $response = $this->withSession(['MaTK' => 3])->get('/services');

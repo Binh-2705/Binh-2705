@@ -1,9 +1,5 @@
 {
-    "require": {
-        "smalot/pdfparser": "^2.12",
-        "phpmailer/phpmailer": "^7.0"
-    },
     "scripts": {
-        "db:migrate": "php scripts/migrate.php"
+        "db:migrate": "php scripts/db/migrate.php"
     }
 }

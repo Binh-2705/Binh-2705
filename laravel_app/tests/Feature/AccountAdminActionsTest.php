@@ -11,7 +11,7 @@ class AccountAdminActionsTest extends TestCase
 {
     public function test_reset_temporary_password_redirects_to_accounts_index(): void
     {
-        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission')->andReturnTrue());
+        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission', 'hasPermissionFromCache')->andReturnTrue());
         $this->mock(AccountSecurityService::class, function ($mock) {
             $mock->shouldReceive('getById')->once()->with(5)->andReturn([
                 'MaTK' => 5,
@@ -29,7 +29,7 @@ class AccountAdminActionsTest extends TestCase
 
     public function test_account_legacy_delete_bridge_redirects_to_accounts_index(): void
     {
-        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission')->andReturnTrue());
+        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission', 'hasPermissionFromCache')->andReturnTrue());
         $this->mock(GenericResourceModuleService::class, function ($mock) {
             $mock->shouldReceive('delete')->once()->with('accounts', '7');
         });

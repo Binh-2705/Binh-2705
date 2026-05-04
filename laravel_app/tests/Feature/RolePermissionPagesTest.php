@@ -10,7 +10,7 @@ class RolePermissionPagesTest extends TestCase
 {
     public function test_role_permissions_page_renders_in_laravel(): void
     {
-        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission')->andReturnTrue());
+        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission', 'hasPermissionFromCache')->andReturnTrue());
         $this->mock(RolePermissionService::class, function ($mock) {
             $mock->shouldReceive('indexData')->once()->andReturn([
                 'roles' => [
@@ -38,7 +38,7 @@ class RolePermissionPagesTest extends TestCase
 
     public function test_role_permission_update_redirects_with_success(): void
     {
-        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission')->andReturnTrue());
+        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission', 'hasPermissionFromCache')->andReturnTrue());
         $this->mock(RolePermissionService::class, function ($mock) {
             $mock->shouldReceive('updateRolePermissions')->once()->with(2, [4, 5]);
         });
@@ -50,7 +50,7 @@ class RolePermissionPagesTest extends TestCase
 
     public function test_restore_default_permissions_redirects_with_success(): void
     {
-        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission')->andReturnTrue());
+        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission', 'hasPermissionFromCache')->andReturnTrue());
         $this->mock(RolePermissionService::class, function ($mock) {
             $mock->shouldReceive('restoreDefaultPermissions')->once()->with(3)->andReturnTrue();
         });

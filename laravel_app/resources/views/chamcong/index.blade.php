@@ -4,10 +4,21 @@
 @php $canEdit = in_array('sua_chamcong', session('quyen', []), true) @endphp
 @php $canDelete = in_array('xoa_chamcong', session('quyen', []), true) @endphp
 @php $canExport = in_array('xuat_bang_cham_cong', session('quyen', []), true) @endphp
+@php $isSelfView = $isSelfView ?? false @endphp
 @extends('layouts.app')
 
 @section('content')
     <section class="panel">
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:12px">
+            <div></div>
+            <div style="display:flex;gap:6px">
+                <a href="{{ route('chamcong.index') }}"
+                   style="padding:5px 14px;border-radius:6px;font-size:0.82rem;border:1px solid #3b4cb8;background:#3b4cb8;color:#fff;text-decoration:none">Danh sách</a>
+                <a href="{{ route('chamcong.matrix', ['thang' => now()->month, 'nam' => now()->year]) }}"
+                   style="padding:5px 14px;border-radius:6px;font-size:0.82rem;border:1px solid #d1d5db;color:#374151;text-decoration:none">Bảng tháng</a>
+            </div>
+        </div>
+        @if (!$isSelfView)
         <form method="get" action="{{ route('chamcong.index') }}">
             <div class="field-grid">
                 <div>
@@ -38,6 +49,7 @@
                 </div>
             </div>
         </form>
+        @endif
     </section>
 
     <section class="panel">

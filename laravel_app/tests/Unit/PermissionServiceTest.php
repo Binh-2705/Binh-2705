@@ -2,9 +2,9 @@
 
 namespace Tests\Unit;
 
+use App\Services\InternalApiClient;
 use App\Services\PermissionService;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class PermissionServiceTest extends TestCase
@@ -14,7 +14,8 @@ class PermissionServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new PermissionService();
+        $client = $this->createMock(InternalApiClient::class);
+        $this->service = new PermissionService($client);
     }
 
     public function test_has_permission_returns_true_when_permission_exists(): void

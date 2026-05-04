@@ -12,7 +12,7 @@ class RemainingExportCompatibilityTest extends TestCase
 {
     public function test_attendance_export_excel_streams_monthly_matrix(): void
     {
-        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission')->andReturnTrue());
+        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission', 'hasPermissionFromCache')->andReturnTrue());
         $this->mock(AttendanceService::class, function ($mock) {
             $mock->shouldReceive('monthlyAttendanceMatrix')->once()->with(4, 2026)->andReturn([
                 'IT' => [
@@ -28,7 +28,7 @@ class RemainingExportCompatibilityTest extends TestCase
 
     public function test_generic_module_export_excel_streams_rows(): void
     {
-        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission')->andReturnTrue());
+        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission', 'hasPermissionFromCache')->andReturnTrue());
         $this->mock(GenericResourceModuleService::class, function ($mock) {
             $mock->shouldReceive('exportRows')->once()->with('positions', [])->andReturn([
                 'meta' => [

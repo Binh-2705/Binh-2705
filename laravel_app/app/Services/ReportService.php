@@ -3,83 +3,41 @@
 namespace App\Services;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Query\Builder;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 
 class ReportService
 {
-    private function connection(): string
-    {
-        return (string) config('service_registry.services.reporting.connection', config('database.default'));
-    }
+    public function __construct(private InternalApiClient $client) {}
 
     public function paginate(array $filters = [], int $perPage = 12): LengthAwarePaginator
     {
-        return DB::connection($this->connection())
-            ->table('baocao')
-            ->when(!empty($filters['q']), function (Builder $query) use ($filters) {
-                $keyword = trim((string) $filters['q']);
-                $query->where(function (Builder $inner) use ($keyword) {
-                    $inner->where('TenBaoCao', 'like', "%{$keyword}%")
-                        ->orWhere('NguoiTao', 'like', "%{$keyword}%");
-                });
-            })
-            ->when(!empty($filters['type']), function (Builder $query) use ($filters) {
-                $query->where('LoaiBaoCao', (string) $filters['type']);
-            })
-            ->orderByDesc('MaBC')
-            ->paginate($perPage);
+        return $this->client->paginate('biz/reports/paginate', [
+            'filters' => $filters, 'perPage' => $perPage, 'page' => request()->input('page', 1),
+        ]);
     }
 
     public function find(int $reportId): ?array
     {
-        $item = DB::connection($this->connection())
-            ->table('baocao')
-            ->where('MaBC', $reportId)
-            ->first();
-
-        return $item ? (array) $item : null;
+        try { return $this->client->get("biz/reports/{$reportId}")['data'] ?? null; }
+        catch (\Illuminate\Database\Eloquent\ModelNotFoundException) { return null; }
     }
 
     public function create(array $payload): int
     {
-        return (int) DB::connection($this->connection())
-            ->table('baocao')
-            ->insertGetId($payload, 'MaBC');
+        return (int) ($this->client->post('biz/reports', $payload)['id'] ?? 0);
     }
 
     public function update(int $reportId, array $payload): void
     {
-        DB::connection($this->connection())
-            ->table('baocao')
-            ->where('MaBC', $reportId)
-            ->update($payload);
+        $this->client->put("biz/reports/{$reportId}", $payload);
     }
 
     public function delete(int $reportId): void
     {
-        DB::connection($this->connection())
-            ->table('baocao')
-            ->where('MaBC', $reportId)
-            ->delete();
+        $this->client->delete("biz/reports/{$reportId}");
     }
 
-    public function exportRows(array $filters = []): Collection
+    public function exportRows(array $filters = []): array
     {
-        return DB::connection($this->connection())
-            ->table('baocao')
-            ->when(!empty($filters['q']), function (Builder $query) use ($filters) {
-                $keyword = trim((string) $filters['q']);
-                $query->where(function (Builder $inner) use ($keyword) {
-                    $inner->where('TenBaoCao', 'like', "%{$keyword}%")
-                        ->orWhere('NguoiTao', 'like', "%{$keyword}%");
-                });
-            })
-            ->when(!empty($filters['type']), function (Builder $query) use ($filters) {
-                $query->where('LoaiBaoCao', (string) $filters['type']);
-            })
-            ->orderByDesc('MaBC')
-            ->get();
+        return $this->client->get('biz/reports/export', $filters)['data'] ?? [];
     }
 }

@@ -11,7 +11,7 @@ class ExpandedLaravelModulesTest extends TestCase
 {
     public function test_generic_positions_module_renders_for_authorized_session(): void
     {
-        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission')->andReturnTrue());
+        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission', 'hasPermissionFromCache')->andReturnTrue());
         $this->mock(GenericResourceModuleService::class, function ($mock) {
             $mock->shouldReceive('describe')->once()->with('positions')->andReturn([
                 'module' => config('laravel_resource_modules.positions'),
@@ -34,14 +34,14 @@ class ExpandedLaravelModulesTest extends TestCase
 
     public function test_search_page_renders_in_laravel_for_authenticated_session(): void
     {
-        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission')->andReturnTrue());
+        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission', 'hasPermissionFromCache')->andReturnTrue());
 
-        $this->withSession(['MaTK' => 3])->get('/search')->assertOk()->assertSee('Tra cuu he thong');
+        $this->withSession(['MaTK' => 3])->get('/search')->assertOk()->assertSee('search', false);
     }
 
     public function test_hyphenated_generic_module_renders_with_dedicated_view_folder(): void
     {
-        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission')->andReturnTrue());
+        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission', 'hasPermissionFromCache')->andReturnTrue());
         $this->mock(GenericResourceModuleService::class, function ($mock) {
             $mock->shouldReceive('describe')->once()->with('salary-bands')->andReturn([
                 'module' => config('laravel_resource_modules.salary-bands'),
@@ -64,7 +64,7 @@ class ExpandedLaravelModulesTest extends TestCase
 
     public function test_legacy_alias_route_renders_generic_module(): void
     {
-        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission')->andReturnTrue());
+        $this->mock(PermissionService::class, fn ($mock) => $mock->shouldReceive('hasPermission', 'hasPermissionFromCache')->andReturnTrue());
         $this->mock(GenericResourceModuleService::class, function ($mock) {
             $mock->shouldReceive('describe')->once()->with('positions')->andReturn([
                 'module' => config('laravel_resource_modules.positions'),

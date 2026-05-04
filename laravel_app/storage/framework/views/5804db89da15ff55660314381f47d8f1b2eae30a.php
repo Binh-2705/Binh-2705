@@ -1,5 +1,6 @@
+<?php $fileFields = $moduleConfig['file_fields'] ?? []; ?>
 <section class="panel">
-    <form method="post" action="<?php echo e($mode === 'create' ? route(($routeKey ?? $moduleKey) . '.store') : route(($routeKey ?? $moduleKey) . '.update', ['record' => $recordId])); ?>">
+    <form method="post" action="<?php echo e($mode === 'create' ? route(($routeKey ?? $moduleKey) . '.store') : route(($routeKey ?? $moduleKey) . '.update', ['record' => $recordId])); ?>" <?php echo e(count($fileFields) ? 'enctype="multipart/form-data"' : ''); ?>>
         <?php echo csrf_field(); ?>
         <?php if($mode === 'edit'): ?>
             <?php echo method_field('PUT'); ?>
@@ -24,9 +25,16 @@
                         $inputType = 'number';
                     }
                 ?>
-                <div class="<?php echo e($isTextarea ? 'full-span' : ''); ?>">
+<div class="<?php echo e($isTextarea ? 'full-span' : ''); ?>">
                     <label for="<?php echo e($field); ?>"><?php echo e($field); ?></label>
-                    <?php if($isTextarea): ?>
+                    <?php if(in_array($field, $fileFields, true)): ?>
+                        <?php if($value): ?>
+                            <div class="top-gap-sm" style="margin-bottom:6px">
+                                <img src="<?php echo e(route('legacy.upload', ['path' => 'photos/' . $value])); ?>" alt="Ảnh hiện tại" style="max-height:80px;border-radius:4px;border:1px solid #e5e7eb;">
+                            </div>
+                        <?php endif; ?>
+                        <input id="<?php echo e($field); ?>" name="<?php echo e($field); ?>" type="file" accept="image/*" <?php echo e($shouldDisable ? 'disabled' : ''); ?>>
+                    <?php elseif($isTextarea): ?>
                         <textarea id="<?php echo e($field); ?>" name="<?php echo e($field); ?>" <?php echo e($shouldDisable ? 'disabled' : ''); ?>><?php echo e($value); ?></textarea>
                     <?php else: ?>
                         <input id="<?php echo e($field); ?>" name="<?php echo e($field); ?>" type="<?php echo e($inputType); ?>" value="<?php echo e($value); ?>" <?php echo e($shouldDisable ? 'disabled' : ''); ?> <?php echo e(!$column['nullable'] && !$shouldDisable ? 'required' : ''); ?>>

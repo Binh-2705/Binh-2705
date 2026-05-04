@@ -1,27 +1,26 @@
 <?php
 
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\AuditLogExportController;
-use App\Http\Controllers\AttendanceController;
-use App\Http\Controllers\DepartmentController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\EmployeeController;
-use App\Http\Controllers\AccountSettingsController;
-use App\Http\Controllers\AccountAdminController;
-use App\Http\Controllers\ChatbotMonitorController;
-use App\Http\Controllers\ContractAdminController;
-use App\Http\Controllers\EmployeeProfileAdminController;
-use App\Http\Controllers\GenericResourceModuleController;
-use App\Http\Controllers\PayrollController;
-use App\Http\Controllers\PasswordRecoveryController;
-use App\Http\Controllers\ResourceModuleController;
-use App\Http\Controllers\RecruitmentController;
-use App\Http\Controllers\ReportController;
-use App\Http\Controllers\RolePermissionController;
-use App\Http\Controllers\SearchController;
-use App\Http\Controllers\ServiceConsoleController;
-use App\Http\Controllers\SystemHealthController;
-use App\Http\Controllers\TrainingController;
+use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Auth\PasswordRecoveryController;
+use App\Http\Controllers\Admin\AccountAdminController;
+use App\Http\Controllers\Admin\AccountSettingsController;
+use App\Http\Controllers\Admin\ContractAdminController;
+use App\Http\Controllers\Admin\EmployeeProfileAdminController;
+use App\Http\Controllers\Admin\RolePermissionController;
+use App\Http\Controllers\Hr\AttendanceController;
+use App\Http\Controllers\Hr\DepartmentController;
+use App\Http\Controllers\Hr\EmployeeController;
+use App\Http\Controllers\Hr\PayrollController;
+use App\Http\Controllers\Hr\RecruitmentController;
+use App\Http\Controllers\Hr\TrainingController;
+use App\Http\Controllers\Report\AuditLogExportController;
+use App\Http\Controllers\Report\ReportController;
+use App\Http\Controllers\System\ChatbotMonitorController;
+use App\Http\Controllers\System\DashboardController;
+use App\Http\Controllers\System\ResourceModuleController;
+use App\Http\Controllers\System\SearchController;
+use App\Http\Controllers\System\ServiceConsoleController;
+use App\Http\Controllers\System\SystemHealthController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -38,6 +37,14 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return redirect()->route('login.form');
 });
+
+Route::get('/uploads/{path}', function (string $path) {
+    $filePath = base_path('../uploads/' . $path);
+    if (!file_exists($filePath)) {
+        abort(404);
+    }
+    return response()->file($filePath);
+})->name('legacy.upload')->where('path', '.+');
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login.form');
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
@@ -117,41 +124,17 @@ Route::get('/departments', [DepartmentController::class, 'index'])
     ->middleware(['session.auth', 'permission:xem_phongban'])
     ->name('departments.index');
 
-Route::get('/departments/export-excel', [DepartmentController::class, 'exportExcel'])
-    ->middleware(['session.auth', 'permission:xuat_excel_phongban'])
-    ->name('departments.export-excel');
-
-Route::post('/departments/import-csv', [DepartmentController::class, 'importCsv'])
-    ->middleware(['session.auth', 'permission:import_csv_phongban'])
-    ->name('departments.import-csv');
-
-Route::get('/departments/create', [DepartmentController::class, 'create'])
-    ->middleware(['session.auth', 'permission:them_phongban'])
-    ->name('departments.create');
-
-Route::post('/departments', [DepartmentController::class, 'store'])
-    ->middleware(['session.auth', 'permission:them_phongban'])
-    ->name('departments.store');
-
-Route::get('/departments/{department}/edit', [DepartmentController::class, 'edit'])
-    ->middleware(['session.auth', 'permission:sua_phongban'])
-    ->name('departments.edit');
-
-Route::put('/departments/{department}', [DepartmentController::class, 'update'])
-    ->middleware(['session.auth', 'permission:sua_phongban'])
-    ->name('departments.update');
-
-Route::post('/departments/{department}', [DepartmentController::class, 'update'])
-    ->middleware(['session.auth', 'permission:sua_phongban'])
-    ->name('departments.update.legacy');
-
-Route::delete('/departments/{department}', [DepartmentController::class, 'destroy'])
-    ->middleware(['session.auth', 'permission:xoa_phongban'])
-    ->name('departments.destroy');
-
 Route::get('/attendance', [AttendanceController::class, 'index'])
     ->middleware(['session.auth', 'permission:xem_chamcong'])
     ->name('attendance.index');
+
+Route::get('/attendance/matrix', [AttendanceController::class, 'matrix'])
+    ->middleware(['session.auth', 'permission:xem_chamcong'])
+    ->name('attendance.matrix');
+
+Route::post('/attendance/matrix/cell', [AttendanceController::class, 'updateCell'])
+    ->middleware(['session.auth', 'permission:them_chamcong'])
+    ->name('attendance.matrix.cell');
 
 Route::get('/attendance/worked-days', [AttendanceController::class, 'workedDays'])
     ->middleware(['session.auth', 'permission:xem_chamcong'])
@@ -207,6 +190,10 @@ Route::post('/payroll', [PayrollController::class, 'store'])
 Route::get('/payroll/{payroll}/edit', [PayrollController::class, 'edit'])
     ->middleware(['session.auth', 'permission:mo_chot_luong'])
     ->name('payroll.edit');
+
+Route::get('/payroll/{payroll}', [PayrollController::class, 'show'])
+    ->middleware(['session.auth', 'permission:xem_luong'])
+    ->name('payroll.show');
 
 Route::put('/payroll/{payroll}', [PayrollController::class, 'update'])
     ->middleware(['session.auth', 'permission:mo_chot_luong'])
@@ -540,50 +527,57 @@ Route::get('/taikhoan/{account}/delete-legacy', [AccountAdminController::class, 
 
 $registerResourceModuleRoutes = function (string $prefix, string $namePrefix, array $moduleConfig, string $moduleKey) {
     Route::prefix($prefix)->name($namePrefix . '.')->group(function () use ($moduleConfig, $moduleKey) {
+        $isReadOnly = (bool) ($moduleConfig['read_only'] ?? false);
+        $disableExport = (bool) ($moduleConfig['disable_export'] ?? false);
+
         Route::get('/', [ResourceModuleController::class, 'index'])
             ->name('index')
             ->middleware(['session.auth', 'permission:' . $moduleConfig['permission']['view']])
             ->defaults('module', $moduleKey);
 
-        Route::get('/export-excel', [ResourceModuleController::class, 'exportExcel'])
-            ->name('export-excel')
-            ->middleware(['session.auth', 'permission:' . $moduleConfig['permission']['view']])
-            ->defaults('module', $moduleKey);
+        if (!$disableExport) {
+            Route::get('/export-excel', [ResourceModuleController::class, 'exportExcel'])
+                ->name('export-excel')
+                ->middleware(['session.auth', 'permission:' . $moduleConfig['permission']['view']])
+                ->defaults('module', $moduleKey);
+        }
 
-        Route::get('/create', [ResourceModuleController::class, 'create'])
-            ->name('create')
-            ->middleware(['session.auth', 'permission:' . $moduleConfig['permission']['create']])
-            ->defaults('module', $moduleKey);
+        if (!$isReadOnly) {
+            Route::get('/create', [ResourceModuleController::class, 'create'])
+                ->name('create')
+                ->middleware(['session.auth', 'permission:' . $moduleConfig['permission']['create']])
+                ->defaults('module', $moduleKey);
 
-        Route::post('/', [ResourceModuleController::class, 'store'])
-            ->name('store')
-            ->middleware(['session.auth', 'permission:' . $moduleConfig['permission']['create']])
-            ->defaults('module', $moduleKey);
+            Route::post('/', [ResourceModuleController::class, 'store'])
+                ->name('store')
+                ->middleware(['session.auth', 'permission:' . $moduleConfig['permission']['create']])
+                ->defaults('module', $moduleKey);
 
-        Route::get('/{record}/edit', [ResourceModuleController::class, 'edit'])
-            ->name('edit')
-            ->middleware(['session.auth', 'permission:' . $moduleConfig['permission']['update']])
-            ->defaults('module', $moduleKey);
+            Route::get('/{record}/edit', [ResourceModuleController::class, 'edit'])
+                ->name('edit')
+                ->middleware(['session.auth', 'permission:' . $moduleConfig['permission']['update']])
+                ->defaults('module', $moduleKey);
 
-        Route::put('/{record}', [ResourceModuleController::class, 'update'])
-            ->name('update')
-            ->middleware(['session.auth', 'permission:' . $moduleConfig['permission']['update']])
-            ->defaults('module', $moduleKey);
+            Route::put('/{record}', [ResourceModuleController::class, 'update'])
+                ->name('update')
+                ->middleware(['session.auth', 'permission:' . $moduleConfig['permission']['update']])
+                ->defaults('module', $moduleKey);
 
-        Route::post('/{record}', [ResourceModuleController::class, 'update'])
-            ->name('update.legacy')
-            ->middleware(['session.auth', 'permission:' . $moduleConfig['permission']['update']])
-            ->defaults('module', $moduleKey);
+            Route::post('/{record}', [ResourceModuleController::class, 'update'])
+                ->name('update.legacy')
+                ->middleware(['session.auth', 'permission:' . $moduleConfig['permission']['update']])
+                ->defaults('module', $moduleKey);
 
-        Route::delete('/{record}', [ResourceModuleController::class, 'destroy'])
-            ->name('destroy')
-            ->middleware(['session.auth', 'permission:' . $moduleConfig['permission']['delete']])
-            ->defaults('module', $moduleKey);
+            Route::delete('/{record}', [ResourceModuleController::class, 'destroy'])
+                ->name('destroy')
+                ->middleware(['session.auth', 'permission:' . $moduleConfig['permission']['delete']])
+                ->defaults('module', $moduleKey);
 
-        Route::get('/{record}/delete-legacy', [ResourceModuleController::class, 'destroyLegacy'])
-            ->name('destroy.legacy')
-            ->middleware(['session.auth', 'permission:' . $moduleConfig['permission']['delete']])
-            ->defaults('module', $moduleKey);
+            Route::get('/{record}/delete-legacy', [ResourceModuleController::class, 'destroyLegacy'])
+                ->name('destroy.legacy')
+                ->middleware(['session.auth', 'permission:' . $moduleConfig['permission']['delete']])
+                ->defaults('module', $moduleKey);
+        }
 
         if (($moduleConfig['legacy_name'] ?? $moduleKey) === 'phancong') {
             Route::get('/history', [ResourceModuleController::class, 'assignmentHistory'])
@@ -624,274 +618,4 @@ foreach (config('laravel_resource_modules', []) as $moduleKey => $moduleConfig) 
     }
 }
 
-Route::get('/nhanvien', [EmployeeController::class, 'index'])
-    ->middleware(['session.auth', 'permission:xem_nhanvien'])
-    ->name('nhanvien.index');
-Route::get('/nhanvien/bacluong-theo-ngach', [EmployeeController::class, 'salaryGradesByBand'])
-    ->middleware(['session.auth', 'permission:xem_nhanvien'])
-    ->name('nhanvien.salary-grades-by-band');
-Route::get('/nhanvien/create', [EmployeeController::class, 'create'])
-    ->middleware(['session.auth', 'permission:them_nhanvien'])
-    ->name('nhanvien.create');
-Route::post('/nhanvien', [EmployeeController::class, 'store'])
-    ->middleware(['session.auth', 'permission:them_nhanvien'])
-    ->name('nhanvien.store');
-Route::get('/nhanvien/{employee}/edit', [EmployeeController::class, 'edit'])
-    ->middleware(['session.auth', 'permission:sua_nhanvien'])
-    ->name('nhanvien.edit');
-Route::put('/nhanvien/{employee}', [EmployeeController::class, 'update'])
-    ->middleware(['session.auth', 'permission:sua_nhanvien'])
-    ->name('nhanvien.update');
-Route::post('/nhanvien/{employee}', [EmployeeController::class, 'update'])
-    ->middleware(['session.auth', 'permission:sua_nhanvien'])
-    ->name('nhanvien.update.legacy');
-Route::delete('/nhanvien/{employee}', [EmployeeController::class, 'destroy'])
-    ->middleware(['session.auth', 'permission:xoa_nhanvien'])
-    ->name('nhanvien.destroy');
-Route::get('/nhanvien/{employee}/delete-legacy', [EmployeeController::class, 'destroyLegacy'])
-    ->middleware(['session.auth', 'permission:xoa_nhanvien'])
-    ->name('nhanvien.destroy.legacy');
-
-Route::get('/phongban', [DepartmentController::class, 'index'])
-    ->middleware(['session.auth', 'permission:xem_phongban'])
-    ->name('phongban.index');
-Route::get('/phongban/export-excel', [DepartmentController::class, 'exportExcel'])
-    ->middleware(['session.auth', 'permission:xuat_excel_phongban'])
-    ->name('phongban.export-excel');
-Route::post('/phongban/import-csv', [DepartmentController::class, 'importCsv'])
-    ->middleware(['session.auth', 'permission:import_csv_phongban'])
-    ->name('phongban.import-csv');
-Route::get('/phongban/create', [DepartmentController::class, 'create'])
-    ->middleware(['session.auth', 'permission:them_phongban'])
-    ->name('phongban.create');
-Route::post('/phongban', [DepartmentController::class, 'store'])
-    ->middleware(['session.auth', 'permission:them_phongban'])
-    ->name('phongban.store');
-Route::get('/phongban/{department}/edit', [DepartmentController::class, 'edit'])
-    ->middleware(['session.auth', 'permission:sua_phongban'])
-    ->name('phongban.edit');
-Route::put('/phongban/{department}', [DepartmentController::class, 'update'])
-    ->middleware(['session.auth', 'permission:sua_phongban'])
-    ->name('phongban.update');
-Route::post('/phongban/{department}', [DepartmentController::class, 'update'])
-    ->middleware(['session.auth', 'permission:sua_phongban'])
-    ->name('phongban.update.legacy');
-Route::delete('/phongban/{department}', [DepartmentController::class, 'destroy'])
-    ->middleware(['session.auth', 'permission:xoa_phongban'])
-    ->name('phongban.destroy');
-Route::get('/phongban/{department}/delete-legacy', [DepartmentController::class, 'destroyLegacy'])
-    ->middleware(['session.auth', 'permission:xoa_phongban'])
-    ->name('phongban.destroy.legacy');
-
-Route::get('/chamcong', [AttendanceController::class, 'index'])
-    ->middleware(['session.auth', 'permission:xem_chamcong'])
-    ->name('chamcong.index');
-Route::get('/chamcong/so-ngay-cong', [AttendanceController::class, 'workedDays'])
-    ->middleware(['session.auth', 'permission:xem_chamcong'])
-    ->name('chamcong.worked-days');
-Route::get('/chamcong/export-excel', [AttendanceController::class, 'exportExcel'])
-    ->middleware(['session.auth', 'permission:xuat_bang_cham_cong'])
-    ->name('chamcong.export-excel');
-Route::get('/chamcong/create', [AttendanceController::class, 'create'])
-    ->middleware(['session.auth', 'permission:them_chamcong'])
-    ->name('chamcong.create');
-Route::post('/chamcong', [AttendanceController::class, 'store'])
-    ->middleware(['session.auth', 'permission:them_chamcong'])
-    ->name('chamcong.store');
-Route::get('/chamcong/{attendance}/edit', [AttendanceController::class, 'edit'])
-    ->middleware(['session.auth', 'permission:sua_chamcong'])
-    ->name('chamcong.edit');
-Route::put('/chamcong/{attendance}', [AttendanceController::class, 'update'])
-    ->middleware(['session.auth', 'permission:sua_chamcong'])
-    ->name('chamcong.update');
-Route::post('/chamcong/{attendance}', [AttendanceController::class, 'update'])
-    ->middleware(['session.auth', 'permission:sua_chamcong'])
-    ->name('chamcong.update.legacy');
-Route::delete('/chamcong/{attendance}', [AttendanceController::class, 'destroy'])
-    ->middleware(['session.auth', 'permission:xoa_chamcong'])
-    ->name('chamcong.destroy');
-Route::get('/chamcong/{attendance}/delete-legacy', [AttendanceController::class, 'destroyLegacy'])
-    ->middleware(['session.auth', 'permission:xoa_chamcong'])
-    ->name('chamcong.destroy.legacy');
-
-Route::get('/luong', [PayrollController::class, 'index'])
-    ->middleware(['session.auth', 'permission:xem_luong'])
-    ->name('luong.index');
-Route::post('/luong/tinh-thang', [PayrollController::class, 'runMonthly'])
-    ->middleware(['session.auth', 'permission:tinh_luong_thang'])
-    ->name('luong.run-monthly');
-Route::get('/luong/job-status', [PayrollController::class, 'jobStatus'])
-    ->middleware(['session.auth', 'permission:xem_luong'])
-    ->name('luong.job-status');
-Route::get('/luong/export-excel', [PayrollController::class, 'exportExcel'])
-    ->middleware(['session.auth', 'permission:xem_luong'])
-    ->name('luong.export-excel');
-Route::get('/luong/create', [PayrollController::class, 'create'])
-    ->middleware(['session.auth', 'permission:tinh_luong_thang'])
-    ->name('luong.create');
-Route::post('/luong', [PayrollController::class, 'store'])
-    ->middleware(['session.auth', 'permission:tinh_luong_thang'])
-    ->name('luong.store');
-Route::get('/luong/{payroll}/edit', [PayrollController::class, 'edit'])
-    ->middleware(['session.auth', 'permission:mo_chot_luong'])
-    ->name('luong.edit');
-Route::put('/luong/{payroll}', [PayrollController::class, 'update'])
-    ->middleware(['session.auth', 'permission:mo_chot_luong'])
-    ->name('luong.update');
-Route::post('/luong/{payroll}', [PayrollController::class, 'update'])
-    ->middleware(['session.auth', 'permission:mo_chot_luong'])
-    ->name('luong.update.legacy');
-Route::get('/luong/{payroll}/lock-legacy', [PayrollController::class, 'lock'])
-    ->middleware(['session.auth', 'permission:chot_luong'])
-    ->name('luong.lock.legacy');
-Route::get('/luong/{payroll}/unlock-legacy', [PayrollController::class, 'unlock'])
-    ->middleware(['session.auth', 'permission:mo_chot_luong'])
-    ->name('luong.unlock.legacy');
-
-Route::get('/tuyendung', [RecruitmentController::class, 'index'])
-    ->middleware(['session.auth', 'permission:xem_dot_tuyen'])
-    ->name('tuyendung.index');
-Route::get('/tuyendung/create', [RecruitmentController::class, 'create'])
-    ->middleware(['session.auth', 'permission:them_dot_tuyen'])
-    ->name('tuyendung.create');
-Route::post('/tuyendung', [RecruitmentController::class, 'store'])
-    ->middleware(['session.auth', 'permission:them_dot_tuyen'])
-    ->name('tuyendung.store');
-Route::get('/tuyendung/{recruitment}/edit', [RecruitmentController::class, 'edit'])
-    ->middleware(['session.auth', 'permission:them_dot_tuyen'])
-    ->name('tuyendung.edit');
-Route::put('/tuyendung/{recruitment}', [RecruitmentController::class, 'update'])
-    ->middleware(['session.auth', 'permission:them_dot_tuyen'])
-    ->name('tuyendung.update');
-Route::post('/tuyendung/{recruitment}', [RecruitmentController::class, 'update'])
-    ->middleware(['session.auth', 'permission:them_dot_tuyen'])
-    ->name('tuyendung.update.legacy');
-Route::delete('/tuyendung/{recruitment}', [RecruitmentController::class, 'destroy'])
-    ->middleware(['session.auth', 'permission:xoa_dot_tuyen'])
-    ->name('tuyendung.destroy');
-Route::get('/tuyendung/{recruitment}/delete-legacy', [RecruitmentController::class, 'destroyLegacy'])
-    ->middleware(['session.auth', 'permission:xoa_dot_tuyen'])
-    ->name('tuyendung.destroy.legacy');
-Route::get('/tuyendung/ungvien', [RecruitmentController::class, 'candidates'])
-    ->middleware(['session.auth', 'permission:xem_ung_vien'])
-    ->name('tuyendung.ungvien.index');
-Route::get('/tuyendung/ungvien/create', [RecruitmentController::class, 'createCandidate'])
-    ->middleware(['session.auth', 'permission:them_ung_vien'])
-    ->name('tuyendung.ungvien.create');
-Route::post('/tuyendung/ungvien', [RecruitmentController::class, 'storeCandidate'])
-    ->middleware(['session.auth', 'permission:them_ung_vien'])
-    ->name('tuyendung.ungvien.store');
-Route::get('/tuyendung/ungvien/{candidate}/chon-dot', [RecruitmentController::class, 'applyCandidate'])
-    ->middleware(['session.auth', 'permission:them_ho_so'])
-    ->name('tuyendung.ungvien.apply');
-Route::post('/tuyendung/ungvien/{candidate}/tao-hoso', [RecruitmentController::class, 'attachCandidate'])
-    ->middleware(['session.auth', 'permission:them_ho_so'])
-    ->name('tuyendung.ungvien.attach');
-Route::get('/tuyendung/{recruitment}/hoso', [RecruitmentController::class, 'applications'])
-    ->middleware(['session.auth', 'permission:xem_ho_so'])
-    ->name('tuyendung.hoso.index');
-Route::post('/tuyendung/hoso/{application}/trang-thai', [RecruitmentController::class, 'updateApplicationStatus'])
-    ->middleware(['session.auth', 'permission:capnhat_trangthai'])
-    ->name('tuyendung.hoso.status');
-Route::get('/tuyendung/hoso/{application}/phongvan', [RecruitmentController::class, 'interviews'])
-    ->middleware(['session.auth', 'permission:xem_lich_phong_van'])
-    ->name('tuyendung.hoso.phongvan');
-Route::post('/tuyendung/hoso/{application}/phongvan', [RecruitmentController::class, 'storeInterview'])
-    ->middleware(['session.auth', 'permission:them_lich_phong_van'])
-    ->name('tuyendung.hoso.phongvan.store');
-Route::post('/tuyendung/hoso/{application}/danhgia', [RecruitmentController::class, 'storeReview'])
-    ->middleware(['session.auth', 'permission:them_danh_gia'])
-    ->name('tuyendung.hoso.danhgia.store');
-Route::post('/tuyendung/hoso/kanban-status', [RecruitmentController::class, 'updateKanban'])
-    ->middleware(['session.auth', 'permission:capnhat_trangthai'])
-    ->name('tuyendung.hoso.kanban-status');
-
-Route::get('/daotao', [TrainingController::class, 'index'])
-    ->middleware(['session.auth', 'permission:xem_khoa_dao_tao'])
-    ->name('daotao.index');
-Route::get('/daotao/create', [TrainingController::class, 'create'])
-    ->middleware(['session.auth', 'permission:them_khoa_dao_tao'])
-    ->name('daotao.create');
-Route::post('/daotao', [TrainingController::class, 'store'])
-    ->middleware(['session.auth', 'permission:them_khoa_dao_tao'])
-    ->name('daotao.store');
-Route::get('/daotao/{training}/edit', [TrainingController::class, 'edit'])
-    ->middleware(['session.auth', 'permission:them_khoa_dao_tao'])
-    ->name('daotao.edit');
-Route::get('/daotao/{training}/hocvien', [TrainingController::class, 'participants'])
-    ->middleware(['session.auth', 'permission:xem_tham_gia_dao_tao'])
-    ->name('daotao.hocvien');
-Route::post('/daotao/{training}/hocvien', [TrainingController::class, 'storeParticipant'])
-    ->middleware(['session.auth', 'permission:them_tham_gia_dao_tao'])
-    ->name('daotao.hocvien.store');
-Route::post('/daotao/hocvien/{participant}/ketqua', [TrainingController::class, 'updateParticipantResult'])
-    ->middleware(['session.auth', 'permission:capnhat_ketqua_dao_tao'])
-    ->name('daotao.hocvien.ketqua');
-Route::put('/daotao/{training}', [TrainingController::class, 'update'])
-    ->middleware(['session.auth', 'permission:them_khoa_dao_tao'])
-    ->name('daotao.update');
-Route::post('/daotao/{training}', [TrainingController::class, 'update'])
-    ->middleware(['session.auth', 'permission:them_khoa_dao_tao'])
-    ->name('daotao.update.legacy');
-Route::delete('/daotao/{training}', [TrainingController::class, 'destroy'])
-    ->middleware(['session.auth', 'permission:xoa_khoa_dao_tao'])
-    ->name('daotao.destroy');
-Route::get('/daotao/{training}/delete-legacy', [TrainingController::class, 'destroy'])
-    ->middleware(['session.auth', 'permission:xoa_khoa_dao_tao'])
-    ->name('daotao.destroy.legacy');
-
-Route::get('/baocao', [ReportController::class, 'index'])
-    ->middleware(['session.auth', 'permission:xem_baocao'])
-    ->name('baocao.index');
-Route::get('/baocao/export-excel', [ReportController::class, 'exportExcel'])
-    ->middleware(['session.auth', 'permission:xuatex_baocao'])
-    ->name('baocao.export-excel');
-Route::get('/baocao/export-json', [ReportController::class, 'exportJson'])
-    ->middleware(['session.auth', 'permission:xuatex_baocao'])
-    ->name('baocao.export-json');
-Route::get('/baocao/create', [ReportController::class, 'create'])
-    ->middleware(['session.auth', 'permission:them_baocao'])
-    ->name('baocao.create');
-Route::post('/baocao', [ReportController::class, 'store'])
-    ->middleware(['session.auth', 'permission:them_baocao'])
-    ->name('baocao.store');
-Route::get('/baocao/{report}/edit', [ReportController::class, 'edit'])
-    ->middleware(['session.auth', 'permission:sua_baocao'])
-    ->name('baocao.edit');
-Route::put('/baocao/{report}', [ReportController::class, 'update'])
-    ->middleware(['session.auth', 'permission:sua_baocao'])
-    ->name('baocao.update');
-Route::post('/baocao/{report}', [ReportController::class, 'update'])
-    ->middleware(['session.auth', 'permission:sua_baocao'])
-    ->name('baocao.update.legacy');
-Route::delete('/baocao/{report}', [ReportController::class, 'destroy'])
-    ->middleware(['session.auth', 'permission:xoa_baocao'])
-    ->name('baocao.destroy');
-Route::get('/baocao/{report}/delete-legacy', [ReportController::class, 'destroyLegacy'])
-    ->middleware(['session.auth', 'permission:xoa_baocao'])
-    ->name('baocao.destroy.legacy');
-
-Route::get('/systemhealth', [SystemHealthController::class, 'index'])
-    ->middleware(['session.auth', 'permission:xem_taikhoan'])
-    ->name('systemhealth.index');
-
-Route::get('/phanquyen', [RolePermissionController::class, 'index'])
-    ->middleware(['session.auth', 'permission:xem_phanquyen'])
-    ->name('phanquyen.index');
-Route::get('/phanquyen/taikhoan/{account}', [RolePermissionController::class, 'showAccount'])
-    ->middleware(['session.auth', 'permission:xem_phanquyen'])
-    ->name('phanquyen.taikhoan');
-Route::post('/phanquyen/{role}', [RolePermissionController::class, 'update'])
-    ->middleware(['session.auth', 'permission:sua_taikhoan'])
-    ->name('phanquyen.update');
-Route::post('/phanquyen/{role}/khoi-phuc-mac-dinh', [RolePermissionController::class, 'restoreDefaults'])
-    ->middleware(['session.auth', 'permission:sua_taikhoan'])
-    ->name('phanquyen.restore-defaults');
-
-Route::get('/audit-log/export-csv', [AuditLogExportController::class, 'exportCsv'])
-    ->middleware(['session.auth', 'permission:xem_taikhoan'])
-    ->name('audit-log.export-csv');
-
-Route::get('/audit-log/export-json', [AuditLogExportController::class, 'exportJson'])
-    ->middleware(['session.auth', 'permission:xem_taikhoan'])
-    ->name('audit-log.export-json');
+require __DIR__ . '/web_legacy.php';
